@@ -1,22 +1,38 @@
 'use client';
 
-import { FileText, ClipboardPaste, Upload, TrendingUp, Target, Award, BarChart3 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { FileText, ClipboardPaste, Upload, TrendingUp, Target, Award, BarChart3, Wand2 } from 'lucide-react';
 import Link from 'next/link';
+import { useApplicationStore } from '@/stores/application-store';
+import dynamic from 'next/dynamic';
+
+// Lazy load Recharts to avoid SSR issues
+const BarChart = dynamic(() => import('recharts').then((m) => m.BarChart), { ssr: false });
+const Bar = dynamic(() => import('recharts').then((m) => m.Bar), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then((m) => m.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then((m) => m.YAxis), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then((m) => m.Tooltip), { ssr: false });
+const ResponsiveContainer = dynamic(() => import('recharts').then((m) => m.ResponsiveContainer), { ssr: false });
 
 const quickActions = [
   { href: '/resumes', icon: FileText, label: 'Create Resume', desc: 'Start from your profile', gradient: 'from-[var(--gradient-1)] to-[var(--gradient-2)]' },
-  { href: '/jobs', icon: ClipboardPaste, label: 'Paste a JD', desc: 'Get instant match score', gradient: 'from-[var(--gradient-2)] to-[var(--gradient-3)]' },
+  { href: '/tailor', icon: Wand2, label: 'AI Tailoring', desc: 'Match & tailor for a JD', gradient: 'from-[var(--gradient-2)] to-[var(--gradient-3)]' },
   { href: '/profile', icon: Upload, label: 'Import CV', desc: 'Upload PDF or DOCX', gradient: 'from-[var(--gradient-3)] to-[var(--gradient-1)]' },
 ];
 
-const stats = [
-  { label: 'Resumes', value: '0', icon: FileText },
-  { label: 'Response Rate', value: '—', icon: TrendingUp },
-  { label: 'Interviews', value: '0', icon: Target },
-  { label: 'Avg ATS Score', value: '—', icon: Award },
-];
-
 export default function DashboardPage() {
+  const { stats, fetchStats } = useApplicationStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { fetchStats(); setMounted(true); }, [fetchStats]);
+
+  const statCards = [
+    { label: 'Resumes', value: stats?.resumeCount ?? '—', icon: FileText },
+    { label: 'Response Rate', value: stats ? `${stats.responseRate}%` : '—', icon: TrendingUp },
+    { label: 'Interviews', value: stats?.interviews ?? '0', icon: Target },
+    { label: 'Avg ATS Score', value: stats?.avgAtsScore ?? '—', icon: Award },
+  ];
+
   return (
     <div className="max-w-[1280px] mx-auto space-y-8">
       {/* Quick Actions */}
@@ -40,7 +56,7 @@ export default function DashboardPage() {
       <section>
         <h3 className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">Overview</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {stats.map((stat) => (
+          {statCards.map((stat) => (
             <div key={stat.label} className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-transparent)] backdrop-blur-md p-5">
               <div className="flex items-center justify-between mb-3">
                 <stat.icon size={16} className="text-[var(--text-muted)]" />
@@ -52,15 +68,31 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Recent Activity */}
+      {/* Activity Chart */}
       <section>
-        <h3 className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">Recent Activity</h3>
+        <h3 className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">Weekly Activity</h3>
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-transparent)] backdrop-blur-md p-6">
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <BarChart3 size={32} className="text-[var(--text-muted)] mb-3" />
-            <p className="text-[var(--text-secondary)]">No activity yet</p>
-            <p className="text-sm text-[var(--text-muted)] mt-1">Start by building your profile or creating a resume.</p>
-          </div>
+          {mounted && stats?.weeklyActivity && stats.weeklyActivity.some((w) => w.count > 0) ? (
+            <div style={{ width: '100%', height: 200 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.weeklyActivity}>
+                  <XAxis dataKey="week" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '8px', fontSize: '12px' }}
+                    labelStyle={{ color: 'var(--text-primary)' }}
+                  />
+                  <Bar dataKey="count" fill="var(--gradient-2)" radius={[4, 4, 0, 0]} name="Applications" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <BarChart3 size={32} className="text-[var(--text-muted)] mb-3" />
+              <p className="text-[var(--text-secondary)]">No activity yet</p>
+              <p className="text-sm text-[var(--text-muted)] mt-1">Start by building your profile or creating a resume.</p>
+            </div>
+          )}
         </div>
       </section>
     </div>

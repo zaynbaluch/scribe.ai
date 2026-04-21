@@ -11,6 +11,7 @@ import resumeRoutes from './routes/resume.routes';
 import exportRoutes from './routes/export.routes';
 import jobRoutes from './routes/job.routes';
 import tailorRoutes from './routes/tailor.routes';
+import applicationRoutes from './routes/application.routes';
 import { getTemplates } from './controllers/export.controller';
 
 dotenv.config();
@@ -38,6 +39,7 @@ app.use('/api/resumes', resumeRoutes);
 app.use('/api/resumes', exportRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/tailor', tailorRoutes);
+app.use('/api/applications', applicationRoutes);
 app.get('/api/templates', getTemplates);
 
 // ─── Error Handler (must be last) ───────────────────────────────────────────
