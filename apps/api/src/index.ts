@@ -7,6 +7,9 @@ import { errorHandler } from './middleware/error-handler.middleware';
 // Routes
 import authRoutes from './routes/auth.routes';
 import profileRoutes from './routes/profile.routes';
+import resumeRoutes from './routes/resume.routes';
+import exportRoutes from './routes/export.routes';
+import { getTemplates } from './controllers/export.controller';
 
 dotenv.config();
 
@@ -29,6 +32,9 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/resumes', resumeRoutes);
+app.use('/api/resumes', exportRoutes);
+app.get('/api/templates', getTemplates);
 
 // ─── Error Handler (must be last) ───────────────────────────────────────────
 

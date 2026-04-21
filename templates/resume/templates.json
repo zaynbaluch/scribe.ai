@@ -1,0 +1,37 @@
+[
+  {
+    "id": "modern-01",
+    "name": "Modern Clean",
+    "category": "modern",
+    "description": "Single-column layout with accent-colored section dividers and pill-style skills. Clean and contemporary.",
+    "isPremium": false
+  },
+  {
+    "id": "classic-02",
+    "name": "Classic Professional",
+    "category": "classic",
+    "description": "Traditional layout with two-column header, horizontal rules, and serif-style headings. Timeless and professional.",
+    "isPremium": false
+  },
+  {
+    "id": "compact-03",
+    "name": "Compact",
+    "category": "compact",
+    "description": "Two-column layout with sidebar for skills and education. Maximizes content per page.",
+    "isPremium": false
+  },
+  {
+    "id": "minimal-04",
+    "name": "Minimalist",
+    "category": "minimal",
+    "description": "Ultra-clean design with no color accents. Maximum readability with thin lines and ample whitespace.",
+    "isPremium": false
+  },
+  {
+    "id": "bold-05",
+    "name": "Bold Statement",
+    "category": "bold",
+    "description": "Strong visual hierarchy with accent background bars on section titles. Makes a bold impression.",
+    "isPremium": false
+  }
+]

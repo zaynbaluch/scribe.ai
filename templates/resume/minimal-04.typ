@@ -1,0 +1,117 @@
+// Minimalist — Ultra-clean, no color accents, maximum readability
+#import "../shared/lib.typ": *
+
+#let data = json("data.json")
+#let styles = data.at("styles", default: (:))
+#let font = styles.at("font", default: "Inter")
+#let fsize = float(styles.at("fontSize", default: 11)) * 1pt
+#let lspacing = float(styles.at("lineSpacing", default: 1.15)) * 0.55em
+#let mx = float(styles.at("marginLeft", default: 0.6)) * 1in
+#let my = float(styles.at("marginTop", default: 0.5)) * 1in
+#let sections = data.at("sectionOrder", default: ("summary", "experience", "skills", "projects", "education"))
+#let vis = data.at("sectionVisibility", default: (:))
+#let profile = data.at("profile", default: (:))
+
+#show: resume-doc.with(
+  author: profile.at("name", default: ""),
+  accent-color: luma(60),
+  font-family: font,
+  font-size: fsize,
+  line-spacing: lspacing,
+  margin-x: mx,
+  margin-y: my,
+)
+
+// ─── Header ─────────────────────────────────────────────────────────────────
+#text(size: 26pt, weight: "light", tracking: 0.02em)[#profile.at("name", default: "Your Name")]
+#v(0.15em)
+#if profile.at("headline", default: "") != "" {
+  text(size: 10pt, fill: luma(100))[#profile.headline]
+  v(0.15em)
+}
+#contact-row(
+  email: profile.at("email", default: none),
+  phone: profile.at("phone", default: none),
+  location: profile.at("location", default: none),
+  website: profile.at("website", default: none),
+  linkedin: profile.at("linkedin", default: none),
+  github: profile.at("github", default: none),
+)
+#v(0.5em)
+
+// ─── Sections ───────────────────────────────────────────────────────────────
+#for section in sections {
+  let show-section = vis.at(section, default: true)
+  if show-section == false { continue }
+
+  if section == "summary" {
+    let summary = profile.at("summary", default: none)
+    if summary != none and summary != "" {
+      section-heading("Summary", style: "minimal")
+      text(size: 9.5pt, fill: luma(40))[#summary]
+    }
+  }
+
+  if section == "experience" {
+    let exps = profile.at("experiences", default: ())
+    if exps.len() > 0 {
+      section-heading("Experience", style: "minimal")
+      for exp in exps {
+        entry-header(
+          exp.at("title", default: ""),
+          exp.at("company", default: "") + if exp.at("location", default: "") != "" { ", " + exp.location } else { "" },
+          format-date-range(exp.at("startDate", default: ""), exp.at("endDate", default: none), current: exp.at("current", default: false)),
+        )
+        if exp.at("bullets", default: ()).len() > 0 { bullet-list(exp.bullets) }
+        else if exp.at("description", default: "") != "" { text(size: 9.5pt)[#exp.description] }
+        v(0.25em)
+      }
+    }
+  }
+
+  if section == "education" {
+    let edu = profile.at("education", default: ())
+    if edu.len() > 0 {
+      section-heading("Education", style: "minimal")
+      for e in edu {
+        entry-header(
+          e.at("degree", default: "") + if e.at("field", default: "") != "" { " in " + e.field } else { "" },
+          e.at("institution", default: ""),
+          format-date-range(e.at("startDate", default: ""), e.at("endDate", default: none)),
+        )
+        v(0.2em)
+      }
+    }
+  }
+
+  if section == "skills" {
+    let skills = profile.at("skills", default: ())
+    if skills.len() > 0 {
+      section-heading("Skills", style: "minimal")
+      skill-list(skills)
+    }
+  }
+
+  if section == "projects" {
+    let projs = profile.at("projects", default: ())
+    if projs.len() > 0 {
+      section-heading("Projects", style: "minimal")
+      for p in projs {
+        entry-header(p.at("name", default: ""), none, "")
+        if p.at("description", default: "") != "" { text(size: 9.5pt)[#p.description] }
+        v(0.2em)
+      }
+    }
+  }
+
+  if section == "certifications" {
+    let certs = profile.at("certifications", default: ())
+    if certs.len() > 0 {
+      section-heading("Certifications", style: "minimal")
+      for c in certs {
+        text(size: 9.5pt)[#c.at("name", default: "") — #c.at("issuer", default: "")]
+        linebreak()
+      }
+    }
+  }
+}
