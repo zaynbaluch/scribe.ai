@@ -26,6 +26,7 @@ model User {
   coverLetters CoverLetter[]
   jobs         Job[]
   applications Application[]
+  portfolio    Portfolio?
 }
 
 // ─── Profile ────────────────────────────────────────────────────────────────────
@@ -244,4 +245,29 @@ model Application {
   reminderSent   Boolean   @default(false)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+}
+
+// ─── Portfolio ──────────────────────────────────────────────────────────────────
+
+model Portfolio {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId       String   @default("developer")
+  primaryColor     String   @default("#818cf8")
+  accentColor      String   @default("#6366f1")
+  showExperience   Boolean  @default(true)
+  showProjects     Boolean  @default(true)
+  showEducation    Boolean  @default(true)
+  showSkills       Boolean  @default(true)
+  showPublications Boolean  @default(false)
+  showVolunteer    Boolean  @default(false)
+  customHeadline   String?
+  customBio        String?  @db.Text
+  passwordHash     String?  // bcrypt hash if password-protected
+  isPublic         Boolean  @default(true)
+  totalViews       Int      @default(0)
+  lastViewedAt     DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }

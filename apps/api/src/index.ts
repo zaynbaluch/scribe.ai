@@ -12,6 +12,7 @@ import exportRoutes from './routes/export.routes';
 import jobRoutes from './routes/job.routes';
 import tailorRoutes from './routes/tailor.routes';
 import applicationRoutes from './routes/application.routes';
+import portfolioRoutes from './routes/portfolio.routes';
 import { getTemplates } from './controllers/export.controller';
 
 dotenv.config();
@@ -40,6 +41,8 @@ app.use('/api/resumes', exportRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/tailor', tailorRoutes);
 app.use('/api/applications', applicationRoutes);
+app.use('/api/portfolio', portfolioRoutes);
+app.use('/p', portfolioRoutes); // Public portfolio routes
 app.get('/api/templates', getTemplates);
 
 // ─── Error Handler (must be last) ───────────────────────────────────────────
