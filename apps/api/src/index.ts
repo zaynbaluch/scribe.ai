@@ -9,6 +9,8 @@ import authRoutes from './routes/auth.routes';
 import profileRoutes from './routes/profile.routes';
 import resumeRoutes from './routes/resume.routes';
 import exportRoutes from './routes/export.routes';
+import jobRoutes from './routes/job.routes';
+import tailorRoutes from './routes/tailor.routes';
 import { getTemplates } from './controllers/export.controller';
 
 dotenv.config();
@@ -34,6 +36,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/resumes', exportRoutes);
+app.use('/api/jobs', jobRoutes);
+app.use('/api/tailor', tailorRoutes);
 app.get('/api/templates', getTemplates);
 
 // ─── Error Handler (must be last) ───────────────────────────────────────────

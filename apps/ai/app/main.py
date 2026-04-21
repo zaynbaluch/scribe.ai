@@ -9,8 +9,8 @@ logger.add(sys.stdout, colorize=True, format="<green>{time:YYYY-MM-DD HH:mm:ss}<
 
 app = FastAPI(
     title="Scribe.ai Service",
-    description="AI service for parsing and tailoring resumes.",
-    version="0.1.0"
+    description="AI service for parsing, tailoring, and generating resume content.",
+    version="0.2.0"
 )
 
 app.add_middleware(
@@ -21,11 +21,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ─── Register Routers ────────────────────────────────────────────────────────
+from app.routers.jobs import router as jobs_router
+from app.routers.tailor import router as tailor_router
+
+app.include_router(jobs_router)
+app.include_router(tailor_router)
+
+# ─── Health Check ────────────────────────────────────────────────────────────
+
 @app.get("/ai/health")
 async def health_check():
     logger.info("Health check endpoint hit")
-    return {"status": "ok", "service": "ai"}
+    return {"status": "ok", "service": "ai", "version": "0.2.0"}
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("AI Service starting up...")
+    logger.info("AI Service starting up (Phase 3: Tailoring Engine)...")

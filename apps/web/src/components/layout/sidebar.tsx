@@ -15,12 +15,14 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
+  Wand2,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/profile', label: 'Profile', icon: User },
   { href: '/resumes', label: 'Resumes', icon: FileText },
+  { href: '/tailor', label: 'AI Tailoring', icon: Wand2 },
   { href: '/cover-letters', label: 'Cover Letters', icon: PenLine },
   { href: '/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/applications', label: 'Applications', icon: KanbanSquare },
