@@ -13,6 +13,7 @@ router.post('/', validate(createResumeSchema), resumeController.createResume);
 router.get('/:id', resumeController.getResumeById);
 router.put('/:id', validate(updateResumeSchema), resumeController.updateResume);
 router.post('/:id/duplicate', resumeController.duplicateResume);
+router.get('/:id/ats-score', resumeController.getAtsScore);
 router.delete('/:id', resumeController.deleteResume);
 
 export default router;

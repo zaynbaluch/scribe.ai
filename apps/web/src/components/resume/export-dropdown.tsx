@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, FileText, FileType, Type, Braces, Loader2, ChevronDown } from 'lucide-react';
+import { Download, FileText, FileType, Type, Braces, Loader2, ChevronDown, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ExportDropdownProps {
   resumeId: string;
+  atsScore?: number;
 }
 
 const FORMATS = [
@@ -15,11 +16,22 @@ const FORMATS = [
   { id: 'json', label: 'JSON', icon: Braces, desc: 'Raw data export' },
 ];
 
-export default function ExportDropdown({ resumeId }: ExportDropdownProps) {
+export default function ExportDropdown({ resumeId, atsScore }: ExportDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState<string | null>(null);
+  const [atsWarning, setAtsWarning] = useState<{ format: string } | null>(null);
 
-  const handleExport = async (format: string) => {
+  const handleExportClick = (format: string) => {
+    // Show ATS warning if score is below 80 and exporting PDF/DOCX
+    if (atsScore !== undefined && atsScore < 80 && (format === 'pdf' || format === 'docx')) {
+      setAtsWarning({ format });
+      return;
+    }
+    doExport(format);
+  };
+
+  const doExport = async (format: string) => {
+    setAtsWarning(null);
     setIsExporting(format);
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('scribe_access_token') : null;
@@ -64,7 +76,7 @@ export default function ExportDropdown({ resumeId }: ExportDropdownProps) {
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-xl py-1 animate-in fade-in slide-in-from-top-2 duration-150">
             {FORMATS.map((f) => (
-              <button key={f.id} onClick={() => handleExport(f.id)}
+              <button key={f.id} onClick={() => handleExportClick(f.id)}
                 disabled={isExporting !== null}
                 className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-[var(--bg-elevated)] transition-colors disabled:opacity-50">
                 {isExporting === f.id ? (
@@ -78,6 +90,37 @@ export default function ExportDropdown({ resumeId }: ExportDropdownProps) {
                 </div>
               </button>
             ))}
+          </div>
+        </>
+      )}
+
+      {/* ATS Warning Dialog */}
+      {atsWarning && (
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" onClick={() => setAtsWarning(null)} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-2xl p-6 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-[var(--warning)]/10 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle size={20} className="text-[var(--warning)]" />
+              </div>
+              <div>
+                <h3 className="font-display text-base font-semibold mb-1">Low ATS Score</h3>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  Your resume has an ATS compatibility score of <strong className="text-[var(--warning)]">{atsScore}</strong>.
+                  We recommend fixing the issues before exporting to maximize your chances.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setAtsWarning(null)}
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors">
+                Go Back
+              </button>
+              <button onClick={() => doExport(atsWarning.format)}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-[var(--warning)]/10 text-[var(--warning)] border border-[var(--warning)]/30 hover:bg-[var(--warning)]/20 transition-colors">
+                Export Anyway
+              </button>
+            </div>
           </div>
         </>
       )}
@@ -95,3 +138,4 @@ function downloadBlob(blob: Blob, filename: string) {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+

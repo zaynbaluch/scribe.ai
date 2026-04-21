@@ -24,17 +24,19 @@ app.add_middleware(
 # ─── Register Routers ────────────────────────────────────────────────────────
 from app.routers.jobs import router as jobs_router
 from app.routers.tailor import router as tailor_router
+from app.routers.ats import router as ats_router
 
 app.include_router(jobs_router)
 app.include_router(tailor_router)
+app.include_router(ats_router)
 
 # ─── Health Check ────────────────────────────────────────────────────────────
 
 @app.get("/ai/health")
 async def health_check():
     logger.info("Health check endpoint hit")
-    return {"status": "ok", "service": "ai", "version": "0.2.0"}
+    return {"status": "ok", "service": "ai", "version": "0.3.0"}
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("AI Service starting up (Phase 3: Tailoring Engine)...")
+    logger.info("AI Service starting up (Phase 4: ATS Optimization)...")

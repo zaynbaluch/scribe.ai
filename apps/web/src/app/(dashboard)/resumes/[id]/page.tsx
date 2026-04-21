@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Shield } from 'lucide-react';
 import { useResumeStore } from '@/stores/resume-store';
 import { useDebounce } from '@/hooks/use-debounce';
 import TemplatePicker from '@/components/resume/template-picker';
@@ -10,6 +10,7 @@ import StyleControls from '@/components/resume/style-controls';
 import SectionToggles from '@/components/resume/section-toggles';
 import ResumePreview from '@/components/resume/resume-preview';
 import ExportDropdown from '@/components/resume/export-dropdown';
+import AtsSimulator from '@/components/resume/ats-simulator';
 import { toast } from 'sonner';
 
 export default function ResumeEditorPage({ params }: { params: Promise<{ id: string }> }) {
@@ -23,6 +24,8 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   const [localStyles, setLocalStyles] = useState<Record<string, any>>({});
   const [localSectionOrder, setLocalSectionOrder] = useState<string[]>([]);
   const [localVisibility, setLocalVisibility] = useState<Record<string, boolean>>({});
+  const [atsOpen, setAtsOpen] = useState(false);
+  const [localAtsScore, setLocalAtsScore] = useState<number | null>(null);
 
   useEffect(() => {
     fetchResume(id);
@@ -101,16 +104,21 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
           )}
         </div>
         <div className="flex items-center gap-3">
-          {activeResume.atsScore !== null && activeResume.atsScore !== undefined && (
+          {(localAtsScore ?? activeResume.atsScore) != null && (
             <div className={`text-xs font-mono font-medium px-2 py-1 rounded-md border ${
-              activeResume.atsScore >= 80 ? 'text-[var(--success)] border-[var(--success)]/30 bg-[var(--success)]/10'
-                : activeResume.atsScore >= 60 ? 'text-[var(--warning)] border-[var(--warning)]/30 bg-[var(--warning)]/10'
+              (localAtsScore ?? activeResume.atsScore)! >= 80 ? 'text-[var(--success)] border-[var(--success)]/30 bg-[var(--success)]/10'
+                : (localAtsScore ?? activeResume.atsScore)! >= 60 ? 'text-[var(--warning)] border-[var(--warning)]/30 bg-[var(--warning)]/10'
                 : 'text-[var(--danger)] border-[var(--danger)]/30 bg-[var(--danger)]/10'
             }`}>
-              ATS {activeResume.atsScore}
+              ATS {localAtsScore ?? activeResume.atsScore}
             </div>
           )}
-          <ExportDropdown resumeId={id} />
+          <button onClick={() => setAtsOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors">
+            <Shield size={14} />
+            ATS Check
+          </button>
+          <ExportDropdown resumeId={id} atsScore={localAtsScore ?? activeResume.atsScore ?? undefined} />
         </div>
       </div>
 
@@ -139,6 +147,14 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
           customStyles={localStyles}
         />
       </div>
+
+      {/* ATS Simulator Panel */}
+      <AtsSimulator
+        resumeId={id}
+        isOpen={atsOpen}
+        onClose={() => setAtsOpen(false)}
+        onScoreUpdate={(score) => setLocalAtsScore(score)}
+      />
     </div>
   );
 }

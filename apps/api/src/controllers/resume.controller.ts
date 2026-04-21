@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import * as resumeService from '../services/resume.service';
 import { asyncHandler, createError } from '../middleware/error-handler.middleware';
+import prisma from '../lib/prisma';
+import logger from '../lib/logger';
+
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 
 export const createResume = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.userId;
@@ -41,3 +45,49 @@ export const deleteResume = asyncHandler(async (req: Request, res: Response) => 
   await resumeService.deleteResume(userId, req.params.id as string);
   res.json({ success: true, data: null });
 });
+
+export const getAtsScore = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const resumeId = req.params.id as string;
+
+  const resume = await prisma.resume.findFirst({ where: { id: resumeId, userId } });
+  if (!resume) throw createError('Resume not found', 404);
+
+  const profileData = resume.baseProfileSnapshot as any;
+  if (!profileData) throw createError('Resume has no profile data', 400);
+
+  // Get JD keywords if resume is linked to a job
+  let jdKeywords: any = null;
+  if (resume.jobId) {
+    const job = await prisma.job.findUnique({ where: { id: resume.jobId } });
+    if (job?.parsedKeywords) {
+      jdKeywords = job.parsedKeywords;
+    }
+  }
+
+  try {
+    const aiRes = await fetch(`${AI_SERVICE_URL}/ai/ats-score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resumeData: profileData, jdKeywords }),
+    });
+    const aiData = await aiRes.json();
+
+    if (!aiData.success) throw new Error('ATS scoring failed');
+
+    // Persist score and report
+    await prisma.resume.update({
+      where: { id: resumeId },
+      data: {
+        atsScore: aiData.data.score,
+        atsReport: aiData.data,
+      },
+    });
+
+    res.json({ success: true, data: aiData.data });
+  } catch (err: any) {
+    logger.error({ err }, 'ATS scoring failed');
+    throw createError(`ATS check failed: ${err.message}`, 500);
+  }
+});
+
