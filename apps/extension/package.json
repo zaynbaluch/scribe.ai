@@ -1,0 +1,25 @@
+{
+  "name": "scribe-extension",
+  "version": "1.0.0",
+  "description": "Scribe.ai Browser Extension",
+  "private": true,
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build"
+  },
+  "dependencies": {
+    "lucide-react": "^0.368.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "typescript": "^5.4.5",
+    "wxt": "^0.18.2"
+  }
+}

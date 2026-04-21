@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-surface: #0a0a0f;
+    --text-primary: #e4e4e7;
+  }
+}
