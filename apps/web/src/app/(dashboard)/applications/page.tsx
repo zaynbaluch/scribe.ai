@@ -46,8 +46,19 @@ export default function ApplicationsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
-        <div className="w-8 h-8 border-2 border-[var(--gradient-2)] border-t-transparent rounded-full animate-spin" />
+      <div className="max-w-[1400px] mx-auto space-y-6">
+        <div className="h-8 w-48 bg-[var(--bg-elevated)] rounded-md animate-pulse"></div>
+        <div className="flex gap-3 overflow-x-auto">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex-shrink-0 w-[220px] rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-transparent)]">
+              <div className="px-3 py-2.5 border-b border-[var(--grid-line)]"><div className="w-16 h-4 bg-[var(--bg-elevated)] rounded animate-pulse"></div></div>
+              <div className="p-2 space-y-2">
+                <div className="h-24 w-full bg-[var(--bg-elevated)] rounded-lg animate-pulse"></div>
+                <div className="h-24 w-full bg-[var(--bg-elevated)] rounded-lg animate-pulse"></div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

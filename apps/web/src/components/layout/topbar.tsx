@@ -1,14 +1,16 @@
 'use client';
 
 import { useAuthStore } from '@/stores/auth-store';
-import { Moon, Sun, Bell, LogOut, ChevronDown } from 'lucide-react';
+import { Moon, Sun, Bell, LogOut, ChevronDown, Menu } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 interface TopbarProps {
   sidebarWidth: number;
+  isMobile?: boolean;
+  onMobileMenuToggle?: () => void;
 }
 
-export default function Topbar({ sidebarWidth }: TopbarProps) {
+export default function Topbar({ sidebarWidth, isMobile, onMobileMenuToggle }: TopbarProps) {
   const { user, logout } = useAuthStore();
   const [isDark, setIsDark] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -46,16 +48,26 @@ export default function Topbar({ sidebarWidth }: TopbarProps) {
 
   return (
     <header
-      className="fixed top-0 right-0 h-14 flex items-center justify-between px-6 border-b border-[var(--grid-line-strong)] bg-[var(--bg-surface-transparent)] backdrop-blur-xl z-30 transition-all duration-250"
+      className="fixed top-0 right-0 h-14 flex items-center justify-between px-4 md:px-6 border-b border-[var(--grid-line-strong)] bg-[var(--bg-surface-transparent)] backdrop-blur-xl z-30 transition-all duration-250"
       style={{ left: sidebarWidth }}
     >
-      {/* Greeting */}
-      <h2 className="font-display text-lg tracking-tight">
-        {getGreeting()},{' '}
-        <span className="text-[var(--text-secondary)]">
-          {user?.name?.split(' ')[0] || 'there'}
-        </span>
-      </h2>
+      <div className="flex items-center gap-3">
+        {isMobile && (
+          <button 
+            onClick={onMobileMenuToggle}
+            className="p-1.5 -ml-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] transition-colors"
+          >
+            <Menu size={20} />
+          </button>
+        )}
+        {/* Greeting */}
+        <h2 className="font-display text-base md:text-lg tracking-tight">
+          {getGreeting()},{' '}
+          <span className="text-[var(--text-secondary)]">
+            {user?.name?.split(' ')[0] || 'there'}
+          </span>
+        </h2>
+      </div>
 
       {/* Right side controls */}
       <div className="flex items-center gap-3">

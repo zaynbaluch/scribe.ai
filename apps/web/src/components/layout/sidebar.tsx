@@ -33,22 +33,29 @@ const navItems = [
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  isMobile?: boolean;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onMobileClose }: SidebarProps) {
   const pathname = usePathname();
+
+  const isHiddenMobile = isMobile && !mobileOpen;
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen flex flex-col border-r border-[var(--grid-line-strong)] bg-[var(--bg-surface)] z-40 transition-all duration-250 ease-in-out"
-      style={{ width: collapsed ? '64px' : '260px' }}
+      className={`fixed top-0 h-screen flex flex-col border-r border-[var(--grid-line-strong)] bg-[var(--bg-surface)] z-50 transition-all duration-250 ease-in-out ${
+        isMobile ? (mobileOpen ? 'left-0 shadow-2xl' : '-left-[260px]') : 'left-0'
+      }`}
+      style={{ width: isMobile ? '260px' : (collapsed ? '64px' : '260px') }}
     >
       {/* Logo */}
       <div className="h-14 flex items-center px-4 border-b border-[var(--grid-line-strong)]">
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--gradient-1)] to-[var(--gradient-2)] flex items-center justify-center text-white font-display font-bold text-sm flex-shrink-0">
           S
         </div>
-        {!collapsed && (
+        {(!collapsed || isMobile) && (
           <span className="ml-3 font-display font-bold text-lg tracking-tight whitespace-nowrap">
             Scribe.ai
           </span>
@@ -65,6 +72,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => {
+                if (isMobile && onMobileClose) onMobileClose();
+              }}
               className={`
                 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
                 ${
@@ -73,10 +83,10 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     : 'text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]'
                 }
               `}
-              title={collapsed ? item.label : undefined}
+              title={collapsed && !isMobile ? item.label : undefined}
             >
               <Icon size={18} className="flex-shrink-0" />
-              {!collapsed && <span className="whitespace-nowrap">{item.label}</span>}
+              {(!collapsed || isMobile) && <span className="whitespace-nowrap">{item.label}</span>}
             </Link>
           );
         })}
@@ -101,14 +111,16 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           )}
         </div>
 
-        {/* Collapse toggle */}
-        <button
-          onClick={onToggle}
-          className="flex items-center justify-center p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors"
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-        </button>
+        {/* Collapse toggle (desktop only) */}
+        {!isMobile && (
+          <button
+            onClick={onToggle}
+            className="flex items-center justify-center p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors"
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+        )}
       </div>
     </aside>
   );

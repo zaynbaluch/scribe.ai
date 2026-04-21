@@ -215,7 +215,6 @@
 - [ ] Landing page with product demo
 - [ ] SEO: meta tags, OG images, sitemap
 - [ ] Legal: Privacy Policy, Terms of Service
-- [ ] Set up Stripe billing (free → pro → lifetime)
 - [ ] Production deployment (Vercel + Railway + Supabase)
 - [ ] Monitoring: Sentry error tracking, PostHog analytics
 

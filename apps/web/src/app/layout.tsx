@@ -18,8 +18,25 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Scribe.ai',
-  description: 'Your career story, intelligently told.',
+  title: {
+    default: "Scribe.ai | Your Career Story, Intelligently Told",
+    template: "%s | Scribe.ai"
+  },
+  description: "Build, tailor, and manage your job applications with the precision of a technical tool and the elegance of premium design.",
+  openGraph: {
+    title: "Scribe.ai",
+    description: "Your career story, intelligently told.",
+    url: "https://scribe.ai",
+    siteName: "Scribe.ai",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Scribe.ai",
+    description: "Your career story, intelligently told.",
+  }
 };
 
 export default function RootLayout({

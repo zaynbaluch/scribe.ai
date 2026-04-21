@@ -56,7 +56,17 @@ export default function DashboardPage() {
       <section>
         <h3 className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">Overview</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {statCards.map((stat) => (
+          {!stats ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-transparent)] p-5">
+                <div className="animate-pulse flex flex-col gap-3">
+                  <div className="w-4 h-4 bg-[var(--bg-elevated)] rounded"></div>
+                  <div className="w-16 h-8 bg-[var(--bg-elevated)] rounded"></div>
+                  <div className="w-24 h-3 bg-[var(--bg-elevated)] rounded"></div>
+                </div>
+              </div>
+            ))
+          ) : statCards.map((stat) => (
             <div key={stat.label} className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-transparent)] backdrop-blur-md p-5">
               <div className="flex items-center justify-between mb-3">
                 <stat.icon size={16} className="text-[var(--text-muted)]" />
