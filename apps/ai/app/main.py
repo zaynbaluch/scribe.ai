@@ -28,4 +28,4 @@ async def health_check():
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("🚀 AI Service starting up...")
+    logger.info("AI Service starting up...")
