@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  authId    String   @unique // OAuth provider ID
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  profile      Profile?
+  resumes      Resume[]
+  applications Application[]
+  coverLetters CoverLetter[]
+}
+
+model Profile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  about          String?  @db.Text
+  location       String?
+  website        String?
+  linkedin       String?
+  github         String?
+  
+  experiences    Experience[]
+  education      Education[]
+  skills         Skill[]
+  projects       Project[]
+  certifications Certification[]
+}
+
+model Experience {
+  id           String    @id @default(uuid())
+  profileId    String
+  profile      Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  company      String
+  position     String
+  location     String?
+  startDate    DateTime
+  endDate      DateTime?
+  current      Boolean   @default(false)
+  description  String    @db.Text
+  orderIndex   Int       @default(0)
+}
+
+model Education {
+  id           String    @id @default(uuid())
+  profileId    String
+  profile      Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  institution  String
+  degree       String
+  field        String?
+  startDate    DateTime
+  endDate      DateTime?
+  description  String?   @db.Text
+  orderIndex   Int       @default(0)
+}
+
+model Skill {
+  id           String    @id @default(uuid())
+  profileId    String
+  profile      Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name         String
+  category     String?
+  orderIndex   Int       @default(0)
+}
+
+model Project {
+  id           String    @id @default(uuid())
+  profileId    String
+  profile      Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name         String
+  description  String    @db.Text
+  url          String?
+  startDate    DateTime?
+  endDate      DateTime?
+  orderIndex   Int       @default(0)
+}
+
+model Certification {
+  id           String    @id @default(uuid())
+  profileId    String
+  profile      Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name         String
+  issuer       String
+  date         DateTime?
+  url          String?
+  orderIndex   Int       @default(0)
+}
+
+model Job {
+  id             String   @id @default(uuid())
+  title          String
+  company        String
+  description    String   @db.Text
+  url            String?
+  extractedSkills String[] // Array of strings mapped by postgres
+  tone           String?
+  createdAt      DateTime @default(now())
+  
+  resumes        Resume[]
+  applications   Application[]
+}
+
+model Resume {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId       String?
+  job         Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  
+  name        String
+  content     Json     // Storing the structured tailored content
+  templateId  String   @default("modern-01")
+  matchScore  Int?
+  atsScore    Int?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  applications Application[]
+  coverLetters CoverLetter[]
+}
+
+model CoverLetter {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeId    String?
+  resume      Resume?  @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  
+  title       String
+  content     String   @db.Text
+  tone        String   @default("formal")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Application {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId       String?
+  job         Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  resumeId    String?
+  resume      Resume?  @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  
+  company     String
+  position    String
+  status      String   @default("Saved") // Saved, Applied, Screening, Interview, Offer, Rejected
+  appliedDate DateTime?
+  notes       String?  @db.Text
+  salaryRange String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

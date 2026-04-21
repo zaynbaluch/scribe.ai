@@ -1,0 +1,20 @@
+[project]
+name = "scribe-ai-service"
+version = "0.1.0"
+description = "FastAPI AI service for Scribe.ai"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn>=0.30.1",
+    "loguru>=0.7.2",
+    "ollama>=0.2.1",
+    "openai>=1.30.1",
+    "pydantic>=2.7.2",
+    "spacy>=3.7.4",
+    "python-dotenv>=1.0.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

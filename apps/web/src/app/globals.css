@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", "Instrument Serif", serif;
+  --font-body: "Inter", "Geist", "Arial", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  --color-base: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-surface-transparent: var(--bg-surface-transparent);
+  --color-elevated: var(--bg-elevated);
+
+  --color-grid: var(--grid-line);
+  --color-grid-strong: var(--grid-line-strong);
+
+  --text-primary: var(--text-primary);
+  --text-secondary: var(--text-secondary);
+  --text-muted: var(--text-muted);
+  --text-watermark: var(--text-watermark);
+
+  --border-subtle: var(--border-subtle);
+  --border-focus: var(--border-focus);
+  --border-strong: var(--border-strong);
+}
+
+@layer base {
+  :root {
+    /* ── Backgrounds ── */
+    --bg-base: #000000;
+    --bg-surface: #0A0A0C;
+    --bg-surface-transparent: rgba(10, 10, 12, 0.6);
+    --bg-elevated: #111114;
+
+    /* ── Grid ── */
+    --grid-line: rgba(255, 255, 255, 0.08);
+    --grid-line-strong: rgba(255, 255, 255, 0.15);
+
+    /* ── Text ── */
+    --text-primary: #FFFFFF;
+    --text-secondary: #A1A1AA;
+    --text-muted: #52525B;
+    --text-watermark: rgba(255, 255, 255, 0.04);
+
+    /* ── Borders ── */
+    --border-subtle: rgba(255, 255, 255, 0.12);
+    --border-focus: rgba(255, 255, 255, 0.3);
+    --border-strong: rgba(255, 255, 255, 0.2);
+
+    /* ── Gradients & Semantic ── */
+    --gradient-1: #FF3366;
+    --gradient-2: #7C3AED;
+    --gradient-3: #06B6D4;
+    
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --info: #06B6D4;
+  }
+
+  [data-theme="light"] {
+    --bg-base: #FAFAFA;
+    --bg-surface: #FFFFFF;
+    --bg-surface-transparent: rgba(255, 255, 255, 0.7);
+    --bg-elevated: #F4F4F5;
+
+    --grid-line: rgba(0, 0, 0, 0.06);
+    --grid-line-strong: rgba(0, 0, 0, 0.12);
+
+    --text-primary: #09090B;
+    --text-secondary: #52525B;
+    --text-muted: #A1A1AA;
+    --text-watermark: rgba(0, 0, 0, 0.03);
+
+    --border-subtle: rgba(0, 0, 0, 0.1);
+    --border-focus: rgba(0, 0, 0, 0.3);
+    --border-strong: rgba(0, 0, 0, 0.15);
+  }
+
+  body {
+    background-color: var(--bg-base);
+    background-image: 
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-white text-black font-semibold text-sm px-5 py-2.5 rounded-md transition-all duration-150;
+    @apply hover:scale-95 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)];
+    @apply active:scale-90;
+  }
+
+  [data-theme="light"] .btn-primary {
+    @apply bg-zinc-950 text-white;
+  }
+
+  .nav-blur {
+    @apply bg-surface-transparent backdrop-blur-md border-b border-grid-strong;
+  }
+}

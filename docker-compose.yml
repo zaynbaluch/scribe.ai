@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: scribe-db
+    environment:
+      POSTGRES_USER: scribe
+      POSTGRES_PASSWORD: scribe_dev_password
+      POSTGRES_DB: scribe_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - scribe_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scribe"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: scribe-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - scribe_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: scribe-mail
+    ports:
+      - "1025:1025"   # SMTP server
+      - "8025:8025"   # Web UI
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+volumes:
+  scribe_pgdata:
+  scribe_redis:

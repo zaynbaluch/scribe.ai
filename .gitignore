@@ -1,0 +1,39 @@
+# node_modules
+node_modules
+/.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+build/
+
+# production
+/dist
+/coverage
+
+# misc
+.DS_Store
+*.pem
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+venv/
+.venv/
+env/
+.env_python
+
+# AI local models/data
+data/
+uploads/
+
+# Turborepo
+.turbo/
