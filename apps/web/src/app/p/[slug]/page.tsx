@@ -15,6 +15,7 @@ interface PortfolioData {
     hasPassword: boolean;
   };
   profile: {
+    imageUrl: string | null;
     summary: string | null; headline: string | null; location: string | null;
     phone: string | null; website: string | null; linkedin: string | null; github: string | null;
     experiences: any[]; education: any[]; skills: any[];
@@ -107,10 +108,12 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ slug
       <header className="border-b border-[#1a1a2e]">
         <div className="max-w-4xl mx-auto px-6 py-16">
           <div className="flex items-start gap-6">
-            {user.avatarUrl && (
-              <img src={user.avatarUrl} alt={user.name}
-                className="w-20 h-20 rounded-2xl object-cover border-2" style={{ borderColor: primary }} />
-            )}
+            <img 
+              src={profile.imageUrl || user.avatarUrl || 'https://api.dicebear.com/7.x/initials/svg?seed=' + user.name} 
+              alt={user.name}
+              className="w-20 h-20 rounded-2xl object-cover border-2 bg-[#18181b]" 
+              style={{ borderColor: primary }} 
+            />
             <div>
               <h1 className="text-3xl font-bold text-white tracking-tight">{user.name}</h1>
               <p className="text-lg mt-1" style={{ color: primary }}>

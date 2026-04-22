@@ -160,17 +160,30 @@ export async function tailorResume(userId: string, resumeId: string, jobId: stri
  */
 export async function generateCoverLetter(userId: string, data: {
   resumeId: string;
-  jobId: string;
+  jobId?: string;
   tone?: string;
+  jdText?: string;
+  jobTitle?: string;
 }) {
   const resume = await prisma.resume.findFirst({ where: { id: data.resumeId, userId } });
   if (!resume) throw new Error('Resume not found');
 
-  const job = await prisma.job.findFirst({ where: { id: data.jobId, userId } });
-  if (!job) throw new Error('Job not found');
+  let jobDescription = data.jdText || '';
+  let jobKeywords = {};
+  let clTitle = data.jobTitle || 'Custom Cover Letter';
+
+  if (data.jobId) {
+    const job = await prisma.job.findFirst({ where: { id: data.jobId, userId } });
+    if (job) {
+      jobDescription = job.rawDescription;
+      jobKeywords = job.parsedKeywords as any;
+      clTitle = `Cover Letter - ${job.title} at ${job.company}`;
+    }
+  }
+
+  if (!jobDescription) throw new Error('Job description is required');
 
   const profile = resume.baseProfileSnapshot as any;
-  const jdKeywords = job.parsedKeywords as any;
 
   try {
     const res = await fetch(`${AI_SERVICE_URL}/ai/cover-letter/generate`, {
@@ -178,8 +191,8 @@ export async function generateCoverLetter(userId: string, data: {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         profile,
-        jd_text: job.rawDescription,
-        jd_keywords: jdKeywords || {},
+        jd_text: jobDescription,
+        jd_keywords: jobKeywords || {},
         tone: data.tone || 'formal',
         stream: false,
       }),
@@ -192,8 +205,8 @@ export async function generateCoverLetter(userId: string, data: {
       data: {
         userId,
         resumeId: data.resumeId,
-        jobId: data.jobId,
-        title: `Cover Letter - ${job.title} at ${job.company}`,
+        jobId: data.jobId || null,
+        title: clTitle,
         content: result.content,
         tone: data.tone || 'formal',
       },

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Shield } from 'lucide-react';
+import { ArrowLeft, Save, Shield, Palette, Type, Layout } from 'lucide-react';
 import { useResumeStore } from '@/stores/resume-store';
 import { useDebounce } from '@/hooks/use-debounce';
 import TemplatePicker from '@/components/resume/template-picker';
@@ -11,6 +11,7 @@ import SectionToggles from '@/components/resume/section-toggles';
 import ResumePreview from '@/components/resume/resume-preview';
 import ExportDropdown from '@/components/resume/export-dropdown';
 import AtsSimulator from '@/components/resume/ats-simulator';
+import ContentEditor from '@/components/resume/content-editor';
 import { toast } from 'sonner';
 
 export default function ResumeEditorPage({ params }: { params: Promise<{ id: string }> }) {
@@ -24,8 +25,10 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   const [localStyles, setLocalStyles] = useState<Record<string, any>>({});
   const [localSectionOrder, setLocalSectionOrder] = useState<string[]>([]);
   const [localVisibility, setLocalVisibility] = useState<Record<string, boolean>>({});
+  const [localProfile, setLocalProfile] = useState<any>(null);
   const [atsOpen, setAtsOpen] = useState(false);
   const [localAtsScore, setLocalAtsScore] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'design' | 'content'>('design');
 
   useEffect(() => {
     fetchResume(id);
@@ -40,6 +43,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
       setLocalStyles(activeResume.customStyles || {});
       setLocalSectionOrder(activeResume.sectionOrder || ['summary', 'experience', 'skills', 'projects', 'education']);
       setLocalVisibility(activeResume.sectionVisibility || {});
+      setLocalProfile(activeResume.baseProfileSnapshot);
     }
   }, [activeResume]);
 
@@ -73,7 +77,12 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
     debouncedSave({ sectionVisibility: vis });
   };
 
-  if (isLoading || !activeResume) {
+  const handleContentChange = (updatedProfile: any) => {
+    setLocalProfile({ ...updatedProfile });
+    debouncedSave({ baseProfileSnapshot: updatedProfile });
+  };
+
+  if (isLoading || !activeResume || !localProfile) {
     return (
       <div className="flex items-center justify-center h-[70vh]">
         <div className="flex flex-col items-center gap-3">
@@ -83,8 +92,6 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
       </div>
     );
   }
-
-  const profile = activeResume.baseProfileSnapshot as any;
 
   return (
     <div className="-mt-4 md:-mt-6 -mx-4 md:-mx-6 h-[calc(100vh-56px)] flex flex-col bg-[var(--bg-base)]">
@@ -125,23 +132,55 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
       {/* Two-Panel Layout */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Controls Panel */}
-        <div className="w-full md:w-[320px] md:border-r border-b md:border-b-0 border-[var(--grid-line-strong)] overflow-y-auto p-4 space-y-6 flex-shrink-0 max-h-[40vh] md:max-h-full">
-          <TemplatePicker templates={templates} selected={localTemplateId} onSelect={handleTemplateChange} />
-          <div className="border-t border-[var(--grid-line)]" />
-          <StyleControls styles={localStyles} onChange={handleStylesChange} />
-          <div className="border-t border-[var(--grid-line)]" />
-          <SectionToggles
-            sectionOrder={localSectionOrder}
-            sectionVisibility={localVisibility}
-            onOrderChange={handleOrderChange}
-            onVisibilityChange={handleVisibilityChange}
-          />
+        <div className="w-full md:w-[320px] md:border-r border-b md:border-b-0 border-[var(--grid-line-strong)] flex flex-col flex-shrink-0 max-h-[50vh] md:max-h-full">
+          {/* Tab Switcher */}
+          <div className="flex p-1 bg-[var(--bg-elevated)] border-b border-[var(--grid-line)]">
+            <button
+              onClick={() => setActiveTab('design')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-all ${
+                activeTab === 'design' 
+                  ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm' 
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+              }`}
+            >
+              <Palette size={14} /> Design
+            </button>
+            <button
+              onClick={() => setActiveTab('content')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-all ${
+                activeTab === 'content' 
+                  ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm' 
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+              }`}
+            >
+              <Type size={14} /> Content
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            {activeTab === 'design' ? (
+              <>
+                <TemplatePicker templates={templates} selected={localTemplateId} onSelect={handleTemplateChange} />
+                <div className="border-t border-[var(--grid-line)]" />
+                <StyleControls styles={localStyles} hasAvatar={!!profile?.imageUrl} onChange={handleStylesChange} />
+                <div className="border-t border-[var(--grid-line)]" />
+                <SectionToggles
+                  sectionOrder={localSectionOrder}
+                  sectionVisibility={localVisibility}
+                  onOrderChange={handleOrderChange}
+                  onVisibilityChange={handleVisibilityChange}
+                />
+              </>
+            ) : (
+              <ContentEditor profile={localProfile} onChange={handleContentChange} />
+            )}
+          </div>
         </div>
 
         {/* Preview Panel */}
         <div className="flex-1 overflow-auto bg-[var(--bg-elevated)]/30">
           <ResumePreview
-            profile={profile}
+            profile={localProfile}
             templateId={localTemplateId}
             sectionOrder={localSectionOrder}
             sectionVisibility={localVisibility}

@@ -10,14 +10,16 @@ interface StyleControlsProps {
     marginBottom?: number;
     marginLeft?: number;
     marginRight?: number;
+    showProfileImage?: boolean;
   };
+  hasAvatar?: boolean;
   onChange: (styles: any) => void;
 }
 
 const FONTS = ['Inter', 'Roboto', 'Lato', 'Georgia', 'Times New Roman', 'Merriweather'];
 const ACCENT_PRESETS = ['#7C3AED', '#06B6D4', '#FF3366', '#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#1a1a2e'];
 
-export default function StyleControls({ styles, onChange }: StyleControlsProps) {
+export default function StyleControls({ styles, hasAvatar = true, onChange }: StyleControlsProps) {
   const update = (key: string, value: any) => onChange({ ...styles, [key]: value });
 
   return (
@@ -96,12 +98,15 @@ export default function StyleControls({ styles, onChange }: StyleControlsProps) 
       </div>
       {/* Toggle options */}
       <div className="pt-3 border-t border-[var(--grid-line)] flex flex-col gap-2">
-        <label className="flex items-center gap-2 cursor-pointer group">
+        <label className={`flex items-center gap-2 cursor-pointer group ${!hasAvatar ? 'opacity-50' : ''}`}>
           <input type="checkbox"
+            disabled={!hasAvatar}
             checked={styles.showProfileImage ?? false}
             onChange={(e) => onChange({ ...styles, showProfileImage: e.target.checked })}
-            className="w-3.5 h-3.5 rounded-sm border-[var(--border-subtle)] text-[var(--gradient-2)] focus:ring-[var(--gradient-2)]/20" />
-          <span className="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">Show Profile Image</span>
+            className="w-3.5 h-3.5 rounded-sm border-[var(--border-subtle)] text-[var(--gradient-2)] focus:ring-[var(--gradient-2)]/20 disabled:cursor-not-allowed" />
+          <span className="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">
+            Show Profile Image {!hasAvatar && '(Requires uploaded avatar)'}
+          </span>
         </label>
       </div>
     </div>

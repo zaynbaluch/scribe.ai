@@ -13,9 +13,9 @@ interface CreateModalProps {
 
 export default function CreateCoverLetterModal({ isOpen, onClose, onCreated }: CreateModalProps) {
   const [resumes, setResumes] = useState<any[]>([]);
-  const [jobs, setJobs] = useState<any[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState('');
-  const [selectedJobId, setSelectedJobId] = useState('');
+  const [jdText, setJdText] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
   const [tone, setTone] = useState('formal');
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -27,22 +27,17 @@ export default function CreateCoverLetterModal({ isOpen, onClose, onCreated }: C
 
   const fetchData = async () => {
     try {
-      const [resumesData, jobsData] = await Promise.all([
-        api.get<any[]>('/api/resumes'),
-        api.get<any[]>('/api/jobs')
-      ]);
+      const resumesData = await api.get<any[]>('/api/resumes');
       setResumes(resumesData);
-      setJobs(jobsData);
       if (resumesData.length > 0) setSelectedResumeId(resumesData[0].id);
-      if (jobsData.length > 0) setSelectedJobId(jobsData[0].id);
     } catch (error) {
-      toast.error('Failed to load data for cover letter creation');
+      toast.error('Failed to load resumes');
     }
   };
 
   const handleGenerate = async () => {
-    if (!selectedResumeId || !selectedJobId) {
-      toast.error('Please select both a resume and a job');
+    if (!selectedResumeId || !jdText.trim()) {
+      toast.error('Please select a resume and paste a job description');
       return;
     }
 
@@ -50,7 +45,8 @@ export default function CreateCoverLetterModal({ isOpen, onClose, onCreated }: C
     try {
       await api.post('/api/cover-letters/generate', {
         resumeId: selectedResumeId,
-        jobId: selectedJobId,
+        jdText: jdText.trim(),
+        jobTitle: jobTitle.trim(),
         tone
       });
       toast.success('Cover letter generated successfully!');
@@ -106,21 +102,33 @@ export default function CreateCoverLetterModal({ isOpen, onClose, onCreated }: C
             </select>
           </div>
 
-          {/* Job Selection */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-[var(--text-muted)] flex items-center gap-1.5">
-              <Briefcase size={14} /> Target Job
-            </label>
-            <select
-              value={selectedJobId}
-              onChange={(e) => setSelectedJobId(e.target.value)}
-              className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--gradient-1)] transition-colors"
-            >
-              <option value="" disabled>Select a job</option>
-              {jobs.map(j => (
-                <option key={j.id} value={j.id}>{j.title} at {j.company}</option>
-              ))}
-            </select>
+          {/* Job Details */}
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-[var(--text-muted)] flex items-center gap-1.5">
+                <Briefcase size={14} /> Job Title (Optional)
+              </label>
+              <input
+                type="text"
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+                placeholder="e.g. Software Engineer at Google"
+                className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--gradient-1)] transition-colors"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-[var(--text-muted)]">
+                Job Description
+              </label>
+              <textarea
+                value={jdText}
+                onChange={(e) => setJdText(e.target.value)}
+                placeholder="Paste the job description here..."
+                rows={5}
+                className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--gradient-1)] transition-colors resize-none"
+              />
+            </div>
           </div>
 
           {/* Tone Selection */}
@@ -153,7 +161,7 @@ export default function CreateCoverLetterModal({ isOpen, onClose, onCreated }: C
           </button>
           <button 
             onClick={handleGenerate}
-            disabled={isGenerating || !selectedResumeId || !selectedJobId}
+            disabled={isGenerating || !selectedResumeId || !jdText.trim()}
             className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {isGenerating ? (

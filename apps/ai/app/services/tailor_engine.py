@@ -133,17 +133,17 @@ def tailor_resume(profile: Dict[str, Any], jd_keywords: Dict, jd_text: str) -> D
         if desc:
             # We add a hint about the project tech stack if it's relevant
             system = (
-                "You are an expert resume writer. Rewrite the project description to better match the job description. "
-                "Highlight the most relevant technologies and impact. "
-                "Keep it concise (1-3 sentences). Return ONLY the rewritten description."
+                "You are an expert resume writer. Rewrite the provided project description to better match the target role. "
+                "CRITICAL INSTRUCTION: DO NOT write a summary of the role. DO NOT write about what the company is seeking. "
+                "You MUST ONLY rewrite the specific project description provided below. Highlight the relevant technologies and impact. "
+                "Keep it concise (1-3 sentences). Return ONLY the rewritten project description."
             )
             prompt = (
                 f"Target Role: {job_title}\n"
                 f"Key Skills: {', '.join(all_keywords[:10])}\n"
                 f"Project Tech Stack: {', '.join(tech_stack)}\n"
-                f"JD Context: {jd_context[:500]}\n\n"
-                f"Original description: {desc}\n\n"
-                f"Tailored description:"
+                f"Original description to rewrite: {desc}\n\n"
+                f"Tailored project description:"
             )
             try:
                 result = _get_llm().generate(prompt, system=system, temperature=0.6, max_tokens=300)

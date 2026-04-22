@@ -3,6 +3,7 @@
 import { useAuthStore } from '@/stores/auth-store';
 import { Moon, Sun, Bell, LogOut, ChevronDown, Menu } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 
 interface TopbarProps {
   sidebarWidth: number;
@@ -12,20 +13,15 @@ interface TopbarProps {
 
 export default function Topbar({ sidebarWidth, isMobile, onMobileMenuToggle }: TopbarProps) {
   const { user, logout } = useAuthStore();
-  const [isDark, setIsDark] = useState(true);
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => setMounted(true), []);
+
   const toggleTheme = () => {
-    const html = document.documentElement;
-    if (isDark) {
-      html.setAttribute('data-theme', 'light');
-      html.classList.remove('dark');
-    } else {
-      html.removeAttribute('data-theme');
-      html.classList.add('dark');
-    }
-    setIsDark(!isDark);
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
 
   // Close dropdown on outside click
@@ -72,13 +68,15 @@ export default function Topbar({ sidebarWidth, isMobile, onMobileMenuToggle }: T
       {/* Right side controls */}
       <div className="flex items-center gap-3">
         {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] transition-colors"
-          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          {isDark ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+        {mounted && (
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] transition-colors"
+            title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+        )}
 
         {/* Notifications */}
         <button className="p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] transition-colors relative">

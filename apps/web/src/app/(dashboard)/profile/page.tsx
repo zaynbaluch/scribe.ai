@@ -211,8 +211,8 @@ export default function ProfilePage() {
             <InputField label="Company" value={item.company} onChange={(v) => onChange({ company: v })} placeholder="e.g. TechCorp" />
             <InputField label="Location" value={item.location || ''} onChange={(v) => onChange({ location: v })} placeholder="e.g. Remote" />
             <div className="flex items-center gap-4">
-              <InputField label="Start Date" value={item.startDate?.slice(0, 7) || ''} onChange={(v) => onChange({ startDate: v })} type="month" />
-              {!item.current && <InputField label="End Date" value={item.endDate?.slice(0, 7) || ''} onChange={(v) => onChange({ endDate: v })} type="month" />}
+              <InputField label="Start Date" value={item.startDate?.slice(0, 10) || ''} onChange={(v) => onChange({ startDate: v })} type="date" />
+              {!item.current && <InputField label="End Date" value={item.endDate?.slice(0, 10) || ''} onChange={(v) => onChange({ endDate: v })} type="date" />}
             </div>
             <label className="col-span-full flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" checked={item.current || false} onChange={(e) => onChange({ current: e.target.checked, endDate: e.target.checked ? null : item.endDate })} className="rounded" />
@@ -241,8 +241,8 @@ export default function ProfilePage() {
             <InputField label="Degree" value={item.degree} onChange={(v) => onChange({ degree: v })} placeholder="e.g. BS Computer Science" />
             <InputField label="Field of Study" value={item.field || ''} onChange={(v) => onChange({ field: v })} placeholder="e.g. Computer Science" />
             <InputField label="GPA" value={item.gpa || ''} onChange={(v) => onChange({ gpa: v })} placeholder="e.g. 3.8/4.0" />
-            <InputField label="Start Date" value={item.startDate?.slice(0, 7) || ''} onChange={(v) => onChange({ startDate: v })} type="month" />
-            <InputField label="End Date" value={item.endDate?.slice(0, 7) || ''} onChange={(v) => onChange({ endDate: v })} type="month" />
+            <InputField label="Start Date" value={item.startDate?.slice(0, 10) || ''} onChange={(v) => onChange({ startDate: v })} type="date" />
+            <InputField label="End Date" value={item.endDate?.slice(0, 10) || ''} onChange={(v) => onChange({ endDate: v })} type="date" />
           </div>
         )}
       />
@@ -298,8 +298,8 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InputField label="Project Name" value={item.name} onChange={(v) => onChange({ name: v })} placeholder="e.g. Scribe.ai" />
             <InputField label="URL" value={item.url || ''} onChange={(v) => onChange({ url: v })} placeholder="https://github.com/..." />
-            <InputField label="Start Date" value={item.startDate?.slice(0, 7) || ''} onChange={(v) => onChange({ startDate: v })} type="month" />
-            <InputField label="End Date" value={item.endDate?.slice(0, 7) || ''} onChange={(v) => onChange({ endDate: v })} type="month" />
+            <InputField label="Start Date" value={item.startDate?.slice(0, 10) || ''} onChange={(v) => onChange({ startDate: v })} type="date" />
+            <InputField label="End Date" value={item.endDate?.slice(0, 10) || ''} onChange={(v) => onChange({ endDate: v })} type="date" />
             <div className="col-span-full">
               <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Tech Stack (comma separated)</label>
               <input type="text" value={item.techStack?.join(', ') || ''} onChange={(e) => onChange({ techStack: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} placeholder="React, Node.js, Typescript"
@@ -362,8 +362,8 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InputField label="Role" value={item.role} onChange={(v) => onChange({ role: v })} placeholder="e.g. Mentor" />
             <InputField label="Organization" value={item.organization} onChange={(v) => onChange({ organization: v })} placeholder="e.g. Red Cross" />
-            <InputField label="Start Date" value={item.startDate?.slice(0, 7) || ''} onChange={(v) => onChange({ startDate: v })} type="month" />
-            <InputField label="End Date" value={item.endDate?.slice(0, 7) || ''} onChange={(v) => onChange({ endDate: v })} type="month" />
+            <InputField label="Start Date" value={item.startDate?.slice(0, 10) || ''} onChange={(v) => onChange({ startDate: v })} type="date" />
+            <InputField label="End Date" value={item.endDate?.slice(0, 10) || ''} onChange={(v) => onChange({ endDate: v })} type="date" />
           </div>
         )}
       />

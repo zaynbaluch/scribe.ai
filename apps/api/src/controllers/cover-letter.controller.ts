@@ -4,9 +4,9 @@ import * as tailorService from '../services/tailor.service';
 
 export const generateCoverLetter = async (req: Request, res: Response) => {
   try {
-    const { resumeId, jobId, tone } = req.body;
+    const { resumeId, jobId, tone, jdText, jobTitle } = req.body;
     const userId = req.user!.userId;
-    const cl = await tailorService.generateCoverLetter(userId, { resumeId, jobId, tone });
+    const cl = await tailorService.generateCoverLetter(userId, { resumeId, jobId, tone, jdText, jobTitle });
     res.status(201).json({ success: true, data: cl });
   } catch (error: any) {
     res.status(500).json({ success: false, error: { message: error.message } });

@@ -24,7 +24,6 @@ const navItems = [
   { href: '/resumes', label: 'Resumes', icon: FileText },
   { href: '/tailor', label: 'AI Tailoring', icon: Wand2 },
   { href: '/cover-letters', label: 'Cover Letters', icon: PenLine },
-  { href: '/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/applications', label: 'Applications', icon: KanbanSquare },
   { href: '/portfolio', label: 'Portfolio', icon: Globe },
   { href: '/settings', label: 'Settings', icon: Settings },
