@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Trash2, GripVertical, Plus, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -19,22 +19,36 @@ export default function SectionEditor({
   const [isExpanded, setIsExpanded] = useState(items.length > 0);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
+  const [localItems, setLocalItems] = useState(items);
+
+  // Sync when props change
+  useEffect(() => {
+    setLocalItems(items);
+  }, [items]);
+
   const addItem = () => {
-    const newItems = [...items, createEmpty()];
-    onUpdate(newItems);
+    const newItems = [...localItems, createEmpty()];
+    setLocalItems(newItems);
     setEditingIndex(newItems.length - 1);
     setIsExpanded(true);
   };
 
   const removeItem = (index: number) => {
-    onUpdate(items.filter((_, i) => i !== index));
+    const newItems = localItems.filter((_, i) => i !== index);
+    setLocalItems(newItems);
+    onUpdate(newItems); // Delete saves instantly or needs manual save? We'll just pass it up.
     if (editingIndex === index) setEditingIndex(null);
   };
 
-  const updateItem = (index: number, updated: any) => {
-    const newItems = [...items];
+  const updateItemLocal = (index: number, updated: any) => {
+    const newItems = [...localItems];
     newItems[index] = { ...newItems[index], ...updated };
-    onUpdate(newItems);
+    setLocalItems(newItems);
+  };
+
+  const saveChanges = () => {
+    onUpdate(localItems);
+    setEditingIndex(null);
   };
 
   return (
@@ -56,16 +70,23 @@ export default function SectionEditor({
       {/* Items */}
       {isExpanded && (
         <div className="border-t border-[var(--border-subtle)]">
-          {items.map((item, index) => (
+          {localItems.map((item, index) => (
             <div key={item.id || index} className="border-b border-[var(--grid-line)] last:border-b-0">
               {editingIndex === index ? (
                 /* Edit mode */
                 <div className="p-5 bg-[var(--bg-elevated)]/50">
-                  {renderForm(item, (updated) => updateItem(index, updated))}
+                  {renderForm(item, (updated) => updateItemLocal(index, updated))}
                   <div className="flex justify-end gap-2 mt-4">
-                    <button onClick={() => setEditingIndex(null)}
+                    <button onClick={() => {
+                        setLocalItems(items); // Revert
+                        setEditingIndex(null);
+                      }}
                       className="px-3 py-1.5 text-sm rounded-md border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors">
-                      Done
+                      Cancel
+                    </button>
+                    <button onClick={saveChanges}
+                      className="px-3 py-1.5 text-sm rounded-md bg-[var(--gradient-2)] text-white hover:opacity-90 transition-colors">
+                      Save
                     </button>
                   </div>
                 </div>

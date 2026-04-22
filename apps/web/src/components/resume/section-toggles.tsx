@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { GripVertical, Eye, EyeOff } from 'lucide-react';
 
 interface SectionTogglesProps {
@@ -25,6 +26,8 @@ export default function SectionToggles({ sectionOrder, sectionVisibility, onOrde
   const allSections = Object.keys(SECTION_LABELS);
   const order = [...sectionOrder, ...allSections.filter((s) => !sectionOrder.includes(s))];
 
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
   const toggleVisibility = (section: string) => {
     onVisibilityChange({
       ...sectionVisibility,
@@ -32,12 +35,22 @@ export default function SectionToggles({ sectionOrder, sectionVisibility, onOrde
     });
   };
 
-  const moveSection = (index: number, direction: 'up' | 'down') => {
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnter = (index: number) => {
+    if (draggedIndex === null || draggedIndex === index) return;
     const newOrder = [...order];
-    const target = direction === 'up' ? index - 1 : index + 1;
-    if (target < 0 || target >= newOrder.length) return;
-    [newOrder[index], newOrder[target]] = [newOrder[target], newOrder[index]];
+    const draggedItem = newOrder[draggedIndex];
+    newOrder.splice(draggedIndex, 1);
+    newOrder.splice(index, 0, draggedItem);
+    setDraggedIndex(index);
     onOrderChange(newOrder);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
   };
 
   return (
@@ -48,27 +61,26 @@ export default function SectionToggles({ sectionOrder, sectionVisibility, onOrde
           const isVisible = sectionVisibility[section] ?? true;
           return (
             <div key={section}
-              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg group transition-colors ${
-                isVisible ? 'hover:bg-[var(--bg-elevated)]' : 'opacity-50 hover:bg-[var(--bg-elevated)]'
-              }`}
+              draggable
+              onDragStart={() => handleDragStart(i)}
+              onDragEnter={() => handleDragEnter(i)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => e.preventDefault()} // necessary to allow dropping
+              className={`flex items-center gap-3 px-2 py-2 rounded-lg group transition-colors cursor-grab active:cursor-grabbing border ${
+                draggedIndex === i ? 'bg-[var(--bg-elevated)] border-[var(--border-focus)] shadow-md opacity-75' : 'border-transparent'
+              } ${isVisible ? 'hover:bg-[var(--bg-elevated)]' : 'opacity-50 hover:bg-[var(--bg-elevated)]'}`}
             >
-              {/* Drag / reorder buttons */}
-              <div className="flex flex-col -space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => moveSection(i, 'up')} disabled={i === 0}
-                  className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] disabled:opacity-30 text-[10px]">▲</button>
-                <button onClick={() => moveSection(i, 'down')} disabled={i === order.length - 1}
-                  className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] disabled:opacity-30 text-[10px]">▼</button>
-              </div>
-
-              <GripVertical size={12} className="text-[var(--text-muted)] opacity-0 group-hover:opacity-50 transition-opacity" />
+              <GripVertical size={14} className="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors" />
 
               {/* Label */}
               <span className="flex-1 text-xs font-medium">{SECTION_LABELS[section] || section}</span>
 
               {/* Visibility toggle */}
-              <button onClick={() => toggleVisibility(section)}
-                className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
-                {isVisible ? <Eye size={13} /> : <EyeOff size={13} />}
+              <button onClick={(e) => { e.stopPropagation(); toggleVisibility(section); }}
+                className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors cursor-pointer"
+                onPointerDown={(e) => e.stopPropagation()} /* prevent dragging when clicking eye */
+              >
+                {isVisible ? <Eye size={14} /> : <EyeOff size={14} />}
               </button>
             </div>
           );

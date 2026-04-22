@@ -94,6 +94,16 @@ export default function StyleControls({ styles, onChange }: StyleControlsProps) 
           ))}
         </div>
       </div>
+      {/* Toggle options */}
+      <div className="pt-3 border-t border-[var(--grid-line)] flex flex-col gap-2">
+        <label className="flex items-center gap-2 cursor-pointer group">
+          <input type="checkbox"
+            checked={styles.showProfileImage ?? false}
+            onChange={(e) => onChange({ ...styles, showProfileImage: e.target.checked })}
+            className="w-3.5 h-3.5 rounded-sm border-[var(--border-subtle)] text-[var(--gradient-2)] focus:ring-[var(--gradient-2)]/20" />
+          <span className="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">Show Profile Image</span>
+        </label>
+      </div>
     </div>
   );
 }

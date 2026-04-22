@@ -29,11 +29,13 @@ from app.routers.jobs import router as jobs_router
 from app.routers.tailor import router as tailor_router
 from app.routers.ats import router as ats_router
 from app.routers.resume import router as resume_router
+from app.routers.cover_letter import router as cover_letter_router
 
 app.include_router(jobs_router)
 app.include_router(tailor_router)
 app.include_router(ats_router)
 app.include_router(resume_router)
+app.include_router(cover_letter_router)
 
 # ─── Health Check ────────────────────────────────────────────────────────────
 

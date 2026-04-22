@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { api } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 interface MatchResult {
   score: number;
@@ -19,6 +20,8 @@ interface TailorSuggestion {
   bulletIndex?: number;
   experienceTitle?: string;
   company?: string;
+  projectIndex?: number;
+  projectName?: string;
   original: string;
   tailored: string;
   changed: boolean;
@@ -134,10 +137,28 @@ export const useTailorStore = create<TailorState>((set, get) => ({
           if (profile.experiences?.[s.experienceIndex]) {
             profile.experiences[s.experienceIndex].description = s.tailored;
           }
+        } else if (s.type === 'description' && s.section === 'projects' && s.projectIndex !== undefined) {
+          if (profile.projects?.[s.projectIndex]) {
+            profile.projects[s.projectIndex].description = s.tailored;
+          }
         }
       });
 
       const tailoredResume = await useResumeStore.getState().createTailoredResume(resumeId, profile);
+      
+      // Auto-generate a cover letter
+      try {
+        await api.post('/api/cover-letters/generate', {
+          resumeId: tailoredResume.id,
+          jobId: get().jobId,
+          tone: 'formal'
+        });
+        toast.success("Tailored resume and Cover Letter created!");
+      } catch (e) {
+        console.error("Cover letter generation failed:", e);
+        toast.success("Tailored resume created, but cover letter failed.");
+      }
+
       get().reset();
       window.location.href = `/resumes/${tailoredResume.id}`;
     } catch (err: any) {

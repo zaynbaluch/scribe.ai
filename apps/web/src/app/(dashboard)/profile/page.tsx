@@ -1,41 +1,84 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useProfileStore } from '@/stores/profile-store';
-import { useDebounce } from '@/hooks/use-debounce';
 import { toast } from 'sonner';
-import { Upload } from 'lucide-react';
+import { Upload, Camera, Check, Edit2 } from 'lucide-react';
 import CompletenessBar from '@/components/profile/completeness-bar';
 import SectionEditor from '@/components/profile/section-editor';
 import SkillTags from '@/components/profile/skill-tags';
 import ImportModal from '@/components/profile/import-modal';
+import Image from 'next/image';
 
 export default function ProfilePage() {
-  const { profile, isLoading, isSaving, fetch, update } = useProfileStore();
+  const { profile, isLoading, fetch, update } = useProfileStore();
   const [importOpen, setImportOpen] = useState(false);
   const [localProfile, setLocalProfile] = useState<any>(null);
+  
+  // Edit mode toggles
+  const [editingPersonalInfo, setEditingPersonalInfo] = useState(false);
+  const [editingSkills, setEditingSkills] = useState(false);
+
+  // File input ref for image upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetch(); }, [fetch]);
-  useEffect(() => { if (profile) setLocalProfile(profile); }, [profile]);
+  useEffect(() => { if (profile && !localProfile) setLocalProfile(profile); }, [profile]);
 
-  const debouncedSave = useDebounce((data: any) => {
-    update(data).then(() => toast.success('Changes saved')).catch(() => toast.error('Failed to save'));
-  }, 1500);
-
-  const updateField = (field: string, value: any) => {
-    const updated = { ...localProfile, [field]: value };
-    setLocalProfile(updated);
-    debouncedSave({ [field]: value });
+  const saveProfile = async (dataToSave: any) => {
+    try {
+      await update(dataToSave);
+      toast.success('Changes saved successfully');
+    } catch (err) {
+      toast.error('Failed to save changes');
+    }
   };
 
-  const updateSection = (section: string, items: any[]) => {
+  const savePersonalInfo = () => {
+    saveProfile({
+      headline: localProfile.headline,
+      location: localProfile.location,
+      phone: localProfile.phone,
+      website: localProfile.website,
+      linkedin: localProfile.linkedin,
+      github: localProfile.github,
+      summary: localProfile.summary,
+      imageUrl: localProfile.imageUrl,
+    });
+    setEditingPersonalInfo(false);
+  };
+
+  const saveSkills = () => {
+    saveProfile({ skills: localProfile.skills });
+    setEditingSkills(false);
+  };
+
+  const saveSection = (section: string, items: any[]) => {
     const updated = { ...localProfile, [section]: items };
     setLocalProfile(updated);
-    debouncedSave({ [section]: items });
+    saveProfile({ [section]: items });
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be less than 2MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      const updated = { ...localProfile, imageUrl: base64String };
+      setLocalProfile(updated);
+      saveProfile({ imageUrl: base64String });
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleImported = (parsed: any) => {
-    // Merge imported data with existing profile
     const merged: any = {};
     if (parsed.summary) merged.summary = parsed.summary;
     if (parsed.headline) merged.headline = parsed.headline;
@@ -69,7 +112,7 @@ export default function ProfilePage() {
         <div>
           <h1 className="font-display text-2xl tracking-tight">Your Profile</h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            {isSaving ? 'Saving...' : 'All changes are auto-saved'}
+            Manage your personal data to generate tailored resumes.
           </p>
         </div>
         <button onClick={() => setImportOpen(true)}
@@ -87,59 +130,78 @@ export default function ProfilePage() {
 
       {/* Personal Info */}
       <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-transparent)] backdrop-blur-md p-5 space-y-4">
-        <h3 className="font-semibold text-sm">Personal Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Headline</label>
-            <input type="text" value={localProfile.headline || ''} onChange={(e) => updateField('headline', e.target.value)}
-              placeholder="e.g. Full-Stack Developer"
-              className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all" />
-          </div>
-          <div>
-            <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Location</label>
-            <input type="text" value={localProfile.location || ''} onChange={(e) => updateField('location', e.target.value)}
-              placeholder="e.g. Islamabad, Pakistan"
-              className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all" />
-          </div>
-          <div>
-            <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Phone</label>
-            <input type="tel" value={localProfile.phone || ''} onChange={(e) => updateField('phone', e.target.value)}
-              placeholder="+92 300 1234567"
-              className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all" />
-          </div>
-          <div>
-            <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Website</label>
-            <input type="url" value={localProfile.website || ''} onChange={(e) => updateField('website', e.target.value)}
-              placeholder="https://yoursite.dev"
-              className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all" />
-          </div>
-          <div>
-            <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">LinkedIn</label>
-            <input type="url" value={localProfile.linkedin || ''} onChange={(e) => updateField('linkedin', e.target.value)}
-              placeholder="https://linkedin.com/in/you"
-              className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all" />
-          </div>
-          <div>
-            <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">GitHub</label>
-            <input type="url" value={localProfile.github || ''} onChange={(e) => updateField('github', e.target.value)}
-              placeholder="https://github.com/you"
-              className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all" />
-          </div>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-sm">Personal Information</h3>
+          {!editingPersonalInfo ? (
+            <button onClick={() => setEditingPersonalInfo(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors">
+              <Edit2 size={12} /> Edit
+            </button>
+          ) : (
+            <button onClick={savePersonalInfo}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-[var(--gradient-2)] text-white hover:opacity-90 transition-colors">
+              <Check size={12} /> Save
+            </button>
+          )}
         </div>
-        <div>
-          <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Summary</label>
-          <textarea value={localProfile.summary || ''} onChange={(e) => updateField('summary', e.target.value)}
-            placeholder="Write a brief professional summary..."
-            rows={4}
-            className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all resize-none" />
-        </div>
+
+        {editingPersonalInfo ? (
+          <div className="space-y-4 pt-2 border-t border-[var(--grid-line)]">
+            {/* Image Upload */}
+            <div className="flex items-center gap-4">
+              <div className="relative w-16 h-16 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center flex-shrink-0 group">
+                {localProfile.imageUrl ? (
+                  <Image src={localProfile.imageUrl} alt="Profile" fill className="object-cover" />
+                ) : (
+                  <Camera size={24} className="text-[var(--text-muted)] group-hover:opacity-0 transition-opacity" />
+                )}
+                <div onClick={() => fileInputRef.current?.click()}
+                  className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  <Upload size={16} className="text-white" />
+                </div>
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+              </div>
+              <div className="text-xs text-[var(--text-muted)]">
+                <p className="font-medium text-[var(--text-secondary)] mb-0.5">Profile Picture</p>
+                <p>Square image, max 2MB.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputField label="Headline" value={localProfile.headline || ''} onChange={(v) => setLocalProfile({ ...localProfile, headline: v })} placeholder="e.g. Full-Stack Developer" />
+              <InputField label="Location" value={localProfile.location || ''} onChange={(v) => setLocalProfile({ ...localProfile, location: v })} placeholder="e.g. Islamabad, Pakistan" />
+              <InputField label="Phone" value={localProfile.phone || ''} onChange={(v) => setLocalProfile({ ...localProfile, phone: v })} placeholder="+92 300 1234567" type="tel" />
+              <InputField label="Website" value={localProfile.website || ''} onChange={(v) => setLocalProfile({ ...localProfile, website: v })} placeholder="https://yoursite.dev" type="url" />
+              <InputField label="LinkedIn" value={localProfile.linkedin || ''} onChange={(v) => setLocalProfile({ ...localProfile, linkedin: v })} placeholder="https://linkedin.com/in/you" type="url" />
+              <InputField label="GitHub" value={localProfile.github || ''} onChange={(v) => setLocalProfile({ ...localProfile, github: v })} placeholder="https://github.com/you" type="url" />
+            </div>
+            <div>
+              <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Summary</label>
+              <textarea value={localProfile.summary || ''} onChange={(e) => setLocalProfile({ ...localProfile, summary: e.target.value })}
+                placeholder="Write a brief professional summary..." rows={4}
+                className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all resize-none" />
+            </div>
+          </div>
+        ) : (
+          <div className="pt-2 border-t border-[var(--grid-line)] flex items-start gap-4">
+            {localProfile.imageUrl && (
+              <div className="w-16 h-16 rounded-full overflow-hidden border border-[var(--border-subtle)] flex-shrink-0 relative">
+                 <Image src={localProfile.imageUrl} alt="Profile" fill className="object-cover" />
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-medium">{profile?.name || 'Your Name'}</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1 max-w-2xl leading-relaxed">{localProfile.summary || 'No summary added.'}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Experience */}
       <SectionEditor
         title="Experience"
         items={localProfile.experiences || []}
-        onUpdate={(items) => updateSection('experiences', items)}
+        onUpdate={(items) => saveSection('experiences', items)}
         getItemTitle={(item) => item.title || 'Untitled Role'}
         getItemSubtitle={(item) => [item.company, item.location].filter(Boolean).join(' · ')}
         createEmpty={() => ({ title: '', company: '', location: '', startDate: '', endDate: '', current: false, bullets: [''], description: '' })}
@@ -169,7 +231,7 @@ export default function ProfilePage() {
       <SectionEditor
         title="Education"
         items={localProfile.education || []}
-        onUpdate={(items) => updateSection('education', items)}
+        onUpdate={(items) => saveSection('education', items)}
         getItemTitle={(item) => item.degree || 'Untitled Degree'}
         getItemSubtitle={(item) => item.institution}
         createEmpty={() => ({ institution: '', degree: '', field: '', startDate: '', endDate: '' })}
@@ -186,26 +248,63 @@ export default function ProfilePage() {
       />
 
       {/* Skills */}
-      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-transparent)] backdrop-blur-md p-5">
-        <h3 className="font-semibold text-sm mb-4">Skills</h3>
-        <SkillTags
-          skills={localProfile.skills || []}
-          onChange={(skills) => updateSection('skills', skills)}
-        />
+      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-transparent)] backdrop-blur-md p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-sm">Skills</h3>
+          {!editingSkills ? (
+            <button onClick={() => setEditingSkills(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors">
+              <Edit2 size={12} /> Edit
+            </button>
+          ) : (
+            <button onClick={saveSkills}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-[var(--gradient-2)] text-white hover:opacity-90 transition-colors">
+              <Check size={12} /> Save
+            </button>
+          )}
+        </div>
+        
+        {editingSkills ? (
+          <div className="pt-2 border-t border-[var(--grid-line)]">
+            <SkillTags
+              skills={localProfile.skills || []}
+              onChange={(skills) => setLocalProfile({ ...localProfile, skills })}
+            />
+          </div>
+        ) : (
+          <div className="pt-2 border-t border-[var(--grid-line)] flex flex-wrap gap-1.5">
+            {localProfile.skills?.length > 0 ? (
+              localProfile.skills.map((s: any, i: number) => (
+                <span key={i} className="px-2.5 py-1 rounded-md text-xs bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                  {s.name}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-[var(--text-muted)]">No skills added.</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Projects */}
       <SectionEditor
         title="Projects"
         items={localProfile.projects || []}
-        onUpdate={(items) => updateSection('projects', items)}
+        onUpdate={(items) => saveSection('projects', items)}
         getItemTitle={(item) => item.name || 'Untitled Project'}
         getItemSubtitle={(item) => item.techStack?.join(', ') || ''}
-        createEmpty={() => ({ name: '', description: '', url: '', techStack: [], bullets: [] })}
+        createEmpty={() => ({ name: '', description: '', url: '', techStack: [], bullets: [], startDate: '', endDate: '' })}
         renderForm={(item, onChange) => (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InputField label="Project Name" value={item.name} onChange={(v) => onChange({ name: v })} placeholder="e.g. Scribe.ai" />
             <InputField label="URL" value={item.url || ''} onChange={(v) => onChange({ url: v })} placeholder="https://github.com/..." />
+            <InputField label="Start Date" value={item.startDate?.slice(0, 7) || ''} onChange={(v) => onChange({ startDate: v })} type="month" />
+            <InputField label="End Date" value={item.endDate?.slice(0, 7) || ''} onChange={(v) => onChange({ endDate: v })} type="month" />
+            <div className="col-span-full">
+              <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Tech Stack (comma separated)</label>
+              <input type="text" value={item.techStack?.join(', ') || ''} onChange={(e) => onChange({ techStack: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} placeholder="React, Node.js, Typescript"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all" />
+            </div>
             <div className="col-span-full">
               <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Description</label>
               <textarea value={item.description || ''} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder="What does this project do?"
@@ -219,7 +318,7 @@ export default function ProfilePage() {
       <SectionEditor
         title="Certifications"
         items={localProfile.certifications || []}
-        onUpdate={(items) => updateSection('certifications', items)}
+        onUpdate={(items) => saveSection('certifications', items)}
         getItemTitle={(item) => item.name || 'Untitled Certification'}
         getItemSubtitle={(item) => item.issuer}
         createEmpty={() => ({ name: '', issuer: '', date: '', url: '' })}
@@ -229,6 +328,42 @@ export default function ProfilePage() {
             <InputField label="Issuer" value={item.issuer} onChange={(v) => onChange({ issuer: v })} placeholder="e.g. Amazon" />
             <InputField label="Date" value={item.date?.slice(0, 7) || ''} onChange={(v) => onChange({ date: v })} type="month" />
             <InputField label="URL" value={item.url || ''} onChange={(v) => onChange({ url: v })} placeholder="Credential URL" />
+          </div>
+        )}
+      />
+
+      {/* Publications */}
+      <SectionEditor
+        title="Publications"
+        items={localProfile.publications || []}
+        onUpdate={(items) => saveSection('publications', items)}
+        getItemTitle={(item) => item.title || 'Untitled Publication'}
+        getItemSubtitle={(item) => item.venue}
+        createEmpty={() => ({ title: '', venue: '', date: '', url: '' })}
+        renderForm={(item, onChange) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <InputField label="Title" value={item.title} onChange={(v) => onChange({ title: v })} placeholder="e.g. Research Paper on AI" />
+            <InputField label="Venue/Publisher" value={item.venue || ''} onChange={(v) => onChange({ venue: v })} placeholder="e.g. IEEE" />
+            <InputField label="Date" value={item.date?.slice(0, 7) || ''} onChange={(v) => onChange({ date: v })} type="month" />
+            <InputField label="URL" value={item.url || ''} onChange={(v) => onChange({ url: v })} placeholder="Link to publication" />
+          </div>
+        )}
+      />
+
+      {/* Volunteer Work */}
+      <SectionEditor
+        title="Volunteer Work"
+        items={localProfile.volunteerWork || []}
+        onUpdate={(items) => saveSection('volunteerWork', items)}
+        getItemTitle={(item) => item.role || 'Untitled Role'}
+        getItemSubtitle={(item) => item.organization}
+        createEmpty={() => ({ role: '', organization: '', startDate: '', endDate: '' })}
+        renderForm={(item, onChange) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <InputField label="Role" value={item.role} onChange={(v) => onChange({ role: v })} placeholder="e.g. Mentor" />
+            <InputField label="Organization" value={item.organization} onChange={(v) => onChange({ organization: v })} placeholder="e.g. Red Cross" />
+            <InputField label="Start Date" value={item.startDate?.slice(0, 7) || ''} onChange={(v) => onChange({ startDate: v })} type="month" />
+            <InputField label="End Date" value={item.endDate?.slice(0, 7) || ''} onChange={(v) => onChange({ endDate: v })} type="month" />
           </div>
         )}
       />

@@ -173,7 +173,7 @@ export async function generateCoverLetter(userId: string, data: {
   const jdKeywords = job.parsedKeywords as any;
 
   try {
-    const res = await fetch(`${AI_SERVICE_URL}/ai/cover-letter`, {
+    const res = await fetch(`${AI_SERVICE_URL}/ai/cover-letter/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -123,9 +123,9 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Two-Panel Layout */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Controls Panel */}
-        <div className="w-[320px] border-r border-[var(--grid-line-strong)] overflow-y-auto p-4 space-y-6">
+        <div className="w-full md:w-[320px] md:border-r border-b md:border-b-0 border-[var(--grid-line-strong)] overflow-y-auto p-4 space-y-6 flex-shrink-0 max-h-[40vh] md:max-h-full">
           <TemplatePicker templates={templates} selected={localTemplateId} onSelect={handleTemplateChange} />
           <div className="border-t border-[var(--grid-line)]" />
           <StyleControls styles={localStyles} onChange={handleStylesChange} />
@@ -139,13 +139,15 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* Preview Panel */}
-        <ResumePreview
-          profile={profile}
-          templateId={localTemplateId}
-          sectionOrder={localSectionOrder}
-          sectionVisibility={localVisibility}
-          customStyles={localStyles}
-        />
+        <div className="flex-1 overflow-auto bg-[var(--bg-elevated)]/30">
+          <ResumePreview
+            profile={profile}
+            templateId={localTemplateId}
+            sectionOrder={localSectionOrder}
+            sectionVisibility={localVisibility}
+            customStyles={localStyles}
+          />
+        </div>
       </div>
 
       {/* ATS Simulator Panel */}

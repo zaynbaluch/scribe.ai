@@ -64,17 +64,27 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
         >
           {/* Header */}
           {templateId === 'bold-05' ? (
-            <div className="rounded px-4 py-3 mb-3" style={{ backgroundColor: accentColor }}>
-              <div className="text-xl font-bold text-white">{profile.name || 'Your Name'}</div>
-              {profile.headline && <div className="text-sm text-white/80 mt-0.5">{profile.headline}</div>}
-              <div className="text-xs text-white/60 mt-1">{[profile.email, profile.phone, profile.location, profile.website].filter(Boolean).join(' | ')}</div>
+            <div className="rounded px-4 py-3 mb-3 flex items-center gap-4" style={{ backgroundColor: accentColor }}>
+              {customStyles?.showProfileImage && profile.imageUrl && (
+                <img src={profile.imageUrl} alt="Profile" className="w-14 h-14 rounded-full object-cover border-2 border-white/20 flex-shrink-0" />
+              )}
+              <div>
+                <div className="text-xl font-bold text-white">{profile.name || 'Your Name'}</div>
+                {profile.headline && <div className="text-sm text-white/80 mt-0.5">{profile.headline}</div>}
+                <div className="text-xs text-white/60 mt-1">{[profile.email, profile.phone, profile.location, profile.website].filter(Boolean).join(' | ')}</div>
+              </div>
             </div>
           ) : templateId === 'classic-02' ? (
             <div className="mb-3">
               <div className="flex justify-between items-start">
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">{profile.name || 'Your Name'}</div>
-                  {profile.headline && <div className="text-sm text-gray-500 italic mt-0.5">{profile.headline}</div>}
+                <div className="flex items-center gap-4">
+                  {customStyles?.showProfileImage && profile.imageUrl && (
+                    <img src={profile.imageUrl} alt="Profile" className="w-14 h-14 rounded-full object-cover border border-gray-300 flex-shrink-0" />
+                  )}
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">{profile.name || 'Your Name'}</div>
+                    {profile.headline && <div className="text-sm text-gray-500 italic mt-0.5">{profile.headline}</div>}
+                  </div>
                 </div>
                 <div className="text-right text-xs text-gray-500">
                   {profile.email && <div>{profile.email}</div>}
@@ -85,19 +95,32 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
               <div className="border-b-2 border-gray-800 mt-2" />
             </div>
           ) : templateId === 'compact-03' ? (
-            <div className="rounded px-3 py-2 mb-3" style={{ backgroundColor: `${accentColor}10` }}>
-              <div className="text-lg font-bold" style={{ color: accentColor }}>{profile.name || 'Your Name'}</div>
-              {profile.headline && <div className="text-xs text-gray-500 mt-0.5">{profile.headline}</div>}
-              <div className="text-[9px] text-gray-400 mt-1">{[profile.email, profile.phone, profile.location].filter(Boolean).join(' | ')}</div>
+            <div className="rounded px-3 py-2 mb-3 flex items-center gap-3" style={{ backgroundColor: `${accentColor}10` }}>
+              {customStyles?.showProfileImage && profile.imageUrl && (
+                <img src={profile.imageUrl} alt="Profile" className="w-10 h-10 rounded-full object-cover border border-gray-200 flex-shrink-0" />
+              )}
+              <div>
+                <div className="text-lg font-bold" style={{ color: accentColor }}>{profile.name || 'Your Name'}</div>
+                {profile.headline && <div className="text-xs text-gray-500 mt-0.5">{profile.headline}</div>}
+                <div className="text-[9px] text-gray-400 mt-1">{[profile.email, profile.phone, profile.location].filter(Boolean).join(' | ')}</div>
+              </div>
             </div>
           ) : templateId === 'minimal-04' ? (
-            <div className="mb-3">
-              <div className="text-2xl font-light tracking-wide text-gray-800">{profile.name || 'Your Name'}</div>
-              {profile.headline && <div className="text-sm text-gray-400 mt-0.5">{profile.headline}</div>}
-              <div className="text-xs text-gray-400 mt-1">{[profile.email, profile.phone, profile.location, profile.website].filter(Boolean).join(' | ')}</div>
+            <div className="mb-3 flex justify-between items-start">
+              <div>
+                <div className="text-2xl font-light tracking-wide text-gray-800">{profile.name || 'Your Name'}</div>
+                {profile.headline && <div className="text-sm text-gray-400 mt-0.5">{profile.headline}</div>}
+                <div className="text-xs text-gray-400 mt-1">{[profile.email, profile.phone, profile.location, profile.website].filter(Boolean).join(' | ')}</div>
+              </div>
+              {customStyles?.showProfileImage && profile.imageUrl && (
+                <img src={profile.imageUrl} alt="Profile" className="w-14 h-14 rounded-full object-cover grayscale opacity-80 flex-shrink-0" />
+              )}
             </div>
           ) : (
-            <div className="text-center mb-4">
+            <div className="text-center mb-4 flex flex-col items-center">
+              {customStyles?.showProfileImage && profile.imageUrl && (
+                <img src={profile.imageUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover border border-gray-200 mb-2" />
+              )}
               <div className="text-xl font-bold" style={{ color: accentColor }}>{profile.name || 'Your Name'}</div>
               {profile.headline && <div className="text-sm text-gray-500 mt-0.5">{profile.headline}</div>}
               <div className="text-xs text-gray-400 mt-1">{[profile.email, profile.phone, profile.location, profile.website, profile.linkedin].filter(Boolean).join(' | ')}</div>

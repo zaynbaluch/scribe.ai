@@ -122,6 +122,44 @@ def tailor_resume(profile: Dict[str, Any], jd_keywords: Dict, jd_text: str) -> D
                     **result,
                 })
 
+    # Tailor project descriptions
+    for i, proj in enumerate(profile.get("projects", [])):
+        desc = proj.get("description", "")
+        tech_stack = proj.get("techStack", [])
+        
+        # Check if project is relevant (tech stack overlaps with keywords)
+        is_relevant = any(kw.lower() in [t.lower() for t in tech_stack] for kw in all_keywords)
+        
+        if desc:
+            # We add a hint about the project tech stack if it's relevant
+            system = (
+                "You are an expert resume writer. Rewrite the project description to better match the job description. "
+                "Highlight the most relevant technologies and impact. "
+                "Keep it concise (1-3 sentences). Return ONLY the rewritten description."
+            )
+            prompt = (
+                f"Target Role: {job_title}\n"
+                f"Key Skills: {', '.join(all_keywords[:10])}\n"
+                f"Project Tech Stack: {', '.join(tech_stack)}\n"
+                f"JD Context: {jd_context[:500]}\n\n"
+                f"Original description: {desc}\n\n"
+                f"Tailored description:"
+            )
+            try:
+                result = _get_llm().generate(prompt, system=system, temperature=0.6, max_tokens=300)
+                tailored = result.strip()
+                suggestions.append({
+                    "section": "projects",
+                    "type": "description",
+                    "projectIndex": i,
+                    "projectName": proj.get("name", ""),
+                    "original": desc,
+                    "tailored": tailored,
+                    "changed": tailored.lower() != desc.lower()
+                })
+            except Exception as e:
+                logger.error(f"Failed to tailor project: {e}")
+
     # Suggest section order based on JD keywords
     suggested_order = suggest_section_order(profile, jd_keywords)
 
@@ -137,10 +175,12 @@ def suggest_section_order(profile: Dict, jd_keywords: Dict) -> List[str]:
     default_order = ["summary", "experience", "skills", "projects", "education", "certifications"]
     categories = jd_keywords.get("categories", {})
 
-    # If JD emphasizes projects/open-source, move projects up
-    if len(profile.get("projects", [])) > 2 and categories.get("tool", []):
+    # If JD emphasizes projects/open-source or we have relevant tech stack, move projects up
+    # Since we can't easily access the score here, we'll aggressively move projects up if we have them and it's a technical role.
+    if len(profile.get("projects", [])) > 0:
         if "projects" in default_order:
             default_order.remove("projects")
-            default_order.insert(2, "projects")  # After experience
+            # Put projects right after summary! (Index 1)
+            default_order.insert(1, "projects")
 
     return default_order

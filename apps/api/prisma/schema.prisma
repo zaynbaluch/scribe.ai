@@ -43,6 +43,7 @@ model Profile {
   website   String?
   linkedin  String?
   github    String?
+  imageUrl  String?   @db.Text
 
   experiences    Experience[]
   education      Education[]
