@@ -40,6 +40,12 @@ export const duplicateResume = asyncHandler(async (req: Request, res: Response) 
   res.status(201).json({ success: true, data: duplicate });
 });
 
+export const createTailoredResume = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const tailored = await resumeService.createTailoredResume(userId, req.body);
+  res.status(201).json({ success: true, data: tailored });
+});
+
 export const deleteResume = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.userId;
   await resumeService.deleteResume(userId, req.params.id as string);

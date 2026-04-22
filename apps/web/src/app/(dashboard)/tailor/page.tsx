@@ -23,9 +23,10 @@ export default function TailorPage() {
 
   useEffect(() => { fetchResumes(); }, [fetchResumes]);
   useEffect(() => {
-    if (resumes.length > 0 && !selectedResumeId) {
-      setSelectedResumeId(resumes[0].id);
-      setResumeId(resumes[0].id);
+    const base = resumes.filter(r => !r.isTailored);
+    if (base.length > 0 && !selectedResumeId) {
+      setSelectedResumeId(base[0].id);
+      setResumeId(base[0].id);
     }
   }, [resumes]);
   useEffect(() => {
@@ -61,12 +62,12 @@ export default function TailorPage() {
         </div>
 
         {/* Resume selector */}
-        {step === 'input' && resumes.length > 0 && (
+        {step === 'input' && resumes.filter(r => !r.isTailored).length > 0 && (
           <div className="ml-auto">
             <select value={selectedResumeId}
               onChange={(e) => { setSelectedResumeId(e.target.value); setResumeId(e.target.value); }}
               className="px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs focus:outline-none">
-              {resumes.map((r) => (
+              {resumes.filter(r => !r.isTailored).map((r) => (
                 <option key={r.id} value={r.id}>{r.name}</option>
               ))}
             </select>

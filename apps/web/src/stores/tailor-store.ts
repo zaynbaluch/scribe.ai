@@ -137,9 +137,9 @@ export const useTailorStore = create<TailorState>((set, get) => ({
         }
       });
 
-      await useResumeStore.getState().updateResume(resumeId, { baseProfileSnapshot: profile });
+      const tailoredResume = await useResumeStore.getState().createTailoredResume(resumeId, profile);
       get().reset();
-      window.location.href = `/resumes/${resumeId}`;
+      window.location.href = `/resumes/${tailoredResume.id}`;
     } catch (err: any) {
       set({ error: err.message || 'Failed to apply changes' });
     } finally {

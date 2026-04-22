@@ -37,6 +37,9 @@ export default function ResumesPage() {
     } catch { toast.error('Failed to delete'); }
   };
 
+  const baseResumes = sorted.filter(r => !r.isTailored);
+  const tailoredResumes = sorted.filter(r => r.isTailored);
+
   return (
     <div className="max-w-[1100px] mx-auto">
       {/* Header */}
@@ -65,7 +68,6 @@ export default function ResumesPage() {
         </div>
       </div>
 
-      {/* Grid */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
@@ -85,27 +87,60 @@ export default function ResumesPage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sorted.map((r) => (
-            <ResumeCard
-              key={r.id}
-              id={r.id}
-              name={r.name}
-              templateId={r.templateId}
-              atsScore={r.atsScore}
-              updatedAt={r.updatedAt}
-              onOpen={(id) => router.push(`/resumes/${id}`)}
-              onDuplicate={handleDuplicate}
-              onDelete={handleDelete}
-            />
-          ))}
+        <div className="space-y-8">
+          {/* Base Resumes Section */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4 text-[var(--text-primary)]">Base Resumes</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {baseResumes.map((r) => (
+                <ResumeCard
+                  key={r.id}
+                  id={r.id}
+                  name={r.name}
+                  templateId={r.templateId}
+                  atsScore={r.atsScore}
+                  updatedAt={r.updatedAt}
+                  onOpen={(id) => router.push(`/resumes/${id}`)}
+                  onDuplicate={handleDuplicate}
+                  onDelete={handleDelete}
+                />
+              ))}
 
-          {/* Create card */}
-          <button onClick={() => setCreateOpen(true)}
-            className="flex flex-col items-center justify-center h-52 rounded-xl border-2 border-dashed border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:border-[var(--border-focus)] hover:bg-[var(--bg-elevated)]/30 transition-all">
-            <Plus size={24} className="mb-2" />
-            <span className="text-sm">New Resume</span>
-          </button>
+              {/* Create card */}
+              <button onClick={() => setCreateOpen(true)}
+                className="flex flex-col items-center justify-center h-52 rounded-xl border-2 border-dashed border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:border-[var(--border-focus)] hover:bg-[var(--bg-elevated)]/30 transition-all">
+                <Plus size={24} className="mb-2" />
+                <span className="text-sm">New Base Resume</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Tailored Resumes Section */}
+          {tailoredResumes.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold mb-4 text-[var(--text-primary)] flex items-center gap-2">
+                Tailored Resumes
+                <span className="text-xs font-normal text-[var(--text-muted)] bg-[var(--bg-elevated)] px-2 py-0.5 rounded-full">
+                  AI Generated
+                </span>
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {tailoredResumes.map((r) => (
+                  <ResumeCard
+                    key={r.id}
+                    id={r.id}
+                    name={r.name}
+                    templateId={r.templateId}
+                    atsScore={r.atsScore}
+                    updatedAt={r.updatedAt}
+                    onOpen={(id) => router.push(`/resumes/${id}`)}
+                    onDuplicate={handleDuplicate}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

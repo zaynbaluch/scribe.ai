@@ -84,6 +84,8 @@ export async function getResumes(userId: string, page = 1, limit = 20, sort = 'u
         atsScore: true,
         matchScore: true,
         jobId: true,
+        isTailored: true,
+        baseResumeId: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -167,6 +169,30 @@ export async function duplicateResume(userId: string, resumeId: string) {
 
   logger.info({ userId, sourceId: resumeId, newId: duplicate.id }, 'Resume duplicated');
   return duplicate;
+}
+
+/**
+ * Create a tailored resume copy from a base resume.
+ */
+export async function createTailoredResume(userId: string, data: { baseResumeId: string; profileSnapshot: any }) {
+  const source = await getResumeById(userId, data.baseResumeId);
+
+  const tailored = await prisma.resume.create({
+    data: {
+      userId,
+      name: `${source.name} (Tailored)`,
+      templateId: source.templateId,
+      baseProfileSnapshot: data.profileSnapshot,
+      sectionOrder: source.sectionOrder,
+      sectionVisibility: source.sectionVisibility || undefined,
+      customStyles: source.customStyles || undefined,
+      isTailored: true,
+      baseResumeId: data.baseResumeId,
+    },
+  });
+
+  logger.info({ userId, sourceId: data.baseResumeId, newId: tailored.id }, 'Tailored resume created');
+  return tailored;
 }
 
 /**

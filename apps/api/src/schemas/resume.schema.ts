@@ -42,5 +42,11 @@ export const updateResumeSchema = z.object({
   baseProfileSnapshot: z.any().optional(),
 });
 
+export const createTailoredResumeSchema = z.object({
+  baseResumeId: z.string().uuid(),
+  profileSnapshot: z.any(),
+});
+
 export type CreateResumeInput = z.infer<typeof createResumeSchema>;
 export type UpdateResumeInput = z.infer<typeof updateResumeSchema>;
+export type CreateTailoredResumeInput = z.infer<typeof createTailoredResumeSchema>;

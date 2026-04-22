@@ -10,6 +10,8 @@ interface ResumeSummary {
   atsScore: number | null;
   matchScore: number | null;
   jobId: string | null;
+  isTailored: boolean;
+  baseResumeId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -25,6 +27,8 @@ interface ResumeDetail {
   customStyles: Record<string, any>;
   atsScore: number | null;
   matchScore: number | null;
+  isTailored: boolean;
+  baseResumeId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -48,6 +52,7 @@ interface ResumeState {
   fetchResume: (id: string) => Promise<void>;
   fetchTemplates: () => Promise<void>;
   createResume: (data: { name: string; templateId?: string }) => Promise<ResumeSummary>;
+  createTailoredResume: (baseResumeId: string, profileSnapshot: any) => Promise<ResumeSummary>;
   updateResume: (id: string, data: Partial<ResumeDetail>) => Promise<void>;
   duplicateResume: (id: string) => Promise<void>;
   deleteResume: (id: string) => Promise<void>;
@@ -102,6 +107,12 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
 
   createResume: async (data) => {
     const resume = await api.post<ResumeSummary>('/api/resumes', data);
+    await get().fetchResumes();
+    return resume;
+  },
+
+  createTailoredResume: async (baseResumeId, profileSnapshot) => {
+    const resume = await api.post<ResumeSummary>('/api/resumes/tailored', { baseResumeId, profileSnapshot });
     await get().fetchResumes();
     return resume;
   },

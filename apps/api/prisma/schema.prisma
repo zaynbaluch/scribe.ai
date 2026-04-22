@@ -200,6 +200,10 @@ model Resume {
   matchScore           Int?
   atsScore             Int?
   atsReport            Json?
+  
+  isTailored           Boolean  @default(false)
+  baseResumeId         String?
+
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
