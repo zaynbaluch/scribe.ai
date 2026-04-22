@@ -179,8 +179,9 @@ model Job {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  resumes      Resume[]
-  applications Application[]
+  resumes       Resume[]
+  applications  Application[]
+  coverLetters  CoverLetter[]
 }
 
 // ─── Resume ─────────────────────────────────────────────────────────────────────
@@ -221,6 +222,7 @@ model CoverLetter {
   resumeId   String?
   resume     Resume?  @relation(fields: [resumeId], references: [id], onDelete: SetNull)
   jobId      String?
+  job        Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
   title      String
   content    String   @db.Text
   tone       String   @default("formal") // formal, conversational, storytelling

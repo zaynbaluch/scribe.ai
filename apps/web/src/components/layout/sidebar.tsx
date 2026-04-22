@@ -45,7 +45,7 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
 
   return (
     <aside
-      className={`fixed top-0 h-screen flex flex-col border-r border-[var(--grid-line-strong)] bg-[var(--bg-surface)] z-50 transition-all duration-250 ease-in-out ${
+      className={`fixed top-0 h-screen flex flex-col border-r border-[var(--grid-line-strong)] bg-[var(--bg-surface)] z-[70] transition-all duration-250 ease-in-out ${
         isMobile ? (mobileOpen ? 'left-0 shadow-2xl' : '-left-[260px]') : 'left-0'
       }`}
       style={{ width: isMobile ? '260px' : (collapsed ? '64px' : '260px') }}

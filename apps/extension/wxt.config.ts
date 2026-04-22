@@ -11,4 +11,9 @@ export default defineConfig({
     ]
   },
   srcDir: 'src',
+  dev: {
+    server: {
+      port: 3002,
+    },
+  },
 });

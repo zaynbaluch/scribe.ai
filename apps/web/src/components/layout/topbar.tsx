@@ -48,7 +48,7 @@ export default function Topbar({ sidebarWidth, isMobile, onMobileMenuToggle }: T
 
   return (
     <header
-      className="fixed top-0 right-0 h-14 flex items-center justify-between px-4 md:px-6 border-b border-[var(--grid-line-strong)] bg-[var(--bg-surface-transparent)] backdrop-blur-xl z-30 transition-all duration-250"
+      className="fixed top-0 right-0 h-14 flex items-center justify-between px-4 md:px-6 border-b border-[var(--grid-line-strong)] bg-[var(--bg-surface-transparent)] backdrop-blur-xl z-[60] transition-all duration-250"
       style={{ left: sidebarWidth }}
     >
       <div className="flex items-center gap-3">

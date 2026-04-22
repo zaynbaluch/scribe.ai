@@ -87,7 +87,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   const profile = activeResume.baseProfileSnapshot as any;
 
   return (
-    <div className="h-[calc(100vh-56px)] flex flex-col">
+    <div className="-mt-4 md:-mt-6 -mx-4 md:-mx-6 h-[calc(100vh-56px)] flex flex-col bg-[var(--bg-base)]">
       {/* Editor Topbar */}
       <div className="relative z-50 flex items-center justify-between px-4 py-2.5 border-b border-[var(--grid-line-strong)] bg-[var(--bg-surface-transparent)] backdrop-blur-md">
         <div className="flex items-center gap-3">

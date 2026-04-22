@@ -6,7 +6,7 @@ export const createJobSchema = z.object({
   location: z.string().max(200).optional(),
   url: z.string().url().optional().or(z.literal('')),
   source: z.enum(['manual', 'linkedin', 'indeed', 'glassdoor', 'extension', 'image']).optional().default('manual'),
-  rawDescription: z.string().min(1, 'Job description is required'),
+  rawDescription: z.string().optional().default(''),
 });
 
 export const updateJobSchema = z.object({
