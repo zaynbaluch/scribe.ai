@@ -5,6 +5,7 @@ import { api } from '@/lib/api-client';
 import { FileText, Calendar, Building2, Trash2, PenLine } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import CreateCoverLetterModal from '@/components/cover-letter/create-modal';
 
 interface CoverLetter {
   id: string;
@@ -20,6 +21,7 @@ export default function CoverLettersPage() {
   const [letters, setLetters] = useState<CoverLetter[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedLetter, setSelectedLetter] = useState<CoverLetter | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     fetchLetters();
@@ -55,9 +57,17 @@ export default function CoverLettersPage() {
 
   return (
     <div className="max-w-[1200px] mx-auto h-[calc(100vh-6rem)] flex flex-col">
-      <div className="mb-6">
-        <h1 className="font-display text-2xl tracking-tight mb-2">Cover Letters</h1>
-        <p className="text-[var(--text-muted)] text-sm">View and manage AI-generated cover letters for your applications.</p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="font-display text-2xl tracking-tight mb-2">Cover Letters</h1>
+          <p className="text-[var(--text-muted)] text-sm">View and manage AI-generated cover letters for your applications.</p>
+        </div>
+        <button 
+          onClick={() => setIsCreateModalOpen(true)}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white text-sm font-medium hover:opacity-90 transition-opacity shadow-lg shadow-[var(--gradient-1)]/20"
+        >
+          <PenLine size={16} /> Create Custom
+        </button>
       </div>
 
       <div className="flex flex-1 gap-6 min-h-0">
@@ -141,6 +151,12 @@ export default function CoverLettersPage() {
           )}
         </div>
       </div>
+
+      <CreateCoverLetterModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+        onCreated={fetchLetters} 
+      />
     </div>
   );
 }

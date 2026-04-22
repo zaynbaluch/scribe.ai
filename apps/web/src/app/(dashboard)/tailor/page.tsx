@@ -119,6 +119,35 @@ export default function TailorPage() {
           isLoading={isLoading}
         />
       )}
+
+      {(step === 'success') && (
+        <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="w-16 h-16 bg-[var(--success)]/10 text-[var(--success)] rounded-full flex items-center justify-center mb-6 ring-8 ring-[var(--success)]/5">
+            <Sparkles size={32} />
+          </div>
+          <h2 className="font-display text-2xl tracking-tight mb-2">Tailoring Complete!</h2>
+          <p className="text-[var(--text-muted)] max-w-md mb-8">
+            Your resume has been successfully tailored. We also automatically generated a Cover Letter for this job!
+          </p>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => {
+                const { newResumeId } = useTailorStore.getState();
+                if (newResumeId) router.push(`/resumes/${newResumeId}`);
+              }}
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white font-medium hover:opacity-90 transition-opacity shadow-lg shadow-[var(--gradient-1)]/20"
+            >
+              Review Resume
+            </button>
+            <button 
+              onClick={() => router.push('/cover-letters')}
+              className="px-6 py-2.5 rounded-xl border border-[var(--border-strong)] bg-[var(--bg-elevated)] font-medium hover:bg-[var(--bg-surface-hover)] transition-colors"
+            >
+              View Cover Letter
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

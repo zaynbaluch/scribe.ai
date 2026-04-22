@@ -29,10 +29,12 @@ interface TailorSuggestion {
 }
 
 interface TailorState {
-  step: 'input' | 'matching' | 'results' | 'tailoring' | 'diff';
+  step: 'input' | 'matching' | 'results' | 'tailoring' | 'diff' | 'success';
   jdText: string;
   jobId: string | null;
   resumeId: string | null;
+  newResumeId: string | null;
+  newCoverLetterId: string | null;
   parsedKeywords: any;
   matchResult: MatchResult | null;
   suggestions: TailorSuggestion[];
@@ -57,6 +59,8 @@ export const useTailorStore = create<TailorState>((set, get) => ({
   jdText: '',
   jobId: null,
   resumeId: null,
+  newResumeId: null,
+  newCoverLetterId: null,
   parsedKeywords: null,
   matchResult: null,
   suggestions: [],
@@ -146,21 +150,21 @@ export const useTailorStore = create<TailorState>((set, get) => ({
 
       const tailoredResume = await useResumeStore.getState().createTailoredResume(resumeId, profile);
       
-      // Auto-generate a cover letter
+      let createdCoverLetterId = null;
       try {
-        await api.post('/api/cover-letters/generate', {
+        const clRes = await api.post<any>('/api/cover-letters/generate', {
           resumeId: tailoredResume.id,
           jobId: get().jobId,
           tone: 'formal'
         });
+        createdCoverLetterId = clRes.id;
         toast.success("Tailored resume and Cover Letter created!");
       } catch (e) {
         console.error("Cover letter generation failed:", e);
         toast.success("Tailored resume created, but cover letter failed.");
       }
 
-      get().reset();
-      window.location.href = `/resumes/${tailoredResume.id}`;
+      set({ step: 'success', newResumeId: tailoredResume.id, newCoverLetterId: createdCoverLetterId });
     } catch (err: any) {
       set({ error: err.message || 'Failed to apply changes' });
     } finally {
@@ -171,5 +175,6 @@ export const useTailorStore = create<TailorState>((set, get) => ({
   reset: () => set({
     step: 'input', jdText: '', jobId: null, parsedKeywords: null,
     matchResult: null, suggestions: [], isLoading: false, error: null,
+    newResumeId: null, newCoverLetterId: null
   }),
 }));
