@@ -45,6 +45,7 @@ interface TailorState {
   rejectSuggestion: (index: number) => void;
   acceptAll: () => void;
   rejectAll: () => void;
+  applyToResume: () => Promise<void>;
   reset: () => void;
 }
 
@@ -109,6 +110,42 @@ export const useTailorStore = create<TailorState>((set, get) => ({
   rejectAll: () => set((s) => ({
     suggestions: s.suggestions.map((sg) => sg.changed ? { ...sg, accepted: false } : sg),
   })),
+
+  applyToResume: async () => {
+    const { resumeId, suggestions } = get();
+    if (!resumeId) return;
+    set({ isLoading: true });
+    try {
+      const { useResumeStore } = await import('@/stores/resume-store');
+      await useResumeStore.getState().fetchResume(resumeId);
+      const activeResume = useResumeStore.getState().activeResume;
+      if (!activeResume) throw new Error("Resume not found");
+
+      const profile = JSON.parse(JSON.stringify(activeResume.baseProfileSnapshot));
+      
+      suggestions.filter(s => s.accepted).forEach(s => {
+        if (s.type === 'summary' && s.section === 'summary') {
+          profile.summary = s.tailored;
+        } else if (s.type === 'bullet' && s.section === 'experience' && s.experienceIndex !== undefined && s.bulletIndex !== undefined) {
+          if (profile.experiences?.[s.experienceIndex]) {
+            profile.experiences[s.experienceIndex].bullets[s.bulletIndex] = s.tailored;
+          }
+        } else if (s.type === 'description' && s.section === 'experience' && s.experienceIndex !== undefined) {
+          if (profile.experiences?.[s.experienceIndex]) {
+            profile.experiences[s.experienceIndex].description = s.tailored;
+          }
+        }
+      });
+
+      await useResumeStore.getState().updateResume(resumeId, { baseProfileSnapshot: profile });
+      get().reset();
+      window.location.href = `/resumes/${resumeId}`;
+    } catch (err: any) {
+      set({ error: err.message || 'Failed to apply changes' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   reset: () => set({
     step: 'input', jdText: '', jobId: null, parsedKeywords: null,

@@ -91,21 +91,36 @@ def tailor_resume(profile: Dict[str, Any], jd_keywords: Dict, jd_text: str) -> D
             **result,
         })
 
-    # Tailor experience bullets
+    # Tailor experience bullets and descriptions
     for i, exp in enumerate(profile.get("experiences", [])):
-        for j, bullet in enumerate(exp.get("bullets", [])):
-            if not bullet:
-                continue
-            result = tailor_bullet(bullet, jd_context, all_keywords, job_title)
-            suggestions.append({
-                "section": "experience",
-                "type": "bullet",
-                "experienceIndex": i,
-                "bulletIndex": j,
-                "experienceTitle": exp.get("title", ""),
-                "company": exp.get("company", ""),
-                **result,
-            })
+        bullets = exp.get("bullets", [])
+        if bullets:
+            for j, bullet in enumerate(bullets):
+                if not bullet:
+                    continue
+                result = tailor_bullet(bullet, jd_context, all_keywords, job_title)
+                suggestions.append({
+                    "section": "experience",
+                    "type": "bullet",
+                    "experienceIndex": i,
+                    "bulletIndex": j,
+                    "experienceTitle": exp.get("title", ""),
+                    "company": exp.get("company", ""),
+                    **result,
+                })
+        else:
+            desc = exp.get("description", "")
+            if desc:
+                # We can reuse tailor_summary for the description as it's a block of text
+                result = tailor_summary(desc, jd_context, all_keywords, job_title)
+                suggestions.append({
+                    "section": "experience",
+                    "type": "description",
+                    "experienceIndex": i,
+                    "experienceTitle": exp.get("title", ""),
+                    "company": exp.get("company", ""),
+                    **result,
+                })
 
     # Suggest section order based on JD keywords
     suggested_order = suggest_section_order(profile, jd_keywords)

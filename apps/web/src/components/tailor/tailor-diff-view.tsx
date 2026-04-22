@@ -19,9 +19,11 @@ interface TailorDiffViewProps {
   onReject: (index: number) => void;
   onAcceptAll: () => void;
   onRejectAll: () => void;
+  onApply: () => void;
+  isLoading?: boolean;
 }
 
-export default function TailorDiffView({ suggestions, onAccept, onReject, onAcceptAll, onRejectAll }: TailorDiffViewProps) {
+export default function TailorDiffView({ suggestions, onAccept, onReject, onAcceptAll, onRejectAll, onApply, isLoading }: TailorDiffViewProps) {
   const changed = suggestions.filter((s) => s.changed);
   const accepted = changed.filter((s) => s.accepted === true).length;
   const rejected = changed.filter((s) => s.accepted === false).length;
@@ -114,6 +116,20 @@ export default function TailorDiffView({ suggestions, onAccept, onReject, onAcce
             </div>
           );
         })}
+      </div>
+
+      {/* Apply Action */}
+      <div className="mt-8 flex justify-end">
+        <button 
+          onClick={onApply}
+          disabled={accepted === 0 || isLoading}
+          className="px-6 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          {isLoading ? (
+            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : <Check size={16} />}
+          Apply {accepted} Changes to Resume
+        </button>
       </div>
     </div>
   );

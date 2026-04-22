@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 import sys
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configure loguru
 logger.remove()

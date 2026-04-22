@@ -138,6 +138,7 @@ export async function updateResume(userId: string, resumeId: string, data: Updat
       sectionOrder: data.sectionOrder,
       sectionVisibility: data.sectionVisibility !== undefined ? data.sectionVisibility : undefined,
       customStyles: data.customStyles !== undefined ? data.customStyles : undefined,
+      baseProfileSnapshot: data.baseProfileSnapshot !== undefined ? data.baseProfileSnapshot : undefined,
     },
   });
 

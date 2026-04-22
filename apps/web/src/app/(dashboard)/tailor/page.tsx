@@ -16,7 +16,7 @@ export default function TailorPage() {
   const {
     step, matchResult, suggestions, isLoading, error, jobId, parsedKeywords,
     setResumeId, analyzeJob, tailorResume, acceptSuggestion, rejectSuggestion,
-    acceptAll, rejectAll, reset,
+    acceptAll, rejectAll, applyToResume, reset,
   } = useTailorStore();
 
   const [selectedResumeId, setSelectedResumeId] = useState('');
@@ -114,6 +114,8 @@ export default function TailorPage() {
           onReject={rejectSuggestion}
           onAcceptAll={acceptAll}
           onRejectAll={rejectAll}
+          onApply={applyToResume}
+          isLoading={isLoading}
         />
       )}
     </div>

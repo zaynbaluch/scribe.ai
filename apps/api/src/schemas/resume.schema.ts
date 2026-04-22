@@ -39,6 +39,7 @@ export const updateResumeSchema = z.object({
   sectionOrder: z.array(z.string()).optional(),
   sectionVisibility: sectionVisibilitySchema.optional(),
   customStyles: customStylesSchema.optional(),
+  baseProfileSnapshot: z.any().optional(),
 });
 
 export type CreateResumeInput = z.infer<typeof createResumeSchema>;

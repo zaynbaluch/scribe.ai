@@ -6,7 +6,7 @@ import os
 
 class OllamaProvider(LLMProvider):
     def __init__(self):
-        self.model = os.getenv("LLM_MODEL", "llama3.2:8b")
+        self.model = os.getenv("LLM_MODEL", "mistral:latest")
         self.base_url = os.getenv("LLM_BASE_URL", "http://localhost:11434")
         self.client = ollama.Client(host=self.base_url)
         logger.info(f"Initialized OllamaProvider with model {self.model} at {self.base_url}")

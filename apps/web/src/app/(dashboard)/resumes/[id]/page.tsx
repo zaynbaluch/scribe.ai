@@ -89,7 +89,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   return (
     <div className="h-[calc(100vh-56px)] flex flex-col">
       {/* Editor Topbar */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--grid-line-strong)] bg-[var(--bg-surface-transparent)] backdrop-blur-md">
+      <div className="relative z-50 flex items-center justify-between px-4 py-2.5 border-b border-[var(--grid-line-strong)] bg-[var(--bg-surface-transparent)] backdrop-blur-md">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push('/resumes')}
             className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors">
