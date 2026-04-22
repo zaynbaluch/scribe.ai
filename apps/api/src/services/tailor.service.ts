@@ -178,14 +178,14 @@ export async function generateCoverLetter(userId: string, data: {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         profile,
-        jdText: job.rawDescription,
-        jdKeywords: jdKeywords || {},
+        jd_text: job.rawDescription,
+        jd_keywords: jdKeywords || {},
         tone: data.tone || 'formal',
         stream: false,
       }),
     });
     const result = await res.json();
-    if (!result.success) throw new Error('Cover letter generation failed');
+    if (!result.content) throw new Error('Cover letter generation failed');
 
     // Save to DB
     const coverLetter = await prisma.coverLetter.create({
@@ -194,7 +194,7 @@ export async function generateCoverLetter(userId: string, data: {
         resumeId: data.resumeId,
         jobId: data.jobId,
         title: `Cover Letter - ${job.title} at ${job.company}`,
-        content: result.data.content,
+        content: result.content,
         tone: data.tone || 'formal',
       },
     });
