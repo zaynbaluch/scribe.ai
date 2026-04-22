@@ -104,7 +104,7 @@ export default function AtsSimulator({ resumeId, isOpen, onClose, onScoreUpdate 
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" onClick={onClose} />
 
       {/* Panel */}
-      <div className="fixed right-0 top-0 bottom-0 w-[560px] max-w-full z-50 bg-[var(--bg-primary)] border-l border-[var(--grid-line-strong)] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+      <div className="fixed right-0 top-0 bottom-0 w-[560px] max-w-full z-50 bg-[var(--bg-surface)] border-l border-[var(--grid-line-strong)] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--grid-line-strong)]">
           <div className="flex items-center gap-2.5">
