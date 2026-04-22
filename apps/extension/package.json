@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Scribe.ai Browser Extension",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "wxt",
     "build": "wxt build"
