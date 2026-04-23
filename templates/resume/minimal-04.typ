@@ -1,7 +1,11 @@
 // Minimalist — Ultra-clean, no color accents, maximum readability
 #import "../shared/lib.typ": *
 
-#let data = json("data.json")
+#let data = if sys.inputs.at("data", default: none) != none {
+  json.decode(sys.inputs.data)
+} else {
+  json("data.json")
+}
 #let styles = data.at("styles", default: (:))
 #let font = styles.at("font", default: "Inter")
 #let fsize = float(styles.at("fontSize", default: 11)) * 1pt

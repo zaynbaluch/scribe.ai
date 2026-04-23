@@ -1,7 +1,11 @@
 // Classic Professional — Traditional layout, horizontal rules, serif feel
 #import "../shared/lib.typ": *
 
-#let data = json("data.json")
+#let data = if sys.inputs.at("data", default: none) != none {
+  json.decode(sys.inputs.data)
+} else {
+  json("data.json")
+}
 #let styles = data.at("styles", default: (:))
 #let accent = rgb(styles.at("accentColor", default: "#1a1a2e"))
 #let font = styles.at("font", default: "Georgia")

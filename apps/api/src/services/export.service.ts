@@ -20,9 +20,9 @@ function formatDate(dateStr: string | null | undefined): string {
 export async function exportPdf(userId: string, resumeId: string): Promise<Buffer> {
   const resume = await getResumeWithValidation(userId, resumeId);
 
-  const snapshot = { ...resume.baseProfileSnapshot as any };
-  if (!snapshot) {
-    throw new Error('Resume has no profile snapshot. Please recreate it.');
+  const snapshot = { ...((resume.tailoredContent as any) || (resume.baseProfileSnapshot as any)) };
+  if (!snapshot || Object.keys(snapshot).length === 0) {
+    throw new Error('Resume has no content. Please create your profile first.');
   }
 
   // Filter invisible items

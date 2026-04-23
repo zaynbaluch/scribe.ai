@@ -101,6 +101,17 @@ export async function sendFollowUpNudge(to: string, name: string, jobTitle: stri
   return sendEmail(to, `👋 Follow up on ${jobTitle} at ${company}?`, html);
 }
 
+/**
+ * Send AI-tailored documents (CV & Cover Letter).
+ */
+export async function sendTailoredDocs(to: string, name: string, jobTitle: string, company: string, attachments: { filename: string, content: Buffer | string }[]) {
+  const html = TAILORED_DOCS_HTML
+    .replace(/{{name}}/g, name)
+    .replace(/{{jobTitle}}/g, jobTitle)
+    .replace(/{{company}}/g, company);
+  return sendEmail(to, `✨ Your tailored application for ${jobTitle} at ${company} is ready!`, html, attachments);
+}
+
 // ─── Pre-compiled Email Templates (inline for simplicity) ───────────────────
 
 const TWO_FACTOR_HTML = `
@@ -269,6 +280,10 @@ const DEADLINE_REMINDER_HTML = `
 `;
 
 const FOLLOW_UP_HTML = `
+... (rest of FOLLOW_UP_HTML) ...
+`;
+
+const TAILORED_DOCS_HTML = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -278,7 +293,7 @@ const FOLLOW_UP_HTML = `
     body { margin: 0; padding: 0; background-color: #050508; -webkit-text-size-adjust: 100%; }
     .logo-img { filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2); }
     @media only screen and (max-width: 480px) {
-      .hero-title { font-size: 24px !important; }
+      .hero-title { font-size: 26px !important; }
     }
   </style>
 </head>
@@ -286,15 +301,23 @@ const FOLLOW_UP_HTML = `
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
     <tr>
       <td align="center" style="padding: 60px 24px;">
-        <img src="cid:scribe-logo" alt="Scribe.ai" width="48" height="48" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
+        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
         
-        <div style="font-size: 14px; font-weight: 600; color: #818cf8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Stay Ahead</div>
-        <h1 class="hero-title" style="font-size: 28px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.02em;">Time to Follow Up?</h1>
-        <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 40px; line-height: 1.6; max-width: 380px;">
-          Hi {{name}}, it's been <strong style="color: #f59e0b;">{{daysAgo}} days</strong> since you applied for <strong style="color: #818cf8;">{{jobTitle}}</strong> at <strong>{{company}}</strong>.
+        <div style="font-size: 14px; font-weight: 600; color: #818cf8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Documents Ready</div>
+        <h1 class="hero-title" style="font-size: 30px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.02em;">Tailored for Success</h1>
+        <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 40px; line-height: 1.6; max-width: 420px;">
+          Hi {{name}}, your AI-optimized application for <strong style="color: #ffffff;">{{jobTitle}}</strong> at <strong>{{company}}</strong> has been generated and is attached to this email.
         </p>
         
-        <a href="http://localhost:3000/applications" style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #6366f1, #818cf8); color: white; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 15px; margin-bottom: 60px; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);">Check Status →</a>
+        <div style="background-color: #09090b; border: 1px solid #18181b; border-radius: 16px; padding: 24px; margin-bottom: 40px; display: inline-block; text-align: left; width: 100%; max-width: 320px;">
+          <div style="color: #ffffff; font-weight: 600; margin-bottom: 12px; font-size: 14px;">Included Files:</div>
+          <div style="color: #a1a1aa; font-size: 13px; margin-bottom: 8px;">📄 Tailored Resume.pdf</div>
+          <div style="color: #a1a1aa; font-size: 13px;">✉️ Targeted Cover Letter.pdf</div>
+        </div>
+        
+        <p style="color: #52525b; font-size: 14px; line-height: 1.6; max-width: 380px; margin: 0 auto 60px;">
+          Go ahead and review them. If they look good, you're ready to apply! Good luck with your application.
+        </p>
         
         <div style="border-top: 1px solid #18181b; padding-top: 40px; color: #3f3f46; font-size: 12px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;">
           Scribe.ai &copy; 2026 &bull; Intelligent Career Growth

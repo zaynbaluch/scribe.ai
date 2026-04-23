@@ -1,7 +1,11 @@
 // Bold Statement — Strong visual hierarchy, accent background bars
 #import "../shared/lib.typ": *
 
-#let data = json("data.json")
+#let data = if sys.inputs.at("data", default: none) != none {
+  json.decode(sys.inputs.data)
+} else {
+  json("data.json")
+}
 #let styles = data.at("styles", default: (:))
 #let accent = rgb(styles.at("accentColor", default: "#7C3AED"))
 #let font = styles.at("font", default: "Inter")

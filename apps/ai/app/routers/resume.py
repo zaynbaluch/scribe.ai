@@ -108,7 +108,7 @@ async def parse_resume(file: UploadFile = File(...)):
         
         prompt = f"Resume Text:\n\n{text[:6000]}"
         
-        raw_json = llm.generate(prompt, system=system, temperature=0.1)
+        raw_json = llm.generate(prompt, system=system, temperature=0.1, format="json")
         clean_json = re.sub(r'```json\s*(.*?)\s*```', r'\1', raw_json, flags=re.DOTALL).strip()
         
         logger.info(f"LLM Raw Output: {raw_json}")
