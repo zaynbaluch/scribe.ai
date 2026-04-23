@@ -27,7 +27,7 @@ export const getCoverLetters = async (req: Request, res: Response) => {
 export const getCoverLetter = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
-    const cl = await CoverLetterService.getCoverLetter(req.params.id, userId);
+    const cl = await CoverLetterService.getCoverLetter(req.params.id as string, userId);
     res.json({ success: true, data: cl });
   } catch (error: any) {
     res.status(404).json({ success: false, error: { message: error.message } });
@@ -37,7 +37,7 @@ export const getCoverLetter = async (req: Request, res: Response) => {
 export const updateCoverLetter = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
-    const cl = await CoverLetterService.updateCoverLetter(req.params.id, userId, req.body);
+    const cl = await CoverLetterService.updateCoverLetter(req.params.id as string, userId, req.body);
     res.json({ success: true, data: cl });
   } catch (error: any) {
     res.status(500).json({ success: false, error: { message: error.message } });
@@ -47,7 +47,7 @@ export const updateCoverLetter = async (req: Request, res: Response) => {
 export const deleteCoverLetter = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
-    await CoverLetterService.deleteCoverLetter(req.params.id, userId);
+    await CoverLetterService.deleteCoverLetter(req.params.id as string, userId);
     res.status(204).send();
   } catch (error: any) {
     res.status(500).json({ success: false, error: { message: error.message } });
@@ -61,21 +61,21 @@ export const exportCoverLetter = async (req: Request, res: Response) => {
 
     switch (format) {
       case 'pdf': {
-        const buffer = await exportService.exportCoverLetterPdf(userId, id);
+        const buffer = await exportService.exportCoverLetterPdf(userId, id as string);
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="cover-letter.pdf"`);
         res.send(buffer);
         break;
       }
       case 'docx': {
-        const buffer = await exportService.exportCoverLetterDocx(userId, id);
+        const buffer = await exportService.exportCoverLetterDocx(userId, id as string);
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
         res.setHeader('Content-Disposition', `attachment; filename="cover-letter.docx"`);
         res.send(buffer);
         break;
       }
       case 'txt': {
-        const text = await exportService.exportCoverLetterTxt(userId, id);
+        const text = await exportService.exportCoverLetterTxt(userId, id as string);
         res.setHeader('Content-Type', 'text/plain');
         res.setHeader('Content-Disposition', `attachment; filename="cover-letter.txt"`);
         res.send(text);

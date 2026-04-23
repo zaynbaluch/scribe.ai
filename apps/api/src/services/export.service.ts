@@ -159,7 +159,7 @@ export async function exportDocx(userId: string, resumeId: string): Promise<Buff
           horizontalPosition: { relative: 'margin', offset: 4500000 }, // roughly right side
           verticalPosition: { relative: 'margin', offset: 0 },
         }
-      });
+      } as any);
     } catch (err) {
       logger.error({ err }, 'Failed to generate QR for DOCX');
     }

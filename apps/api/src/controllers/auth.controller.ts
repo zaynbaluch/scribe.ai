@@ -57,7 +57,8 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   const result = await authService.loginWithEmailPassword(email, password);
 
   if ('requires2FA' in result) {
-    return res.json({ success: true, data: { requires2FA: true, email } });
+    res.json({ success: true, data: { requires2FA: true, email } });
+    return;
   }
 
   const { user, tokens } = result;

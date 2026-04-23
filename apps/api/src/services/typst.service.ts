@@ -16,6 +16,8 @@ interface ResumeData {
   styles: any;
   sectionOrder: string[];
   sectionVisibility: any;
+  showQrCode?: boolean;
+  qrImagePath?: string;
 }
 
 export async function compilePdf(templateId: string, data: ResumeData): Promise<Buffer> {

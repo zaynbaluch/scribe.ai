@@ -61,7 +61,7 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
     data.phone = undefined;
   }
 
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx: any) => {
     // Update scalar fields
     await tx.profile.update({
       where: { id: profileId },

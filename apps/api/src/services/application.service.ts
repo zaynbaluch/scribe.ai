@@ -101,11 +101,11 @@ export async function getStats(userId: string) {
   });
 
   const total = all.length;
-  const applied = all.filter((a) => a.status !== 'saved').length;
-  const screening = all.filter((a) => a.status === 'screening').length;
-  const interviews = all.filter((a) => a.status === 'interview').length;
-  const offers = all.filter((a) => a.status === 'offer').length;
-  const rejected = all.filter((a) => a.status === 'rejected').length;
+  const applied = all.filter((a: any) => a.status !== 'saved').length;
+  const screening = all.filter((a: any) => a.status === 'screening').length;
+  const interviews = all.filter((a: any) => a.status === 'interview').length;
+  const offers = all.filter((a: any) => a.status === 'offer').length;
+  const rejected = all.filter((a: any) => a.status === 'rejected').length;
 
   const responseRate = applied > 0 ? Math.round(((screening + interviews + offers + rejected) / applied) * 100) : 0;
   const interviewRate = applied > 0 ? Math.round((interviews / applied) * 100) : 0;
@@ -120,7 +120,7 @@ export async function getStats(userId: string) {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
 
-    const count = all.filter((a) => {
+    const count = all.filter((a: any) => {
       const date = a.appliedAt || a.createdAt;
       return date >= weekStart && date < weekEnd;
     }).length;
@@ -136,7 +136,7 @@ export async function getStats(userId: string) {
     where: { userId, atsScore: { not: null } },
     select: { atsScore: true },
   });
-  const avgAts = resumes.length > 0 ? Math.round(resumes.reduce((sum, r) => sum + (r.atsScore || 0), 0) / resumes.length) : null;
+  const avgAts = resumes.length > 0 ? Math.round(resumes.reduce((sum: number, r: any) => sum + (r.atsScore || 0), 0) / resumes.length) : null;
 
   return {
     total,
