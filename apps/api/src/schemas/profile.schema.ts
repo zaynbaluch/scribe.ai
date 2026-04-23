@@ -4,10 +4,10 @@ import { z } from 'zod';
 
 const experienceSchema = z.object({
   id: z.string().uuid().optional(),
-  title: z.string().min(1),
-  company: z.string().min(1),
+  title: z.string().optional().nullable(),
+  company: z.string().optional().nullable(),
   location: z.string().optional().nullable(),
-  startDate: z.string().min(1), // ISO date string
+  startDate: z.string().optional().nullable(), // ISO date string
   endDate: z.string().optional().nullable(),
   current: z.boolean().optional().default(false),
   description: z.string().optional().nullable(),
@@ -17,10 +17,10 @@ const experienceSchema = z.object({
 
 const educationSchema = z.object({
   id: z.string().uuid().optional(),
-  institution: z.string().min(1),
-  degree: z.string().min(1),
+  institution: z.string().optional().nullable(),
+  degree: z.string().optional().nullable(),
   field: z.string().optional().nullable(),
-  startDate: z.string().min(1),
+  startDate: z.string().optional().nullable(),
   endDate: z.string().optional().nullable(),
   gpa: z.string().optional().nullable(),
   honors: z.string().optional().nullable(),
@@ -38,7 +38,7 @@ const skillSchema = z.object({
 
 const projectSchema = z.object({
   id: z.string().uuid().optional(),
-  name: z.string().min(1),
+  name: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   url: z.string().optional().nullable(),
   techStack: z.array(z.string()).optional().default([]),
@@ -50,8 +50,8 @@ const projectSchema = z.object({
 
 const certificationSchema = z.object({
   id: z.string().uuid().optional(),
-  name: z.string().min(1),
-  issuer: z.string().min(1),
+  name: z.string().optional().nullable(),
+  issuer: z.string().optional().nullable(),
   date: z.string().optional().nullable(),
   expiryDate: z.string().optional().nullable(),
   url: z.string().optional().nullable(),

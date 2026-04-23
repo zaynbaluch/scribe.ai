@@ -15,33 +15,42 @@ def _get_llm():
     return _llm
 
 
-def tailor_bullet(original: str, jd_context: str, keywords: List[str], job_title: str = "") -> Dict:
-    """Rewrite a single bullet point to better match the JD."""
+def tailor_experience(exp: Dict[str, Any], jd_context: str, keywords: List[str], job_title: str = "") -> Dict:
+    """Rewrite experience details into 2-3 fresh, high-impact bullets."""
     llm = _get_llm()
 
     keyword_str = ", ".join(keywords[:10])
+    original_bullets = "\n".join(exp.get("bullets", []))
+    original_desc = exp.get("description", "")
+    
     system = (
-        "You are an expert resume writer. Rewrite the bullet point to better match the job description. "
+        "You are an expert resume writer. Rewrite the provided job experience into 2-3 HIGH-IMPACT bullet points. "
         "CRITICAL INSTRUCTIONS:\n"
-        "1. Use PAST TENSE for all actions (e.g., 'Leveraged', 'Developed', 'Managed').\n"
-        "2. DO NOT invent new skills or experiences. Only rephrase existing information.\n"
-        "3. Use strong action verbs and quantify impact.\n"
-        "4. Keep it concise. Return ONLY the rewritten bullet."
+        "1. Use PAST TENSE for all actions.\n"
+        "2. DO NOT invent new skills or experiences. Only use provided info.\n"
+        "3. Focus on results and quantify impact where possible.\n"
+        "4. Return ONLY the bullet points, each starting with '• '."
     )
     prompt = (
         f"Target Role: {job_title}\n"
-        f"Key Skills: {keyword_str}\n"
-        f"Original bullet: {original}\n\n"
-        f"Tailored bullet (PAST TENSE):"
+        f"Job: {exp.get('title')} at {exp.get('company')}\n"
+        f"Original Details:\n{original_desc}\n{original_bullets}\n\n"
+        f"Tailored Bullets (2-3 items, PAST TENSE):"
     )
 
     try:
-        result = llm.generate(prompt, system=system, temperature=0.6, max_tokens=200)
-        result = result.strip().strip('"').strip("'").strip("-").strip("•").strip()
-        return {"original": original, "tailored": result, "changed": result.lower() != original.lower()}
+        result = llm.generate(prompt, system=system, temperature=0.6, max_tokens=300)
+        lines = [line.strip().strip('•').strip('-').strip() for line in result.split('\n') if line.strip()]
+        tailored_bullets = lines[:3] # Ensure at most 3
+        
+        return {
+            "original_bullets": exp.get("bullets", []),
+            "tailored_bullets": tailored_bullets,
+            "changed": len(tailored_bullets) > 0
+        }
     except Exception as e:
-        logger.error(f"Failed to tailor bullet: {e}")
-        return {"original": original, "tailored": original, "changed": False, "error": str(e)}
+        logger.error(f"Failed to tailor experience: {e}")
+        return {"original_bullets": exp.get("bullets", []), "tailored_bullets": exp.get("bullets", []), "changed": False}
 
 
 def tailor_summary(original: str, jd_context: str, keywords: List[str], job_title: str = "") -> Dict:
@@ -92,75 +101,58 @@ def tailor_resume(profile: Dict[str, Any], jd_keywords: Dict, jd_text: str) -> D
             **result,
         })
 
-    # Tailor experience bullets and descriptions
+    # Tailor experience
     for i, exp in enumerate(profile.get("experiences", [])):
-        bullets = exp.get("bullets", [])
-        if bullets:
-            for j, bullet in enumerate(bullets):
-                if not bullet:
-                    continue
-                result = tailor_bullet(bullet, jd_context, all_keywords, job_title)
-                suggestions.append({
-                    "section": "experience",
-                    "type": "bullet",
-                    "experienceIndex": i,
-                    "bulletIndex": j,
-                    "experienceTitle": exp.get("title", ""),
-                    "company": exp.get("company", ""),
-                    **result,
-                })
-        else:
-            desc = exp.get("description", "")
-            if desc:
-                # We can reuse tailor_summary for the description as it's a block of text
-                result = tailor_summary(desc, jd_context, all_keywords, job_title)
-                suggestions.append({
-                    "section": "experience",
-                    "type": "description",
-                    "experienceIndex": i,
-                    "experienceTitle": exp.get("title", ""),
-                    "company": exp.get("company", ""),
-                    **result,
-                })
+        result = tailor_experience(exp, jd_context, all_keywords, job_title)
+        if result["changed"]:
+            suggestions.append({
+                "section": "experience",
+                "type": "bullets",
+                "experienceIndex": i,
+                "experienceTitle": exp.get("title", ""),
+                "company": exp.get("company", ""),
+                "original": "\n".join(exp.get("bullets", [])),
+                "tailored": "\n".join(result["tailored_bullets"]),
+                "changed": True
+            })
 
-    # Tailor project descriptions
+    # Tailor projects
     for i, proj in enumerate(profile.get("projects", [])):
-        desc = proj.get("description", "")
         tech_stack = proj.get("techStack", [])
+        desc = proj.get("description", "")
+        bullets = proj.get("bullets", [])
         
-        # Check if project is relevant (tech stack overlaps with keywords)
-        is_relevant = any(kw.lower() in [t.lower() for t in tech_stack] for kw in all_keywords)
-        
-        if desc:
-            # We add a hint about the project tech stack if it's relevant
-            system = (
-                "You are an expert resume writer. Rewrite the provided project description to better match the target role. "
-                "CRITICAL INSTRUCTIONS:\n"
-                "1. Use PAST TENSE for all actions (e.g., 'Built', 'Implemented').\n"
-                "2. DO NOT invent new facts or tech stacks. Only use what is provided.\n"
-                "3. Highlight relevant technologies and impact.\n"
-                "4. Return ONLY the rewritten project description."
-            )
-            prompt = (
-                f"Target Role: {job_title}\n"
-                f"Project Tech Stack: {', '.join(tech_stack)}\n"
-                f"Original description: {desc}\n\n"
-                f"Tailored project description (PAST TENSE):"
-            )
-            try:
-                result = _get_llm().generate(prompt, system=system, temperature=0.6, max_tokens=300)
-                tailored = result.strip()
-                suggestions.append({
-                    "section": "projects",
-                    "type": "description",
-                    "projectIndex": i,
-                    "projectName": proj.get("name", ""),
-                    "original": desc,
-                    "tailored": tailored,
-                    "changed": tailored.lower() != desc.lower()
-                })
-            except Exception as e:
-                logger.error(f"Failed to tailor project: {e}")
+        system = (
+            "You are an expert resume writer. Rewrite the project details into a concise description with 1-2 impact bullets. "
+            "CRITICAL INSTRUCTIONS:\n"
+            "1. Use PAST TENSE.\n"
+            "2. DO NOT invent facts. Only use provided info.\n"
+            "3. Keep it VERY CONCISE (at most 2 high-impact bullets).\n"
+            "4. Return ONLY the bullet points, each starting with '• '."
+        )
+        prompt = (
+            f"Target Role: {job_title}\n"
+            f"Project: {proj.get('name')}\n"
+            f"Tech Stack: {', '.join(tech_stack)}\n"
+            f"Original Details: {desc}\n" + "\n".join(bullets) + "\n\n"
+            f"Tailored Project Details (PAST TENSE):"
+        )
+        try:
+            result = _get_llm().generate(prompt, system=system, temperature=0.6, max_tokens=250)
+            lines = [line.strip().strip('•').strip('-').strip() for line in result.split('\n') if line.strip()]
+            tailored_bullets = lines[:2]
+            
+            suggestions.append({
+                "section": "projects",
+                "type": "bullets",
+                "projectIndex": i,
+                "projectName": proj.get("name", ""),
+                "original": desc + "\n" + "\n".join(bullets),
+                "tailored": "\n".join(tailored_bullets),
+                "changed": len(tailored_bullets) > 0
+            })
+        except Exception as e:
+            logger.error(f"Failed to tailor project: {e}")
 
     # Suggest section order based on JD keywords
     suggested_order = suggest_section_order(profile, jd_keywords)

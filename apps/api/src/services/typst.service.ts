@@ -37,23 +37,22 @@ async function runTypst(templatePath: string, dataPath: string, data: any): Prom
     throw new Error(`Template not found at ${templatePath}`);
   }
 
-  // Create temp directory for this compilation
+  // Create temp directory for output
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'scribe-typst-'));
   const outputPath = path.join(tmpDir, 'output.pdf');
 
   try {
-    // Write data JSON
-    await fs.writeFile(dataPath, JSON.stringify(data, null, 2), 'utf-8');
-
-    // Compile
+    // Compile using --input flag (thread-safe, no temp JSON file needed)
     const { stderr } = await execFileAsync(TYPST_BIN, [
       'compile',
       '--root', TEMPLATES_DIR,
+      '--input', `data=${JSON.stringify(data)}`,
       templatePath,
       outputPath,
     ], {
       timeout: 15000,
       cwd: TEMPLATES_DIR,
+      maxBuffer: 1024 * 1024 * 10, // 10MB buffer for large JSON inputs
     });
 
     if (stderr) logger.warn({ stderr }, 'Typst compilation warnings');
@@ -63,7 +62,6 @@ async function runTypst(templatePath: string, dataPath: string, data: any): Prom
   } finally {
     try {
       await fs.rm(tmpDir, { recursive: true, force: true });
-      await fs.unlink(dataPath).catch(() => {});
     } catch {}
   }
 }

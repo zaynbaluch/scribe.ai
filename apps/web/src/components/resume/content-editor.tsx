@@ -207,26 +207,7 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                     {proj.visible === false ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <CustomDatePicker 
-                    label="Started" 
-                    value={proj.startDate || ''} 
-                    onChange={(v) => {
-                      const newProjs = [...profile.projects];
-                      newProjs[idx].startDate = v;
-                      updateProfile('projects', newProjs);
-                    }} 
-                  />
-                  <CustomDatePicker 
-                    label="Ended" 
-                    value={proj.endDate || ''} 
-                    onChange={(v) => {
-                      const newProjs = [...profile.projects];
-                      newProjs[idx].endDate = v;
-                      updateProfile('projects', newProjs);
-                    }} 
-                  />
-                </div>
+
                 <div>
                   <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Technologies / Stack</label>
                   <input 

@@ -133,17 +133,15 @@ export const useTailorStore = create<TailorState>((set, get) => ({
       suggestions.filter(s => s.accepted).forEach(s => {
         if (s.type === 'summary' && s.section === 'summary') {
           profile.summary = s.tailored;
-        } else if (s.type === 'bullet' && s.section === 'experience' && s.experienceIndex !== undefined && s.bulletIndex !== undefined) {
+        } else if (s.type === 'bullets' && s.section === 'experience' && s.experienceIndex !== undefined) {
           if (profile.experiences?.[s.experienceIndex]) {
-            profile.experiences[s.experienceIndex].bullets[s.bulletIndex] = s.tailored;
+            profile.experiences[s.experienceIndex].bullets = s.tailored.split('\n').map(b => b.trim().replace(/^•\s*/, '')).filter(Boolean);
+            profile.experiences[s.experienceIndex].description = ''; // Prefer bullets for tailored view
           }
-        } else if (s.type === 'description' && s.section === 'experience' && s.experienceIndex !== undefined) {
-          if (profile.experiences?.[s.experienceIndex]) {
-            profile.experiences[s.experienceIndex].description = s.tailored;
-          }
-        } else if (s.type === 'description' && s.section === 'projects' && s.projectIndex !== undefined) {
+        } else if (s.type === 'bullets' && s.section === 'projects' && s.projectIndex !== undefined) {
           if (profile.projects?.[s.projectIndex]) {
-            profile.projects[s.projectIndex].description = s.tailored;
+            profile.projects[s.projectIndex].bullets = s.tailored.split('\n').map(b => b.trim().replace(/^•\s*/, '')).filter(Boolean);
+            profile.projects[s.projectIndex].description = ''; // Prefer bullets for tailored view
           }
         }
       });

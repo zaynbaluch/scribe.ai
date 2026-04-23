@@ -21,7 +21,8 @@ export default function Topbar({ sidebarWidth, isMobile, onMobileMenuToggle }: T
   useEffect(() => setMounted(true), []);
 
   const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+    const next = resolvedTheme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
   };
 
   // Close dropdown on outside click
@@ -78,10 +79,7 @@ export default function Topbar({ sidebarWidth, isMobile, onMobileMenuToggle }: T
           </button>
         )}
 
-        {/* Notifications */}
-        <button className="p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] transition-colors relative">
-          <Bell size={18} />
-        </button>
+
 
         {/* User dropdown */}
         <div className="relative" ref={menuRef}>

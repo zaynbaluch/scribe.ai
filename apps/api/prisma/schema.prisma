@@ -260,7 +260,7 @@ model Portfolio {
   id               String   @id @default(uuid())
   userId           String   @unique
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  templateId       String   @default("developer")
+  templateId       String   @default("modern")
   primaryColor     String   @default("#818cf8")
   accentColor      String   @default("#6366f1")
   showExperience   Boolean  @default(true)

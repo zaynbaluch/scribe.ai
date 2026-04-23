@@ -1,4 +1,4 @@
-#let data = json("data.json")
+#let data = json.decode(sys.inputs.data)
 
 #set page(
   margin: (x: 1in, y: 1in),

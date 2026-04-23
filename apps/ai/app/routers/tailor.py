@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 from loguru import logger
-from app.services.tailor_engine import tailor_resume, tailor_bullet
+from app.services.tailor_engine import tailor_resume
 from app.services.cover_letter import generate_cover_letter, stream_cover_letter
 
 router = APIRouter(prefix="/ai", tags=["tailor"])
@@ -17,11 +17,6 @@ class TailorRequest(BaseModel):
     jdKeywords: Dict[str, Any]
     jdText: str = Field(..., min_length=10)
 
-class TailorBulletRequest(BaseModel):
-    bullet: str
-    jdContext: str
-    keywords: List[str] = []
-    jobTitle: str = ""
 
 class CoverLetterRequest(BaseModel):
     profile: Dict[str, Any]
@@ -42,15 +37,6 @@ async def tailor_resume_endpoint(req: TailorRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/tailor/bullet")
-async def tailor_single_bullet(req: TailorBulletRequest):
-    """Tailor a single bullet point."""
-    try:
-        result = tailor_bullet(req.bullet, req.jdContext, req.keywords, req.jobTitle)
-        return {"success": True, "data": result}
-    except Exception as e:
-        logger.error(f"Bullet tailoring failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/cover-letter")

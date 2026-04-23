@@ -33,6 +33,15 @@ export default function ApplicationDetail({ app, isOpen, onClose, onUpdate, onDe
   const [salaryRange, setSalaryRange] = useState(app.salaryRange || '');
   const [nextDeadline, setNextDeadline] = useState(app.nextDeadline?.split('T')[0] || '');
 
+  // Sync state when app changes
+  useEffect(() => {
+    setNotes(app.notes || '');
+    setContactName(app.contactName || '');
+    setContactEmail(app.contactEmail || '');
+    setSalaryRange(app.salaryRange || '');
+    setNextDeadline(app.nextDeadline?.split('T')[0] || '');
+  }, [app]);
+
   if (!isOpen) return null;
 
   const handleSave = () => {
@@ -48,7 +57,7 @@ export default function ApplicationDetail({ app, isOpen, onClose, onUpdate, onDe
   return (
     <>
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" onClick={onClose} />
-      <div className="fixed right-0 top-0 bottom-0 w-[440px] max-w-full z-50 bg-[var(--bg-primary)] border-l border-[var(--grid-line-strong)] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+      <div className="fixed right-0 top-14 bottom-0 w-[440px] max-w-full z-50 bg-[var(--bg-primary)] border-l border-[var(--grid-line-strong)] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
         {/* Header */}
         <div className="px-5 py-4 border-b border-[var(--grid-line-strong)]">
           <div className="flex items-start justify-between">

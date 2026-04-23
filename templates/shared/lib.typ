@@ -129,13 +129,25 @@
   }
 }
 
-// ─── Helper: Format Date ────────────────────────────────────────────────────
+#let pretty-date(iso-str) = {
+  if iso-str == none or iso-str == "" { return none }
+  let s = iso-str.slice(0, 7)
+  let year = s.slice(0, 4)
+  let month-num = s.slice(5, 7)
+  let months = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+  let m-idx = int(month-num) - 1
+  if m-idx >= 0 and m-idx < 12 {
+    months.at(m-idx) + " " + year
+  } else {
+    s
+  }
+}
 
 #let format-date-range(start, end, current: false) = {
-  let s = if start != none and start != "" { start } else { "" }
-  let e = if current { "Present" } else if end != none and end != "" { end } else { "" }
-  if s != "" and e != "" { s + " - " + e }
-  else if s != "" { s }
+  let s = pretty-date(start)
+  let e = if current { "Present" } else { pretty-date(end) }
+  if s != none and e != none { s + " - " + e }
+  else if s != none { s }
   else { e }
 }
 

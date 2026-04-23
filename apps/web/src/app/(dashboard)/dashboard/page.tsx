@@ -88,23 +88,26 @@ export default function DashboardPage() {
                 <AreaChart data={stats.weeklyActivity}>
                   <defs>
                     <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--gradient-2)" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="var(--gradient-2)" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#7C3AED" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="week" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <XAxis dataKey="week" tick={{ fontSize: 10, fill: '#71717a' }} axisLine={false} tickLine={false} dy={10} />
+                  <YAxis tick={{ fontSize: 10, fill: '#71717a' }} axisLine={false} tickLine={false} allowDecimals={false} dx={-10} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '8px', fontSize: '12px' }}
-                    labelStyle={{ color: 'var(--text-primary)' }}
+                    contentStyle={{ backgroundColor: 'rgba(10, 10, 12, 0.8)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px' }}
+                    labelStyle={{ color: '#fff', fontWeight: 'bold', marginBottom: '4px' }}
+                    itemStyle={{ color: '#7C3AED' }}
+                    cursor={{ stroke: '#7C3AED', strokeWidth: 1, strokeDasharray: '4 4' }}
                   />
                   <Area 
                     type="monotone" 
                     dataKey="count" 
-                    stroke="var(--gradient-2)" 
+                    stroke="#7C3AED" 
                     fillOpacity={1} 
                     fill="url(#colorCount)" 
-                    strokeWidth={2}
+                    strokeWidth={3}
+                    animationDuration={1500}
                     name="Applications" 
                   />
                 </AreaChart>

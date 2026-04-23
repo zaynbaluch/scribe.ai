@@ -101,10 +101,7 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
           {!collapsed && (
             <div className="flex flex-col">
               <span className="font-mono text-[11px] font-medium tracking-wider text-[var(--text-muted)] uppercase">
-                FREE
-              </span>
-              <span className="text-[11px] text-[var(--gradient-2)] cursor-pointer hover:underline">
-                Upgrade to Pro
+                FREE PLAN
               </span>
             </div>
           )}

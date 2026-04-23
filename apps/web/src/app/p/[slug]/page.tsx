@@ -115,7 +115,7 @@ export default function PublicPortfolioPage({ params }: { params: Promise<{ slug
 
 function ModernTemplate({ user, portfolio, profile, primary, accent, profileImage }: any) {
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e4e4e7]" style={{ '--p': primary, '--a': accent } as any}>
+    <div className="min-h-screen bg-[#030303] text-[#e4e4e7] font-sans selection:bg-[var(--p)] selection:text-white" style={{ '--p': primary, '--a': accent } as any}>
       <header className="border-b border-[#1a1a2e] relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#1e1b4b] to-transparent opacity-30" />
         <div className="max-w-4xl mx-auto px-6 py-16 relative z-10">
@@ -218,8 +218,8 @@ function ModernTemplate({ user, portfolio, profile, primary, accent, profileImag
 
 function ClassicTemplate({ user, portfolio, profile, primary, accent, profileImage }: any) {
   return (
-    <div className="min-h-screen bg-[#fcfcfc] text-[#18181b] font-serif" style={{ '--p': primary, '--a': accent } as any}>
-      <header className="max-w-3xl mx-auto px-6 pt-20 pb-12 text-center border-b border-[#e4e4e7]">
+    <div className="min-h-screen bg-[#fcfcfc] text-[#18181b] font-serif selection:bg-black selection:text-white" style={{ '--p': primary, '--a': accent } as any}>
+      <header className="max-w-3xl mx-auto px-6 pt-24 pb-16 text-center border-b-2 border-black/10">
         <img src={profileImage} alt={user.name}
           className="w-24 h-24 rounded-full mx-auto mb-6 object-cover grayscale hover:grayscale-0 transition-all border-2 border-[#e4e4e7] p-1" />
         <h1 className="text-4xl font-medium tracking-tight mb-2 italic">{user.name}</h1>
@@ -288,8 +288,8 @@ function ClassicTemplate({ user, portfolio, profile, primary, accent, profileIma
 
 function MinimalTemplate({ user, portfolio, profile, primary, accent, profileImage }: any) {
   return (
-    <div className="min-h-screen bg-white text-[#111] font-sans antialiased" style={{ '--p': primary } as any}>
-      <main className="max-w-2xl mx-auto px-8 py-24 space-y-24">
+    <div className="min-h-screen bg-white text-[#111] font-sans antialiased selection:bg-blue-100" style={{ '--p': primary } as any}>
+      <main className="max-w-2xl mx-auto px-8 py-32 space-y-32">
         <header>
           <h1 className="text-4xl font-bold tracking-tight mb-4">{user.name}</h1>
           <p className="text-lg text-[#666] leading-relaxed max-w-lg">

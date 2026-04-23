@@ -24,7 +24,11 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetch(); }, [fetch]);
-  useEffect(() => { if (profile && !localProfile) setLocalProfile(profile); }, [profile]);
+  useEffect(() => { 
+    if (profile) {
+      setLocalProfile(profile); 
+    }
+  }, [profile]);
 
   const saveProfile = async (dataToSave: any) => {
     try {
@@ -91,6 +95,7 @@ export default function ProfilePage() {
     if (parsed.certifications?.length) merged.certifications = parsed.certifications;
 
     update(merged).then(() => {
+      setLocalProfile(prev => ({ ...prev, ...merged }));
       toast.success('Imported data saved to profile');
       fetch();
     }).catch(() => toast.error('Failed to save imported data'));
@@ -132,7 +137,7 @@ export default function ProfilePage() {
       {/* Personal Info */}
       <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-transparent)] backdrop-blur-md p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm">Personal Information</h3>
+          <h3 className="font-semibold text-sm">Personal Details</h3>
           {!editingPersonalInfo ? (
             <button onClick={() => setEditingPersonalInfo(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors">
@@ -191,8 +196,11 @@ export default function ProfilePage() {
               </div>
             )}
             <div>
-              <p className="text-sm font-medium">{profile?.name || 'Your Name'}</p>
-              <p className="text-xs text-[var(--text-muted)] mt-1 max-w-2xl leading-relaxed">{localProfile.summary || 'No summary added.'}</p>
+              <p className="text-sm font-semibold">{localProfile.name || profile?.user?.name || 'Your Name'}</p>
+              {localProfile.headline && (
+                <p className="text-[11px] text-[var(--gradient-2)] font-medium mt-0.5">{localProfile.headline}</p>
+              )}
+              <p className="text-xs text-[var(--text-muted)] mt-2 max-w-2xl leading-relaxed">{localProfile.summary || 'No summary added.'}</p>
             </div>
           </div>
         )}
@@ -294,13 +302,12 @@ export default function ProfilePage() {
         onUpdate={(items) => saveSection('projects', items)}
         getItemTitle={(item) => item.name || 'Untitled Project'}
         getItemSubtitle={(item) => item.techStack?.join(', ') || ''}
-        createEmpty={() => ({ name: '', description: '', url: '', techStack: [], bullets: [], startDate: '', endDate: '' })}
+        createEmpty={() => ({ name: '', description: '', url: '', techStack: [], bullets: [] })}
         renderForm={(item, onChange) => (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InputField label="Project Name" value={item.name} onChange={(v) => onChange({ name: v })} placeholder="e.g. Scribe.ai" />
             <InputField label="URL" value={item.url || ''} onChange={(v) => onChange({ url: v })} placeholder="https://github.com/..." />
-            <CustomDatePicker label="Start Date" value={item.startDate || ''} onChange={(v) => onChange({ startDate: v })} mode="month" />
-            <CustomDatePicker label="End Date" value={item.endDate || ''} onChange={(v) => onChange({ endDate: v })} mode="month" />
+
             <div className="col-span-full">
               <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Tech Stack (comma separated)</label>
               <input type="text" value={item.techStack?.join(', ') || ''} onChange={(e) => onChange({ techStack: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} placeholder="React, Node.js, Typescript"
@@ -310,6 +317,16 @@ export default function ProfilePage() {
               <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Description</label>
               <textarea value={item.description || ''} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder="What does this project do?"
                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all resize-none" />
+            </div>
+            <div className="col-span-full">
+              <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Bullets (one per line)</label>
+              <textarea 
+                value={item.bullets?.join('\n') || ''} 
+                onChange={(e) => onChange({ bullets: e.target.value.split('\n').map(s => s.trim()).filter(Boolean) })} 
+                rows={4} 
+                placeholder="• High-impact results..."
+                className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all resize-none" 
+              />
             </div>
           </div>
         )}

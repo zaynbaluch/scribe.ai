@@ -8,22 +8,34 @@ import re
 router = APIRouter(prefix="/ai", tags=["Resume Parsing"])
 
 class ParsedSkill(BaseModel):
-    name: str
-    category: str
+    name: Optional[str] = None
+    category: Optional[str] = "Other"
 
 class ParsedExperience(BaseModel):
-    company: str
-    title: str
-    startDate: str
-    endDate: str
-    description: str
+    company: Optional[str] = None
+    title: Optional[str] = None
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+    description: Optional[str] = None
+    bullets: List[str] = []
 
 class ParsedEducation(BaseModel):
-    institution: str
-    degree: str
-    field: str
-    startDate: str
-    endDate: str
+    institution: Optional[str] = None
+    degree: Optional[str] = None
+    field: Optional[str] = None
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+
+class ParsedProject(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    techStack: List[str] = []
+    bullets: List[str] = []
+
+class ParsedCertification(BaseModel):
+    name: Optional[str] = None
+    issuer: Optional[str] = None
+    date: Optional[str] = None
 
 class ParseResumeResponse(BaseModel):
     summary: Optional[str] = None
@@ -32,8 +44,8 @@ class ParseResumeResponse(BaseModel):
     experiences: List[ParsedExperience] = []
     education: List[ParsedEducation] = []
     skills: List[ParsedSkill] = []
-    projects: list = []
-    certifications: list = []
+    projects: List[ParsedProject] = []
+    certifications: List[ParsedCertification] = []
     rawText: str
     confidence: float
 
@@ -59,19 +71,23 @@ async def parse_resume(file: UploadFile = File(...)):
 
         system = (
             "You are an expert resume parser. Extract structured data from the following resume text. "
-            "Return ONLY a valid JSON object. Do not include markdown formatting or explanations. "
+            "CRITICAL INSTRUCTIONS:\n"
+            "1. Use EXACT WORDS from the resume for summaries, descriptions, and bullet points. Do not paraphrase or summarize unless the information is extremely long or missing.\n"
+            "2. Map 'About Me', 'Professional Profile', or 'Personal Statement' sections to the 'summary' field.\n"
+            "3. DO NOT invent false details. If a field is missing, use null or empty list.\n"
+            "4. DO NOT include dates for projects.\n"
+            "5. Return ONLY a valid JSON object. No markdown, no explanations.\n\n"
             "JSON structure must match:\n"
             "{\n"
             "  \"summary\": \"string\",\n"
             "  \"headline\": \"string\",\n"
             "  \"phone\": \"string\",\n"
-            "  \"experiences\": [{\"company\": \"str\", \"title\": \"str\", \"startDate\": \"str\", \"endDate\": \"str\", \"description\": \"str\"}],\n"
+            "  \"experiences\": [{\"company\": \"str\", \"title\": \"str\", \"startDate\": \"str\", \"endDate\": \"str\", \"description\": \"str\", \"bullets\": [\"str\"]}],\n"
             "  \"education\": [{\"institution\": \"str\", \"degree\": \"str\", \"field\": \"str\", \"startDate\": \"str\", \"endDate\": \"str\"}],\n"
             "  \"skills\": [{\"name\": \"str\", \"category\": \"str\"}],\n"
             "  \"projects\": [{\"name\": \"str\", \"description\": \"str\", \"techStack\": [\"str\"]}],\n"
             "  \"certifications\": [{\"name\": \"str\", \"issuer\": \"str\", \"date\": \"str\"}]\n"
             "}\n"
-            "If a field is missing, use null or an empty list. Ensure dates are in YYYY-MM-DD or readable format."
         )
         
         prompt = f"Resume Text:\n\n{text[:6000]}" # Limit to 6000 chars for context window

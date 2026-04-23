@@ -3,6 +3,17 @@ import logger from '../lib/logger';
 import { compilePdf, compileCoverLetterPdf } from './typst.service';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'docx';
 
+function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  } catch {
+    return dateStr || '';
+  }
+}
+
 /**
  * Export a resume as PDF via Typst compilation.
  */
@@ -87,7 +98,7 @@ export async function exportDocx(userId: string, resumeId: string): Promise<Buff
             new TextRun({ text: ` — ${exp.company || ''}`, size: 21, font: 'Calibri' }),
           ],
         }));
-        const dateStr = [exp.startDate, exp.current ? 'Present' : exp.endDate].filter(Boolean).join(' - ');
+        const dateStr = [formatDate(exp.startDate), exp.current ? 'Present' : formatDate(exp.endDate)].filter(Boolean).join(' - ');
         if (dateStr) {
           sections.push(new Paragraph({
             children: [new TextRun({ text: dateStr, size: 18, color: '888888', font: 'Calibri' })],
@@ -113,6 +124,7 @@ export async function exportDocx(userId: string, resumeId: string): Promise<Buff
           children: [
             new TextRun({ text: degree, bold: true, size: 21, font: 'Calibri' }),
             new TextRun({ text: ` — ${edu.institution || ''}`, size: 21, font: 'Calibri' }),
+            new TextRun({ text: ` (${formatDate(edu.startDate)}${edu.endDate ? ' - ' + formatDate(edu.endDate) : ''})`, size: 18, color: '888888', font: 'Calibri' }),
           ],
         }));
         sections.push(new Paragraph({ spacing: { after: 80 } }));
@@ -138,6 +150,14 @@ export async function exportDocx(userId: string, resumeId: string): Promise<Buff
           sections.push(new Paragraph({
             children: [new TextRun({ text: proj.description, size: 20, font: 'Calibri' })],
           }));
+        }
+        for (const bullet of (proj.bullets || [])) {
+          if (bullet) {
+            sections.push(new Paragraph({
+              children: [new TextRun({ text: bullet, size: 20, font: 'Calibri' })],
+              bullet: { level: 0 },
+            }));
+          }
         }
         sections.push(new Paragraph({ spacing: { after: 80 } }));
       }
@@ -186,7 +206,7 @@ export async function exportTxt(userId: string, resumeId: string): Promise<strin
       lines.push('-'.repeat(40));
       for (const exp of profile.experiences) {
         lines.push(`${exp.title} — ${exp.company}`);
-        const dateStr = [exp.startDate, exp.current ? 'Present' : exp.endDate].filter(Boolean).join(' - ');
+        const dateStr = [formatDate(exp.startDate), exp.current ? 'Present' : formatDate(exp.endDate)].filter(Boolean).join(' - ');
         if (dateStr) lines.push(dateStr);
         for (const bullet of (exp.bullets || [])) { if (bullet) lines.push(`  * ${bullet}`); }
         lines.push('');
@@ -197,7 +217,7 @@ export async function exportTxt(userId: string, resumeId: string): Promise<strin
       lines.push('EDUCATION');
       lines.push('-'.repeat(40));
       for (const edu of profile.education) {
-        lines.push(`${edu.degree}${edu.field ? ' in ' + edu.field : ''} — ${edu.institution}`);
+        lines.push(`${edu.degree}${edu.field ? ' in ' + edu.field : ''} — ${edu.institution} (${formatDate(edu.startDate)}${edu.endDate ? ' - ' + formatDate(edu.endDate) : ''})`);
       }
       lines.push('');
     }

@@ -11,6 +11,17 @@ interface ResumePreviewProps {
   customStyles: Record<string, any>;
 }
 
+function formatDate(dateStr: string) {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  } catch {
+    return dateStr;
+  }
+}
+
 export default function ResumePreview({ profile, templateId, sectionOrder, sectionVisibility, customStyles }: ResumePreviewProps) {
   const [zoom, setZoom] = useState(0.7);
 
@@ -69,7 +80,7 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
                 <img src={profile.imageUrl} alt="Profile" className="w-14 h-14 rounded-full object-cover border-2 border-white/20 flex-shrink-0" />
               )}
               <div>
-                <div className="text-xl font-bold text-white">{profile.name || 'Your Name'}</div>
+                <div className="text-xl font-bold text-white">{profile?.name || 'Your Name'}</div>
                 {profile.headline && <div className="text-sm text-white/80 mt-0.5">{profile.headline}</div>}
                 <div className="text-xs text-white/60 mt-1">{[profile.email, profile.phone, profile.location, profile.website].filter(Boolean).join(' | ')}</div>
               </div>
@@ -82,7 +93,7 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
                     <img src={profile.imageUrl} alt="Profile" className="w-14 h-14 rounded-full object-cover border border-gray-300 flex-shrink-0" />
                   )}
                   <div>
-                    <div className="text-2xl font-bold text-gray-900">{profile.name || 'Your Name'}</div>
+                    <div className="text-2xl font-bold text-gray-900">{profile?.name || 'Your Name'}</div>
                     {profile.headline && <div className="text-sm text-gray-500 italic mt-0.5">{profile.headline}</div>}
                   </div>
                 </div>
@@ -100,7 +111,7 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
                 <img src={profile.imageUrl} alt="Profile" className="w-10 h-10 rounded-full object-cover border border-gray-200 flex-shrink-0" />
               )}
               <div>
-                <div className="text-lg font-bold" style={{ color: accentColor }}>{profile.name || 'Your Name'}</div>
+                <div className="text-lg font-bold" style={{ color: accentColor }}>{profile?.name || 'Your Name'}</div>
                 {profile.headline && <div className="text-xs text-gray-500 mt-0.5">{profile.headline}</div>}
                 <div className="text-[9px] text-gray-400 mt-1">{[profile.email, profile.phone, profile.location].filter(Boolean).join(' | ')}</div>
               </div>
@@ -108,7 +119,7 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
           ) : templateId === 'minimal-04' ? (
             <div className="mb-3 flex justify-between items-start">
               <div>
-                <div className="text-2xl font-light tracking-wide text-gray-800">{profile.name || 'Your Name'}</div>
+                <div className="text-2xl font-light tracking-wide text-gray-800">{profile?.name || 'Your Name'}</div>
                 {profile.headline && <div className="text-sm text-gray-400 mt-0.5">{profile.headline}</div>}
                 <div className="text-xs text-gray-400 mt-1">{[profile.email, profile.phone, profile.location, profile.website].filter(Boolean).join(' | ')}</div>
               </div>
@@ -188,7 +199,7 @@ function renderSections(order: string[], profile: any, vis: Record<string, boole
                   <span className="text-[10px] font-bold">{exp.title}</span>
                   {exp.company && <span className="text-[10px] text-gray-500"> — {exp.company}</span>}
                 </div>
-                <span className="text-[9px] text-gray-400">{exp.startDate}{exp.endDate ? ` - ${exp.endDate}` : exp.current ? ' - Present' : ''}</span>
+                <span className="text-[9px] text-gray-400">{formatDate(exp.startDate)}{exp.endDate ? ` - ${formatDate(exp.endDate)}` : exp.current ? ' - Present' : ''}</span>
               </div>
               {exp.bullets?.map((b: string, j: number) => b && (
                 <div key={j} className="text-[9px] text-gray-600 ml-2">• {b}</div>
@@ -210,7 +221,7 @@ function renderSections(order: string[], profile: any, vis: Record<string, boole
                 <span className="text-[10px] font-bold">{e.degree}{e.field ? ` in ${e.field}` : ''}</span>
                 <span className="text-[10px] text-gray-500"> — {e.institution}</span>
               </div>
-              <span className="text-[9px] text-gray-400">{e.startDate}{e.endDate ? ` - ${e.endDate}` : ''}</span>
+              <span className="text-[9px] text-gray-400">{formatDate(e.startDate)}{e.endDate ? ` - ${formatDate(e.endDate)}` : ''}</span>
             </div>
           ))}
         </SectionBlock>;
@@ -238,10 +249,10 @@ function renderSections(order: string[], profile: any, vis: Record<string, boole
         return <SectionBlock key={section} title="Projects" accentColor={accent} templateId={templateId}>
           {visibleProjects.map((p: any, i: number) => (
             <div key={i} className="mb-1.5">
-              <div className="flex justify-between items-baseline">
+              <div className="flex flex-col mb-0.5">
                 <span className="text-[10px] font-bold">{p.name}</span>
                 {p.techStack?.length > 0 && (
-                  <span className="text-[8px] text-gray-400 italic">{p.techStack.join(', ')}</span>
+                  <span className="text-[8px] text-gray-400 italic leading-tight">{p.techStack.join(', ')}</span>
                 )}
               </div>
               {p.description && <div className="text-[9px] text-gray-600 leading-tight">{p.description}</div>}

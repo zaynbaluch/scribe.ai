@@ -1,7 +1,7 @@
 // Modern Clean — Single-column, accent-colored dividers, pill-style skills
 #import "../shared/lib.typ": *
 
-#let data = json("data.json")
+#let data = json.decode(sys.inputs.data)
 #let styles = data.at("styles", default: (:))
 #let accent = rgb(styles.at("accentColor", default: "#7C3AED"))
 #let font = styles.at("font", default: "Inter")
@@ -113,7 +113,7 @@
         entry-header(
           p.at("name", default: ""),
           if p.at("techStack", default: ()).len() > 0 { p.techStack.join(", ") } else { none },
-          if p.at("url", default: "") != "" { p.url } else { "" },
+          "",
           accent: accent,
         )
         if p.at("description", default: "") != "" {
