@@ -368,7 +368,7 @@ export async function exportJson(userId: string, resumeId: string): Promise<any>
  */
 export async function exportCoverLetterPdf(userId: string, id: string): Promise<Buffer> {
   const cl = await getCoverLetterWithValidation(userId, id);
-  const resume = await prisma.resume.findUnique({ where: { id: cl.resumeId } });
+  const resume = await prisma.resume.findUnique({ where: { id: cl.resumeId || undefined } });
   const profile = (resume?.baseProfileSnapshot as any) || {};
 
   return compileCoverLetterPdf('default', {
@@ -382,7 +382,7 @@ export async function exportCoverLetterPdf(userId: string, id: string): Promise<
  */
 export async function exportCoverLetterDocx(userId: string, id: string): Promise<Buffer> {
   const cl = await getCoverLetterWithValidation(userId, id);
-  const resume = await prisma.resume.findUnique({ where: { id: cl.resumeId } });
+  const resume = await prisma.resume.findUnique({ where: { id: cl.resumeId || undefined } });
   const profile = (resume?.baseProfileSnapshot as any) || {};
 
   const sections: any[] = [];
@@ -439,7 +439,7 @@ export async function exportCoverLetterDocx(userId: string, id: string): Promise
  */
 export async function exportCoverLetterTxt(userId: string, id: string): Promise<string> {
   const cl = await getCoverLetterWithValidation(userId, id);
-  const resume = await prisma.resume.findUnique({ where: { id: cl.resumeId } });
+  const resume = await prisma.resume.findUnique({ where: { id: cl.resumeId || undefined } });
   const profile = (resume?.baseProfileSnapshot as any) || {};
 
   const lines: string[] = [];
