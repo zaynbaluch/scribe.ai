@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Calendar, User, DollarSign, FileText, Mail, Trash2 } from 'lucide-react';
 import { type AppStatus } from '@/stores/application-store';
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api-client';
-import { FileText, Calendar, Building2, Trash2, PenLine } from 'lucide-react';
+import { FileText, Calendar, Building2, Trash2, PenLine, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import CreateCoverLetterModal from '@/components/cover-letter/create-modal';
@@ -71,9 +71,9 @@ export default function CoverLettersPage() {
         </button>
       </div>
 
-      <div className="flex flex-1 gap-6 min-h-0">
+      <div className="flex flex-1 gap-6 min-h-0 relative">
         {/* List Panel */}
-        <div className="w-[350px] flex flex-col gap-3 overflow-y-auto pr-2 border-r border-[var(--grid-line)]">
+        <div className={`w-full md:w-[350px] flex flex-col gap-3 overflow-y-auto md:pr-2 md:border-r border-[var(--grid-line)] ${selectedLetter ? 'hidden md:flex' : 'flex'}`}>
           {letters.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-6 text-center border border-dashed border-[var(--border-subtle)] rounded-xl bg-[var(--bg-elevated)]/30">
               <PenLine size={24} className="text-[var(--text-muted)] mb-3" />
@@ -125,11 +125,17 @@ export default function CoverLettersPage() {
         </div>
 
         {/* View Panel */}
-        <div className="flex-1 bg-[var(--bg-elevated)]/30 rounded-xl border border-[var(--border-subtle)] overflow-hidden flex flex-col">
+        <div className={`flex-1 bg-[var(--bg-elevated)]/30 rounded-xl border border-[var(--border-subtle)] overflow-hidden flex flex-col ${selectedLetter ? 'flex' : 'hidden md:flex'}`}>
           {selectedLetter ? (
             <>
-              <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] flex justify-between items-center">
-                <h2 className="font-medium text-sm">{selectedLetter.title}</h2>
+              <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] flex flex-wrap gap-3 justify-between items-center">
+                <div className="flex items-center gap-3 min-w-0">
+                  <button onClick={() => setSelectedLetter(null)} 
+                    className="md:hidden p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] flex-shrink-0">
+                    <ArrowLeft size={18} />
+                  </button>
+                  <h2 className="font-medium text-sm truncate">{selectedLetter.title}</h2>
+                </div>
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => router.push(`/cover-letters/${selectedLetter.id}`)}

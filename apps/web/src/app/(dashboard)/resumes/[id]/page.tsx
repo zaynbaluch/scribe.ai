@@ -120,33 +120,33 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
     <div className="-mt-4 md:-mt-6 -mx-4 md:-mx-6 h-[calc(100vh-56px)] flex flex-col bg-[var(--bg-base)]">
       {/* Editor Topbar */}
       <div className="relative z-50 flex items-center justify-between px-4 py-2.5 border-b border-[var(--grid-line-strong)] bg-[var(--bg-surface-transparent)] backdrop-blur-md">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
           <button onClick={() => router.push('/resumes')}
-            className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors">
+            className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors flex-shrink-0">
             <ArrowLeft size={18} />
           </button>
           <input type="text" value={localName} onChange={(e) => handleNameChange(e.target.value)}
-            className="bg-transparent text-lg font-display tracking-tight border-none outline-none focus:ring-0 w-64" />
+            className="bg-transparent text-base md:text-lg font-display tracking-tight border-none outline-none focus:ring-0 w-full max-w-[120px] md:max-w-64 truncate" />
           {isSaving && (
-            <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
-              <Save size={12} className="animate-pulse" /> Saving...
+            <span className="text-[10px] md:text-xs text-[var(--text-muted)] flex items-center gap-1 flex-shrink-0">
+              <Save size={10} className="animate-pulse" /> <span className="hidden xs:inline">Saving...</span>
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 md:gap-3 flex-shrink-0">
           {(localAtsScore ?? activeResume.atsScore) != null && (
-            <div className={`text-xs font-mono font-medium px-2 py-1 rounded-md border ${
+            <div className={`text-[10px] md:text-xs font-mono font-medium px-1.5 md:py-1 rounded-md border ${
               (localAtsScore ?? activeResume.atsScore)! >= 80 ? 'text-[var(--success)] border-[var(--success)]/30 bg-[var(--success)]/10'
                 : (localAtsScore ?? activeResume.atsScore)! >= 60 ? 'text-[var(--warning)] border-[var(--warning)]/30 bg-[var(--warning)]/10'
                 : 'text-[var(--danger)] border-[var(--danger)]/30 bg-[var(--danger)]/10'
             }`}>
-              ATS {localAtsScore ?? activeResume.atsScore}
+              <span className="hidden xs:inline">ATS </span>{localAtsScore ?? activeResume.atsScore}
             </div>
           )}
           <button onClick={() => setAtsOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors">
+            className="flex items-center gap-1 px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-medium border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors">
             <Shield size={14} />
-            ATS Check
+            <span className="hidden sm:inline">ATS Check</span>
           </button>
           <ExportDropdown resumeId={id} atsScore={localAtsScore ?? activeResume.atsScore ?? undefined} />
         </div>

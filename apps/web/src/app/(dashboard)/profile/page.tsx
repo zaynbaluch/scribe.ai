@@ -123,15 +123,15 @@ export default function ProfilePage() {
   return (
     <div className="max-w-[900px] mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl tracking-tight">Your Profile</h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            Manage your personal data to generate tailored resumes.
+            Manage your personal data for tailored resumes.
           </p>
         </div>
         <button onClick={() => setImportOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border-subtle)] text-sm font-medium hover:bg-[var(--bg-elevated)] hover:border-[var(--border-focus)] transition-all">
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-sm font-medium hover:bg-[var(--bg-elevated)] transition-all sm:w-auto w-full">
           <Upload size={16} />
           Import Resume
         </button>

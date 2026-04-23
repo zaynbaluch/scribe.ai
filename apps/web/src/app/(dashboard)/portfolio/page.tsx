@@ -122,34 +122,40 @@ export default function PortfolioPage() {
         {/* Vanity URL */}
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5">
           <h3 className="text-sm font-semibold mb-3">Portfolio URL</h3>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-[var(--text-muted)] whitespace-nowrap">{typeof window !== 'undefined' ? window.location.origin : ''}/p/</span>
-            <input value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-              placeholder="your-name" maxLength={40}
-              className="flex-1 px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] text-sm font-mono focus:outline-none focus:border-[var(--border-focus)]" />
-            <button onClick={saveSlug}
-              className="px-3 py-2 rounded-lg text-xs font-medium bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:opacity-90 transition-opacity">
-              Save
-            </button>
-            {config.slug && (
-              <>
-                <button onClick={copyUrl}
-                  className="p-2 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors">
-                  {copied ? <Check size={14} className="text-[var(--success)]" /> : <Copy size={14} />}
-                </button>
-                <a href={`/p/${config.slug}`} target="_blank" rel="noopener noreferrer"
-                  className="p-2 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors">
-                  <ExternalLink size={14} />
-                </a>
-              </>
-            )}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex-1 flex items-center gap-2 bg-[var(--bg-elevated)] px-3 py-2 rounded-lg border border-[var(--border-subtle)] focus-within:border-[var(--border-focus)] transition-colors">
+              <span className="text-[10px] md:text-xs text-[var(--text-muted)] whitespace-nowrap hidden xs:inline">
+                {typeof window !== 'undefined' ? window.location.origin.replace(/^https?:\/\//, '') : ''}/p/
+              </span>
+              <input value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                placeholder="your-slug" maxLength={40}
+                className="flex-1 bg-transparent text-sm font-mono focus:outline-none min-w-0" />
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={saveSlug}
+                className="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-medium bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:opacity-90 transition-opacity">
+                Save
+              </button>
+              {config.slug && (
+                <div className="flex items-center gap-2">
+                  <button onClick={copyUrl}
+                    className="p-2 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors">
+                    {copied ? <Check size={14} className="text-[var(--success)]" /> : <Copy size={14} />}
+                  </button>
+                  <a href={`/p/${config.slug}`} target="_blank" rel="noopener noreferrer"
+                    className="p-2 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors">
+                    <ExternalLink size={14} />
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Template Selection */}
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5">
           <h3 className="text-sm font-semibold mb-3">Template</h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {TEMPLATES.map((t) => (
               <button key={t.id}
                 onClick={() => saveConfig({ templateId: t.id })}
@@ -168,7 +174,7 @@ export default function PortfolioPage() {
         {/* Colors */}
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-1.5"><Palette size={14} /> Colors</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] mb-1.5 block">Primary</label>
               <div className="flex items-center gap-2">
@@ -201,7 +207,7 @@ export default function PortfolioPage() {
         {/* Section Visibility */}
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5">
           <h3 className="text-sm font-semibold mb-3">Visible Sections</h3>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {SECTIONS.map((s) => {
               const isOn = config[s.key as keyof PortfolioConfig] as boolean;
               return (
