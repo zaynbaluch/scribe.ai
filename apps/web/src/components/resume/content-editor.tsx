@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Plus, Trash2, Eye, EyeOff, Calendar } from 'lucide-react';
 import CustomDatePicker from '@/components/ui/custom-date-picker';
+import BulletsEditor from '@/components/profile/bullets-editor';
 
 interface ContentEditorProps {
   profile: any;
@@ -122,47 +123,27 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Bullets</label>
-                  <div className="space-y-2">
-                    {exp.bullets?.map((bullet: string, bIdx: number) => (
-                      <div key={bIdx} className="flex gap-2">
-                        <textarea 
-                          value={bullet}
-                          rows={2}
-                          onChange={(e) => {
-                            const newExps = [...profile.experiences];
-                            const exp = { ...newExps[idx] };
-                            const bullets = [...(exp.bullets || [])];
-                            bullets[bIdx] = e.target.value;
-                            exp.bullets = bullets;
-                            newExps[idx] = exp;
-                            updateProfile('experiences', newExps);
-                          }}
-                          className="flex-1 px-2 py-1.5 rounded bg-[var(--bg-elevated)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--gradient-2)] resize-none"
-                        />
-                        <button 
-                          onClick={() => {
-                            const newExps = [...profile.experiences];
-                            newExps[idx].bullets.splice(bIdx, 1);
-                            updateProfile('experiences', newExps);
-                          }}
-                          className="p-1 text-[var(--text-muted)] hover:text-red-500"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    ))}
-                    <button 
-                      onClick={() => {
-                        const newExps = [...profile.experiences];
-                        newExps[idx].bullets = [...(newExps[idx].bullets || []), ''];
-                        updateProfile('experiences', newExps);
-                      }}
-                      className="text-[10px] text-[var(--gradient-2)] hover:underline flex items-center gap-1"
-                    >
-                      <Plus size={10} /> Add Bullet
-                    </button>
-                  </div>
+                  <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Description</label>
+                  <textarea 
+                    value={exp.description || ''} 
+                    onChange={(e) => {
+                      const newExps = [...profile.experiences];
+                      newExps[idx].description = e.target.value;
+                      updateProfile('experiences', newExps);
+                    }}
+                    rows={2}
+                    className="w-full px-2 py-1.5 rounded bg-[var(--bg-elevated)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--gradient-2)] resize-none"
+                  />
+                </div>
+                <div>
+                  <BulletsEditor 
+                    bullets={exp.bullets || []} 
+                    onChange={(bullets) => {
+                      const newExps = [...profile.experiences];
+                      newExps[idx].bullets = bullets;
+                      updateProfile('experiences', newExps);
+                    }} 
+                  />
                 </div>
               </div>
             ))}
@@ -237,47 +218,14 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Key Features / Bullets</label>
-                  <div className="space-y-2">
-                    {proj.bullets?.map((bullet: string, bIdx: number) => (
-                      <div key={bIdx} className="flex gap-2">
-                        <textarea 
-                          value={bullet}
-                          rows={2}
-                          onChange={(e) => {
-                            const newProjs = [...profile.projects];
-                            const projItem = { ...newProjs[idx] };
-                            const bullets = [...(projItem.bullets || [])];
-                            bullets[bIdx] = e.target.value;
-                            projItem.bullets = bullets;
-                            newProjs[idx] = projItem;
-                            updateProfile('projects', newProjs);
-                          }}
-                          className="flex-1 px-2 py-1.5 rounded bg-[var(--bg-elevated)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--gradient-2)] resize-none"
-                        />
-                        <button 
-                          onClick={() => {
-                            const newProjs = [...profile.projects];
-                            newProjs[idx].bullets.splice(bIdx, 1);
-                            updateProfile('projects', newProjs);
-                          }}
-                          className="p-1 text-[var(--text-muted)] hover:text-red-500"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    ))}
-                    <button 
-                      onClick={() => {
-                        const newProjs = [...profile.projects];
-                        newProjs[idx].bullets = [...(newProjs[idx].bullets || []), ''];
-                        updateProfile('projects', newProjs);
-                      }}
-                      className="text-[10px] text-[var(--gradient-2)] hover:underline flex items-center gap-1"
-                    >
-                      <Plus size={10} /> Add Bullet
-                    </button>
-                  </div>
+                  <BulletsEditor 
+                    bullets={proj.bullets || []} 
+                    onChange={(bullets) => {
+                      const newProjs = [...profile.projects];
+                      newProjs[idx].bullets = bullets;
+                      updateProfile('projects', newProjs);
+                    }} 
+                  />
                 </div>
               </div>
             ))}

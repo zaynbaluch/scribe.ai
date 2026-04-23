@@ -19,11 +19,9 @@ export async function parseResume(fileBuffer: Buffer, mimeType: string): Promise
       body: formData,
     });
 
-    if (!response.ok) {
-      throw new Error(`AI service returned ${response.status}`);
-    }
-
-    return await response.json();
+    const result = await response.json();
+    logger.info({ result }, 'AI service response received');
+    return result;
   } catch (err) {
     logger.warn({ err }, 'AI service unavailable, using basic fallback parsing');
     return basicFallbackParse(fileBuffer, mimeType);

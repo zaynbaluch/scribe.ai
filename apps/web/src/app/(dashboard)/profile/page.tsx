@@ -8,6 +8,7 @@ import CompletenessBar from '@/components/profile/completeness-bar';
 import SectionEditor from '@/components/profile/section-editor';
 import SkillTags from '@/components/profile/skill-tags';
 import ImportModal from '@/components/profile/import-modal';
+import BulletsEditor from '@/components/profile/bullets-editor';
 import CustomDatePicker from '@/components/ui/custom-date-picker';
 import Image from 'next/image';
 
@@ -86,6 +87,7 @@ export default function ProfilePage() {
   };
 
   const handleImported = (parsed: any) => {
+    console.log('Frontend received parsed data:', parsed);
     const merged: any = {};
     if (parsed.name) merged.name = parsed.name;
     if (parsed.summary) merged.summary = parsed.summary;
@@ -255,6 +257,13 @@ export default function ProfilePage() {
               <textarea value={item.description || ''} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder="Describe your role and key achievements..."
                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all resize-none" />
             </div>
+            <div className="col-span-full mt-2">
+              <BulletsEditor 
+                label="Key Achievements (Bullets)" 
+                bullets={item.bullets || []} 
+                onChange={(bullets) => onChange({ bullets })} 
+              />
+            </div>
           </div>
         )}
       />
@@ -341,14 +350,11 @@ export default function ProfilePage() {
               <textarea value={item.description || ''} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder="What does this project do?"
                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all resize-none" />
             </div>
-            <div className="col-span-full">
-              <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Bullets (one per line)</label>
-              <textarea 
-                value={item.bullets?.join('\n') || ''} 
-                onChange={(e) => onChange({ bullets: e.target.value.split('\n').map(s => s.trim()).filter(Boolean) })} 
-                rows={4} 
-                placeholder="• High-impact results..."
-                className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all resize-none" 
+            <div className="col-span-full mt-2">
+              <BulletsEditor 
+                label="Key Features (Bullets)" 
+                bullets={item.bullets || []} 
+                onChange={(bullets) => onChange({ bullets })} 
               />
             </div>
           </div>

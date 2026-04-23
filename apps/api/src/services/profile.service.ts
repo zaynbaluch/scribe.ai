@@ -2,6 +2,12 @@ import prisma from '../lib/prisma';
 import logger from '../lib/logger';
 import { UpdateProfileInput } from '../schemas/profile.schema';
 
+function safeDate(dateStr: any): Date | null {
+  if (!dateStr) return null;
+  const date = new Date(dateStr);
+  return isNaN(date.getTime()) ? null : date;
+}
+
 /**
  * Get the full profile for a user, including all nested sections.
  */
@@ -84,8 +90,8 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
             title: exp.title,
             company: exp.company,
             location: exp.location || null,
-            startDate: new Date(exp.startDate),
-            endDate: exp.endDate ? new Date(exp.endDate) : null,
+            startDate: safeDate(exp.startDate),
+            endDate: safeDate(exp.endDate),
             current: exp.current || false,
             description: exp.description || null,
             bullets: exp.bullets || [],
@@ -105,8 +111,8 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
             institution: edu.institution,
             degree: edu.degree,
             field: edu.field || null,
-            startDate: new Date(edu.startDate),
-            endDate: edu.endDate ? new Date(edu.endDate) : null,
+            startDate: safeDate(edu.startDate),
+            endDate: safeDate(edu.endDate),
             gpa: edu.gpa || null,
             honors: edu.honors || null,
             description: edu.description || null,
@@ -144,8 +150,8 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
             url: proj.url || null,
             techStack: proj.techStack || [],
             bullets: proj.bullets || [],
-            startDate: proj.startDate ? new Date(proj.startDate) : null,
-            endDate: proj.endDate ? new Date(proj.endDate) : null,
+            startDate: safeDate(proj.startDate),
+            endDate: safeDate(proj.endDate),
             orderIndex: proj.orderIndex ?? i,
           })),
         });
@@ -161,8 +167,8 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
             profileId,
             name: cert.name,
             issuer: cert.issuer,
-            date: cert.date ? new Date(cert.date) : null,
-            expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
+            date: safeDate(cert.date),
+            expiryDate: safeDate(cert.expiryDate),
             url: cert.url || null,
             orderIndex: cert.orderIndex ?? i,
           })),

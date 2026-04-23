@@ -4,6 +4,8 @@ from typing import List, Optional
 import PyPDF2
 from io import BytesIO
 import re
+import json
+import logging
 
 router = APIRouter(prefix="/ai", tags=["Resume Parsing"])
 
@@ -71,6 +73,8 @@ async def parse_resume(file: UploadFile = File(...)):
         if not text.strip():
             raise HTTPException(status_code=400, detail="Could not extract text from PDF")
 
+        logger = logging.getLogger("uvicorn")
+
         from app.providers.factory import get_llm_provider
         llm = get_llm_provider()
 
@@ -78,7 +82,7 @@ async def parse_resume(file: UploadFile = File(...)):
             "You are an expert resume parser. Extract structured data from the following resume text. "
             "CRITICAL INSTRUCTIONS:\n"
             "1. EXTRACT NAME: The candidate's name is at the VERY TOP of the resume (first 1-3 lines). It can be of any cultural background (Western, Muslim, African, Asian, etc.). If you see a large text at the start, it is likely the name. DO NOT leave this empty. Infer it from the context if not explicitly labeled.\n"
-            "2. PHONE ACCURACY: The 'phone' field MUST ONLY contain a valid telephone number. STRICT RULE: DO NOT put an email address in the phone field. If you find an email, put it in the 'email' field. If no phone number is found, leave the 'phone' field as null. Support all international formats.\n"
+            "2. PHONE ACCURACY: The 'phone' field MUST ONLY contain a valid telephone number. STRICT RULE: DO NOT put an email address in the phone field. If you find an email, put it in the 'email' field. If no phone number is found, leave the 'phone' field as null. NOTE: Sometimes PDF parsing attaches the phone number to a preceding word (e.g., 'CERTIFICATIONS0333-1234567'). You MUST look for such patterns and extract just the phone number. Support all international formats.\n"
             "3. EDUCATION LOGIC: Split degrees into 'degree' (e.g. BS, MS, PhD, BBA) and 'field' (e.g. Computer Science, Business Administration). Do not repeat the field in the degree.\n"
             "4. SKILLS PRIORITY: Extract technical skills (languages, frameworks, tools, methodologies) FIRST. List them at the beginning of the skills array. Then include soft skills or inferred skills.\n"
             "5. SOCIAL LINKS: Extract LinkedIn, GitHub, and Website handles or URLs into their respective fields. Be thorough and search the entire header area.\n"
@@ -107,9 +111,7 @@ async def parse_resume(file: UploadFile = File(...)):
         raw_json = llm.generate(prompt, system=system, temperature=0.1)
         clean_json = re.sub(r'```json\s*(.*?)\s*```', r'\1', raw_json, flags=re.DOTALL).strip()
         
-        import json
-        import logging
-        logger = logging.getLogger("uvicorn")
+        logger.info(f"LLM Raw Output: {raw_json}")
         
         # More robust JSON cleaning
         json_start = clean_json.find('{')
@@ -119,6 +121,7 @@ async def parse_resume(file: UploadFile = File(...)):
         
         try:
             data = json.loads(clean_json)
+            logger.info(f"Parsed JSON Data: {data}")
         except json.JSONDecodeError as je:
             logger.error(f"Failed to parse JSON from LLM: {clean_json}")
             raise HTTPException(status_code=500, detail=f"Invalid JSON from AI: {str(je)}")
@@ -126,6 +129,18 @@ async def parse_resume(file: UploadFile = File(...)):
         # Post-processing to fix phone field if it contains an email
         phone = data.get("phone")
         email = data.get("email")
+        
+        # Regex fallback for phone if LLM failed
+        if not phone:
+            # Look for common phone patterns like 03xx-xxxxxxx or +xx xxx xxxxxxx
+            phone_match = re.search(r'(\+?\d[\d\s-]{7,15})', text)
+            if phone_match:
+                extracted_phone = phone_match.group(1).strip()
+                # Basic validation: ensure it's not an email or too short
+                if "@" not in extracted_phone and len(re.sub(r'\D', '', extracted_phone)) >= 7:
+                    phone = extracted_phone
+                    logger.info(f"Regex Fallback Phone Found: {phone}")
+
         if phone and "@" in phone:
             if not email:
                 email = phone
@@ -151,7 +166,6 @@ async def parse_resume(file: UploadFile = File(...)):
     except HTTPException as he:
         raise he
     except Exception as e:
-        import logging
         logger = logging.getLogger("uvicorn")
         logger.error(f"Resume parsing error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

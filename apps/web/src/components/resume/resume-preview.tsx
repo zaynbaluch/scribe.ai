@@ -142,8 +142,8 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
             </div>
           )}
 
-          {/* QR Code (Floating for non-minimal templates) */}
-          {(showQrCode ?? profile.showQrCode) !== false && templateId !== 'minimal-04' && templateId !== 'compact-03' && (
+          {/* QR Code (Floating) */}
+          {(showQrCode ?? profile.showQrCode) !== false && (
             <div className="absolute top-4 right-4 flex flex-col items-center gap-0.5 opacity-100 z-50">
               <div className="p-0.5 bg-white border border-gray-100 shadow-sm rounded-sm">
                 <img 
@@ -219,12 +219,12 @@ function renderSections(order: string[], profile: any, vis: Record<string, boole
                 </div>
                 <span className="text-[9px] text-gray-400">{formatDate(exp.startDate)}{exp.endDate ? ` - ${formatDate(exp.endDate)}` : exp.current ? ' - Present' : ''}</span>
               </div>
+              {exp.description && (
+                <div className="text-[9px] text-gray-600 mb-1">{exp.description}</div>
+              )}
               {exp.bullets?.map((b: string, j: number) => b && (
                 <div key={j} className="text-[9px] text-gray-600 ml-2">• {b}</div>
               ))}
-              {!exp.bullets?.length && exp.description && (
-                <div className="text-[9px] text-gray-600">{exp.description}</div>
-              )}
             </div>
           ))}
         </SectionBlock>;
