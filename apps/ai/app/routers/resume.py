@@ -38,9 +38,14 @@ class ParsedCertification(BaseModel):
     date: Optional[str] = None
 
 class ParseResumeResponse(BaseModel):
+    name: Optional[str] = None
     summary: Optional[str] = None
     headline: Optional[str] = None
     phone: Optional[str] = None
+    email: Optional[str] = None
+    linkedin: Optional[str] = None
+    github: Optional[str] = None
+    website: Optional[str] = None
     experiences: List[ParsedExperience] = []
     education: List[ParsedEducation] = []
     skills: List[ParsedSkill] = []
@@ -72,38 +77,69 @@ async def parse_resume(file: UploadFile = File(...)):
         system = (
             "You are an expert resume parser. Extract structured data from the following resume text. "
             "CRITICAL INSTRUCTIONS:\n"
-            "1. Use EXACT WORDS from the resume for summaries, descriptions, and bullet points. Do not paraphrase or summarize unless the information is extremely long or missing.\n"
-            "2. Map 'About Me', 'Professional Profile', or 'Personal Statement' sections to the 'summary' field.\n"
-            "3. DO NOT invent false details. If a field is missing, use null or empty list.\n"
-            "4. DO NOT include dates for projects.\n"
-            "5. Return ONLY a valid JSON object. No markdown, no explanations.\n\n"
-            "JSON structure must match:\n"
+            "1. EXTRACT NAME: The candidate's name is at the VERY TOP of the resume (first 1-3 lines). It can be of any cultural background (Western, Muslim, African, Asian, etc.). If you see a large text at the start, it is likely the name. DO NOT leave this empty. Infer it from the context if not explicitly labeled.\n"
+            "2. PHONE ACCURACY: The 'phone' field MUST ONLY contain a valid telephone number. STRICT RULE: DO NOT put an email address in the phone field. If you find an email, put it in the 'email' field. If no phone number is found, leave the 'phone' field as null. Support all international formats.\n"
+            "3. EDUCATION LOGIC: Split degrees into 'degree' (e.g. BS, MS, PhD, BBA) and 'field' (e.g. Computer Science, Business Administration). Do not repeat the field in the degree.\n"
+            "4. SKILLS PRIORITY: Extract technical skills (languages, frameworks, tools, methodologies) FIRST. List them at the beginning of the skills array. Then include soft skills or inferred skills.\n"
+            "5. SOCIAL LINKS: Extract LinkedIn, GitHub, and Website handles or URLs into their respective fields. Be thorough and search the entire header area.\n"
+            "6. EXPERIENCE: Use EXACT text for job titles and bullet points. Ensure the 'description' is a concise summary and 'bullets' contains the detailed points.\n"
+            "7. Return ONLY valid JSON.\n\n"
+            "JSON structure:\n"
             "{\n"
+            "  \"name\": \"string\",\n"
             "  \"summary\": \"string\",\n"
             "  \"headline\": \"string\",\n"
             "  \"phone\": \"string\",\n"
+            "  \"email\": \"string\",\n"
+            "  \"linkedin\": \"string\",\n"
+            "  \"github\": \"string\",\n"
+            "  \"website\": \"string\",\n"
             "  \"experiences\": [{\"company\": \"str\", \"title\": \"str\", \"startDate\": \"str\", \"endDate\": \"str\", \"description\": \"str\", \"bullets\": [\"str\"]}],\n"
             "  \"education\": [{\"institution\": \"str\", \"degree\": \"str\", \"field\": \"str\", \"startDate\": \"str\", \"endDate\": \"str\"}],\n"
             "  \"skills\": [{\"name\": \"str\", \"category\": \"str\"}],\n"
-            "  \"projects\": [{\"name\": \"str\", \"description\": \"str\", \"techStack\": [\"str\"]}],\n"
+            "  \"projects\": [{\"name\": \"str\", \"description\": \"str\", \"techStack\": [\"str\"], \"bullets\": [\"str\"]}],\n"
             "  \"certifications\": [{\"name\": \"str\", \"issuer\": \"str\", \"date\": \"str\"}]\n"
             "}\n"
         )
         
-        prompt = f"Resume Text:\n\n{text[:6000]}" # Limit to 6000 chars for context window
+        prompt = f"Resume Text:\n\n{text[:6000]}"
         
         raw_json = llm.generate(prompt, system=system, temperature=0.1)
-        
-        # Clean up JSON if LLM added markdown wrappers
         clean_json = re.sub(r'```json\s*(.*?)\s*```', r'\1', raw_json, flags=re.DOTALL).strip()
         
         import json
-        data = json.loads(clean_json)
+        import logging
+        logger = logging.getLogger("uvicorn")
+        
+        # More robust JSON cleaning
+        json_start = clean_json.find('{')
+        json_end = clean_json.rfind('}')
+        if json_start != -1 and json_end != -1:
+            clean_json = clean_json[json_start:json_end+1]
+        
+        try:
+            data = json.loads(clean_json)
+        except json.JSONDecodeError as je:
+            logger.error(f"Failed to parse JSON from LLM: {clean_json}")
+            raise HTTPException(status_code=500, detail=f"Invalid JSON from AI: {str(je)}")
+
+        # Post-processing to fix phone field if it contains an email
+        phone = data.get("phone")
+        email = data.get("email")
+        if phone and "@" in phone:
+            if not email:
+                email = phone
+            phone = None
         
         return ParseResumeResponse(
+            name=data.get("name"),
             summary=data.get("summary"),
             headline=data.get("headline"),
-            phone=data.get("phone"),
+            phone=phone,
+            email=email,
+            linkedin=data.get("linkedin"),
+            github=data.get("github"),
+            website=data.get("website"),
             experiences=data.get("experiences", []),
             education=data.get("education", []),
             skills=data.get("skills", []),
@@ -112,5 +148,10 @@ async def parse_resume(file: UploadFile = File(...)):
             rawText=text,
             confidence=0.9
         )
+    except HTTPException as he:
+        raise he
     except Exception as e:
+        import logging
+        logger = logging.getLogger("uvicorn")
+        logger.error(f"Resume parsing error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

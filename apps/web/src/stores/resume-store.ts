@@ -25,6 +25,7 @@ interface ResumeDetail {
   sectionOrder: string[];
   sectionVisibility: Record<string, boolean>;
   customStyles: Record<string, any>;
+  showQrCode: boolean;
   atsScore: number | null;
   matchScore: number | null;
   isTailored: boolean;

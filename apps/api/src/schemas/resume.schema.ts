@@ -31,6 +31,7 @@ export const createResumeSchema = z.object({
     .default(['summary', 'experience', 'skills', 'projects', 'education']),
   sectionVisibility: sectionVisibilitySchema.optional(),
   customStyles: customStylesSchema.optional(),
+  showQrCode: z.boolean().optional().default(true),
 });
 
 export const updateResumeSchema = z.object({
@@ -39,6 +40,7 @@ export const updateResumeSchema = z.object({
   sectionOrder: z.array(z.string()).optional(),
   sectionVisibility: sectionVisibilitySchema.optional(),
   customStyles: customStylesSchema.optional(),
+  showQrCode: z.boolean().optional(),
   baseProfileSnapshot: z.any().optional(),
 });
 

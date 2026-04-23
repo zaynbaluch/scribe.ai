@@ -80,6 +80,8 @@ const volunteerWorkSchema = z.object({
 // ─── Profile update schema (partial) ────────────────────────────────────────
 
 export const updateProfileSchema = z.object({
+  name: z.string().optional().nullable(),
+  email: z.string().optional().nullable(),
   summary: z.string().optional().nullable(),
   headline: z.string().optional().nullable(),
   location: z.string().optional().nullable(),
@@ -87,6 +89,8 @@ export const updateProfileSchema = z.object({
   website: z.string().optional().nullable(),
   linkedin: z.string().optional().nullable(),
   github: z.string().optional().nullable(),
+  imageUrl: z.string().optional().nullable(),
+  showQrCode: z.boolean().optional(),
   experiences: z.array(experienceSchema).optional(),
   education: z.array(educationSchema).optional(),
   skills: z.array(skillSchema).optional(),

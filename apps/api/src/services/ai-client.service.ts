@@ -41,11 +41,12 @@ async function basicFallbackParse(fileBuffer: Buffer, mimeType: string): Promise
     try {
       const pdfParseModule = await import('pdf-parse');
       const pdfParse = pdfParseModule.default || pdfParseModule;
-      const data = await (pdfParse as any)(fileBuffer);
-      rawText = data.text;
+      // Provide an empty options object to avoid some pdf-parse bugs
+      const data = await (pdfParse as any)(fileBuffer, { pagerender: (pageData: any) => pageData.text });
+      rawText = data.text || '';
     } catch (err) {
-      logger.error({ err }, 'PDF parsing failed');
-      throw new Error('Could not parse PDF file');
+      logger.error({ err }, 'Fallback PDF parsing failed, using empty text');
+      rawText = '';
     }
   } else {
     // For DOCX, just extract as text (basic)

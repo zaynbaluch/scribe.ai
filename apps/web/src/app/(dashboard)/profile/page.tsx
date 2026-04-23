@@ -41,6 +41,8 @@ export default function ProfilePage() {
 
   const savePersonalInfo = () => {
     saveProfile({
+      name: localProfile.name,
+      email: localProfile.email,
       headline: localProfile.headline,
       location: localProfile.location,
       phone: localProfile.phone,
@@ -85,9 +87,14 @@ export default function ProfilePage() {
 
   const handleImported = (parsed: any) => {
     const merged: any = {};
+    if (parsed.name) merged.name = parsed.name;
     if (parsed.summary) merged.summary = parsed.summary;
     if (parsed.headline) merged.headline = parsed.headline;
     if (parsed.phone) merged.phone = parsed.phone;
+    if (parsed.email) merged.email = parsed.email;
+    if (parsed.linkedin) merged.linkedin = parsed.linkedin;
+    if (parsed.github) merged.github = parsed.github;
+    if (parsed.website) merged.website = parsed.website;
     if (parsed.experiences?.length) merged.experiences = parsed.experiences;
     if (parsed.education?.length) merged.education = parsed.education;
     if (parsed.skills?.length) merged.skills = parsed.skills;
@@ -174,6 +181,8 @@ export default function ProfilePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputField label="Full Name" value={localProfile.name || ''} onChange={(v) => setLocalProfile({ ...localProfile, name: v })} placeholder="e.g. Zain Abbas" />
+              <InputField label="Email" value={localProfile.email || ''} onChange={(v) => setLocalProfile({ ...localProfile, email: v })} placeholder="you@example.com" type="email" />
               <InputField label="Headline" value={localProfile.headline || ''} onChange={(v) => setLocalProfile({ ...localProfile, headline: v })} placeholder="e.g. Full-Stack Developer" />
               <InputField label="Location" value={localProfile.location || ''} onChange={(v) => setLocalProfile({ ...localProfile, location: v })} placeholder="e.g. Islamabad, Pakistan" />
               <InputField label="Phone" value={localProfile.phone || ''} onChange={(v) => setLocalProfile({ ...localProfile, phone: v })} placeholder="+92 300 1234567" type="tel" />
@@ -181,8 +190,22 @@ export default function ProfilePage() {
               <InputField label="LinkedIn" value={localProfile.linkedin || ''} onChange={(v) => setLocalProfile({ ...localProfile, linkedin: v })} placeholder="https://linkedin.com/in/you" type="url" />
               <InputField label="GitHub" value={localProfile.github || ''} onChange={(v) => setLocalProfile({ ...localProfile, github: v })} placeholder="https://github.com/you" type="url" />
             </div>
+            
+            <div className="flex items-center justify-between p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] mt-4">
+              <div>
+                <p className="text-xs font-medium text-[var(--text-secondary)]">Portfolio QR Code</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Include a high-definition QR code linking to your portfolio on non-minimal templates.</p>
+              </div>
+              <button 
+                onClick={() => setLocalProfile({ ...localProfile, showQrCode: localProfile.showQrCode === false ? true : false })}
+                className={`w-10 h-5 rounded-full transition-colors relative ${localProfile.showQrCode !== false ? 'bg-[var(--gradient-2)]' : 'bg-gray-600'}`}
+              >
+                <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localProfile.showQrCode !== false ? 'left-6' : 'left-1'}`} />
+              </button>
+            </div>
+
             <div>
-              <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Summary</label>
+              <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5 mt-4">Summary</label>
               <textarea value={localProfile.summary || ''} onChange={(e) => setLocalProfile({ ...localProfile, summary: e.target.value })}
                 placeholder="Write a brief professional summary..." rows={4}
                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--gradient-2)]/15 transition-all resize-none" />
@@ -196,7 +219,7 @@ export default function ProfilePage() {
               </div>
             )}
             <div>
-              <p className="text-sm font-semibold">{localProfile.name || profile?.user?.name || 'Your Name'}</p>
+              <p className="text-sm font-semibold">{localProfile.name || 'Your Name'}</p>
               {localProfile.headline && (
                 <p className="text-[11px] text-[var(--gradient-2)] font-medium mt-0.5">{localProfile.headline}</p>
               )}

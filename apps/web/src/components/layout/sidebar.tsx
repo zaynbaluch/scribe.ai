@@ -93,20 +93,6 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
 
       {/* Bottom section */}
       <div className="p-3 border-t border-[var(--grid-line-strong)] flex flex-col gap-2">
-        {/* Plan badge */}
-        <div
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--bg-elevated)] ${collapsed ? 'justify-center' : ''}`}
-        >
-          <Sparkles size={14} className="text-[var(--gradient-2)] flex-shrink-0" />
-          {!collapsed && (
-            <div className="flex flex-col">
-              <span className="font-mono text-[11px] font-medium tracking-wider text-[var(--text-muted)] uppercase">
-                FREE PLAN
-              </span>
-            </div>
-          )}
-        </div>
-
         {/* Collapse toggle (desktop only) */}
         {!isMobile && (
           <button

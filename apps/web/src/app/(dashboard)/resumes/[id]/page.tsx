@@ -28,6 +28,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   const [localProfile, setLocalProfile] = useState<any>(null);
   const [atsOpen, setAtsOpen] = useState(false);
   const [localAtsScore, setLocalAtsScore] = useState<number | null>(null);
+  const [localShowQrCode, setLocalShowQrCode] = useState(true);
   const [activeTab, setActiveTab] = useState<'design' | 'content'>('design');
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
       setLocalStyles(activeResume.customStyles || {});
       setLocalSectionOrder(activeResume.sectionOrder || ['summary', 'experience', 'skills', 'projects', 'education']);
       setLocalVisibility(activeResume.sectionVisibility || {});
+      setLocalShowQrCode(activeResume.showQrCode !== false);
       setLocalProfile(activeResume.baseProfileSnapshot);
     }
   }, [activeResume]);
@@ -80,6 +82,11 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   const handleContentChange = (updatedProfile: any) => {
     setLocalProfile({ ...updatedProfile });
     debouncedSave({ baseProfileSnapshot: updatedProfile });
+  };
+
+  const handleQrToggle = (show: boolean) => {
+    setLocalShowQrCode(show);
+    debouncedSave({ showQrCode: show });
   };
 
   if (isLoading || !activeResume || !localProfile) {
@@ -164,6 +171,16 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
                 <div className="border-t border-[var(--grid-line)]" />
                 <StyleControls styles={localStyles} hasAvatar={!!localProfile?.imageUrl} onChange={handleStylesChange} />
                 <div className="border-t border-[var(--grid-line)]" />
+                <div className="flex items-center justify-between p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)]">
+                  <span className="text-xs font-medium">Show QR Code</span>
+                  <button 
+                    onClick={() => handleQrToggle(!localShowQrCode)}
+                    className={`w-8 h-4 rounded-full transition-colors relative ${localShowQrCode ? 'bg-[var(--gradient-2)]' : 'bg-gray-600'}`}
+                  >
+                    <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${localShowQrCode ? 'left-4.5' : 'left-0.5'}`} />
+                  </button>
+                </div>
+                <div className="border-t border-[var(--grid-line)]" />
                 <SectionToggles
                   sectionOrder={localSectionOrder}
                   sectionVisibility={localVisibility}
@@ -185,6 +202,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
             sectionOrder={localSectionOrder}
             sectionVisibility={localVisibility}
             customStyles={localStyles}
+            showQrCode={localShowQrCode}
           />
         </div>
       </div>

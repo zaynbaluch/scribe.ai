@@ -4,10 +4,10 @@ import { compilePdf, compileCoverLetterPdf } from './typst.service';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'docx';
 
 function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return '';
+  if (!dateStr || dateStr === 'null' || dateStr === 'undefined' || dateStr === '0') return '';
   try {
     const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return dateStr;
+    if (isNaN(date.getTime()) || date.getTime() === 0) return '';
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   } catch {
     return dateStr || '';

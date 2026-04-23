@@ -41,6 +41,8 @@ export interface User {
 export interface Profile {
   id: string;
   userId: string;
+  name?: string | null;
+  email?: string | null;
   summary?: string | null;
   headline?: string | null;
   location?: string | null;
@@ -48,6 +50,8 @@ export interface Profile {
   website?: string | null;
   linkedin?: string | null;
   github?: string | null;
+  imageUrl?: string | null;
+  showQrCode: boolean;
   experiences: Experience[];
   education: Education[];
   skills: Skill[];

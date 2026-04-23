@@ -32,18 +32,20 @@ model User {
 // ─── Profile ────────────────────────────────────────────────────────────────────
 
 model Profile {
-  id        String @id @default(uuid())
-  userId    String @unique
-  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id        String    @id @default(uuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String?
   summary   String? @db.Text
   headline  String?
   location  String?
   phone     String?
+  email     String?
   website   String?
   linkedin  String?
   github    String?
   imageUrl  String?   @db.Text
+  showQrCode Boolean   @default(true)
 
   experiences    Experience[]
   education      Education[]
@@ -202,6 +204,7 @@ model Resume {
   matchScore           Int?
   atsScore             Int?
   atsReport            Json?
+  showQrCode           Boolean  @default(true)
   
   isTailored           Boolean  @default(false)
   baseResumeId         String?

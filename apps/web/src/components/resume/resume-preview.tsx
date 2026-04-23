@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Code, Link, Globe, Mail, Phone, MapPin } from 'lucide-react';
 
 interface ResumePreviewProps {
   profile: any;
@@ -9,20 +9,21 @@ interface ResumePreviewProps {
   sectionOrder: string[];
   sectionVisibility: Record<string, boolean>;
   customStyles: Record<string, any>;
+  showQrCode?: boolean;
 }
 
-function formatDate(dateStr: string) {
-  if (!dateStr) return '';
+function formatDate(dateStr: string | null | undefined) {
+  if (!dateStr || dateStr === 'null' || dateStr === 'undefined' || dateStr === '0') return '';
   try {
     const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return dateStr;
+    if (isNaN(date.getTime()) || date.getTime() === 0) return '';
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   } catch {
     return dateStr;
   }
 }
 
-export default function ResumePreview({ profile, templateId, sectionOrder, sectionVisibility, customStyles }: ResumePreviewProps) {
+export default function ResumePreview({ profile, templateId, sectionOrder, sectionVisibility, customStyles, showQrCode }: ResumePreviewProps) {
   const [zoom, setZoom] = useState(0.7);
 
   if (!profile) {
@@ -71,7 +72,7 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
             lineHeight: lineSpacing,
             padding: `${marginY}px ${marginX}px`,
           }}
-          className="bg-white text-gray-900 shadow-xl rounded-sm"
+          className="bg-white text-gray-900 shadow-xl rounded-sm relative"
         >
           {/* Header */}
           {templateId === 'bold-05' ? (
@@ -82,11 +83,11 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
               <div>
                 <div className="text-xl font-bold text-white">{profile?.name || 'Your Name'}</div>
                 {profile.headline && <div className="text-sm text-white/80 mt-0.5">{profile.headline}</div>}
-                <div className="text-xs text-white/60 mt-1">{[profile.email, profile.phone, profile.location, profile.website].filter(Boolean).join(' | ')}</div>
+                <div className="text-xs text-[var(--text-muted)] mt-1">{[profile.email, profile.phone, profile.location, profile.website, profile.linkedin, profile.github].filter(Boolean).join(' | ')}</div>
               </div>
             </div>
           ) : templateId === 'classic-02' ? (
-            <div className="mb-3">
+            <div className="mb-3 relative pr-14">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-4">
                   {customStyles?.showProfileImage && profile.imageUrl && (
@@ -97,10 +98,13 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
                     {profile.headline && <div className="text-sm text-gray-500 italic mt-0.5">{profile.headline}</div>}
                   </div>
                 </div>
-                <div className="text-right text-xs text-gray-500">
-                  {profile.email && <div>{profile.email}</div>}
-                  {profile.phone && <div>{profile.phone}</div>}
-                  {profile.location && <div>{profile.location}</div>}
+                <div className="text-right text-[9px] text-gray-500 space-y-0.5 pr-2">
+                  {profile.email && <div className="flex items-center justify-end gap-1.5"><Mail size={8} /> {profile.email}</div>}
+                  {profile.phone && !profile.phone.includes('@') && <div className="flex items-center justify-end gap-1.5"><Phone size={8} /> {profile.phone}</div>}
+                  {profile.location && <div className="flex items-center justify-end gap-1.5"><MapPin size={8} /> {profile.location}</div>}
+                  {profile.website && <div className="flex items-center justify-end gap-1.5"><Globe size={8} /> {profile.website.replace(/^https?:\/\//, '')}</div>}
+                  {profile.linkedin && <div className="flex items-center justify-end gap-1.5"><Link size={8} /> linkedin.com/in/{profile.linkedin.split('/').pop()}</div>}
+                  {profile.github && <div className="flex items-center justify-end gap-1.5"><Code size={8} /> github.com/{profile.github.split('/').pop()}</div>}
                 </div>
               </div>
               <div className="border-b-2 border-gray-800 mt-2" />
@@ -113,7 +117,7 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
               <div>
                 <div className="text-lg font-bold" style={{ color: accentColor }}>{profile?.name || 'Your Name'}</div>
                 {profile.headline && <div className="text-xs text-gray-500 mt-0.5">{profile.headline}</div>}
-                <div className="text-[9px] text-gray-400 mt-1">{[profile.email, profile.phone, profile.location].filter(Boolean).join(' | ')}</div>
+                <div className="text-[9px] text-gray-400 mt-1">{[profile.email, profile.phone, profile.location, profile.website, profile.linkedin, profile.github].filter(Boolean).join(' | ')}</div>
               </div>
             </div>
           ) : templateId === 'minimal-04' ? (
@@ -121,20 +125,34 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
               <div>
                 <div className="text-2xl font-light tracking-wide text-gray-800">{profile?.name || 'Your Name'}</div>
                 {profile.headline && <div className="text-sm text-gray-400 mt-0.5">{profile.headline}</div>}
-                <div className="text-xs text-gray-400 mt-1">{[profile.email, profile.phone, profile.location, profile.website].filter(Boolean).join(' | ')}</div>
+                <div className="text-xs text-gray-400 mt-1">{[profile.email, profile.phone, profile.location, profile.website, profile.linkedin, profile.github].filter(Boolean).join(' | ')}</div>
               </div>
               {customStyles?.showProfileImage && profile.imageUrl && (
                 <img src={profile.imageUrl} alt="Profile" className="w-14 h-14 rounded-full object-cover grayscale opacity-80 flex-shrink-0" />
               )}
             </div>
           ) : (
-            <div className="text-center mb-4 flex flex-col items-center">
+            <div className="text-center mb-4 flex flex-col items-center relative pr-14 pl-14">
               {customStyles?.showProfileImage && profile.imageUrl && (
                 <img src={profile.imageUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover border border-gray-200 mb-2" />
               )}
               <div className="text-xl font-bold" style={{ color: accentColor }}>{profile.name || 'Your Name'}</div>
               {profile.headline && <div className="text-sm text-gray-500 mt-0.5">{profile.headline}</div>}
-              <div className="text-xs text-gray-400 mt-1">{[profile.email, profile.phone, profile.location, profile.website, profile.linkedin].filter(Boolean).join(' | ')}</div>
+              <div className="text-xs text-gray-400 mt-1 max-w-[80%]">{[profile.email, profile.phone, profile.location, profile.website, profile.linkedin].filter(Boolean).join(' | ')}</div>
+            </div>
+          )}
+
+          {/* QR Code (Floating for non-minimal templates) */}
+          {(showQrCode ?? profile.showQrCode) !== false && templateId !== 'minimal-04' && templateId !== 'compact-03' && (
+            <div className="absolute top-4 right-4 flex flex-col items-center gap-0.5 opacity-100 z-50">
+              <div className="p-0.5 bg-white border border-gray-100 shadow-sm rounded-sm">
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`https://scribe.ai/p/${profile.user?.vanitySlug || 'me'}`)}&format=svg&ecc=H`} 
+                  alt="Portfolio QR"
+                  className="w-10 h-10"
+                />
+              </div>
+              <span className="text-[5px] text-gray-500 font-bold tracking-widest uppercase">Portfolio</span>
             </div>
           )}
 
@@ -252,10 +270,10 @@ function renderSections(order: string[], profile: any, vis: Record<string, boole
               <div className="flex flex-col mb-0.5">
                 <span className="text-[10px] font-bold">{p.name}</span>
                 {p.techStack?.length > 0 && (
-                  <span className="text-[8px] text-gray-400 italic leading-tight">{p.techStack.join(', ')}</span>
+                  <span className="text-[8px] text-gray-400 italic leading-tight" dangerouslySetInnerHTML={{ __html: p.techStack.join(', ') }} />
                 )}
               </div>
-              {p.description && <div className="text-[9px] text-gray-600 leading-tight">{p.description}</div>}
+              {p.description && <div className="text-[9px] text-gray-600 leading-tight" dangerouslySetInnerHTML={{ __html: p.description }} />}
               {p.bullets?.length > 0 && (
                 <ul className="list-disc ml-3 mt-0.5">
                   {p.bullets.map((b: string, bi: number) => (

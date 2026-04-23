@@ -49,11 +49,19 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
 
   const profileId = existingProfile.id;
 
+  // Prevent emails from leaking into phone field
+  if (data.phone && data.phone.includes('@')) {
+    if (!data.email) data.email = data.phone;
+    data.phone = undefined;
+  }
+
   return prisma.$transaction(async (tx) => {
     // Update scalar fields
     await tx.profile.update({
       where: { id: profileId },
       data: {
+        name: data.name !== undefined ? data.name : undefined,
+        email: data.email !== undefined ? data.email : undefined,
         summary: data.summary !== undefined ? data.summary : undefined,
         headline: data.headline !== undefined ? data.headline : undefined,
         location: data.location !== undefined ? data.location : undefined,
@@ -61,6 +69,8 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
         website: data.website !== undefined ? data.website : undefined,
         linkedin: data.linkedin !== undefined ? data.linkedin : undefined,
         github: data.github !== undefined ? data.github : undefined,
+        imageUrl: data.imageUrl !== undefined ? data.imageUrl : undefined,
+        showQrCode: data.showQrCode !== undefined ? data.showQrCode : undefined,
       },
     });
 

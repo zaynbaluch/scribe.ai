@@ -58,6 +58,7 @@ export async function createResume(userId: string, data: CreateResumeInput) {
       sectionOrder: data.sectionOrder || ['summary', 'experience', 'skills', 'projects', 'education'],
       sectionVisibility: data.sectionVisibility || {},
       customStyles: data.customStyles || {},
+      showQrCode: data.showQrCode !== undefined ? data.showQrCode : true,
     },
   });
 
@@ -140,6 +141,7 @@ export async function updateResume(userId: string, resumeId: string, data: Updat
       sectionOrder: data.sectionOrder,
       sectionVisibility: data.sectionVisibility !== undefined ? data.sectionVisibility : undefined,
       customStyles: data.customStyles !== undefined ? data.customStyles : undefined,
+      showQrCode: data.showQrCode !== undefined ? data.showQrCode : undefined,
       baseProfileSnapshot: data.baseProfileSnapshot !== undefined ? data.baseProfileSnapshot : undefined,
     },
   });

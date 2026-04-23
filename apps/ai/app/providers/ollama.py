@@ -17,7 +17,7 @@ class OllamaProvider(LLMProvider):
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
 
-        response = self.client.chat(model=self.model, messages=messages, tools=tools)
+        response = self.client.chat(model=self.model, messages=messages, tools=tools, format='json')
         return response.get('message', {}).get('content', '')
 
     def stream(self, prompt: str, system: Optional[str] = None, **kwargs) -> Generator[str, None, None]:
