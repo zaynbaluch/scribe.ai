@@ -113,9 +113,9 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
  * Verify a Google ID token (from the frontend Google Sign-In)
  * and extract user information.
  */
-export async function verifyGoogleToken(credential: string): Promise<OAuthUserInfo> {
+export async function verifyGoogleToken(token: string): Promise<OAuthUserInfo> {
   // ─── Dev Mode Bypass ──────────────────────────────────────────────────────
-  if (process.env.NODE_ENV === 'development' && credential === 'dev-mode-token') {
+  if (process.env.NODE_ENV === 'development' && token === 'dev-mode-token') {
     return {
       email: 'dev@scribe.ai',
       name: 'Dev User',
@@ -124,25 +124,52 @@ export async function verifyGoogleToken(credential: string): Promise<OAuthUserIn
     };
   }
 
-  try {
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: GOOGLE_CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
-    if (!payload || !payload.email || !payload.sub) {
-      throw new Error('Invalid Google token payload');
+  // ─── Universal Guard: Force Access Token Flow for ya29 tokens ──────────────
+  if (token.startsWith('ya29')) {
+    logger.info({ token: token.substring(0, 10) + '...' }, 'SCRIBE_DEBUG: Handling Google Access Token');
+    try {
+      const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) throw new Error(`Google API responded with ${response.status}`);
+
+      const payload = await response.json();
+      return {
+        oauthId: payload.sub,
+        email: payload.email,
+        name: payload.name || payload.given_name || payload.email.split('@')[0],
+        avatarUrl: payload.picture,
+      };
+    } catch (error: any) {
+      logger.error({ err: error }, 'Failed to verify Google access token');
+      throw new Error('Invalid Google credential');
     }
-    return {
-      email: payload.email,
-      name: payload.name || payload.email.split('@')[0],
-      avatarUrl: payload.picture,
-      oauthId: payload.sub,
-    };
-  } catch (err) {
-    logger.error({ err }, 'Failed to verify Google token');
-    throw new Error('Invalid Google credential');
   }
+
+  // ─── ID Token Flow: Only for JWTs (starting with ey) ──────────────────────
+  if (token.startsWith('ey') && token.split('.').length === 3) {
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: token,
+        audience: GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) throw new Error('Invalid Google payload');
+
+      return {
+        oauthId: payload.sub,
+        email: payload.email,
+        name: payload.name || payload.email.split('@')[0],
+        avatarUrl: payload.picture,
+      };
+    } catch (error: any) {
+      logger.error({ err: error }, 'Failed to verify Google ID token');
+      throw new Error('Invalid Google credential');
+    }
+  }
+
+  throw new Error('Unrecognized Google token format. Please try again.');
 }
 
 /**
@@ -186,6 +213,12 @@ export async function findOrCreateUser(info: OAuthUserInfo, provider: string) {
   }
 
   return user;
+}
+
+interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
 }
 
 /**

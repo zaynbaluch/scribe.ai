@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import { useAuthStore } from '@/stores/auth-store';
 import { toast } from 'sonner';
+import Logo from '@/components/ui/logo';
 import { ArrowRight } from 'lucide-react';
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
@@ -46,9 +47,7 @@ export default function LoginPage() {
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-transparent)] backdrop-blur-xl p-8 flex flex-col items-center gap-6">
           {/* Logo */}
           <div className="flex flex-col items-center gap-2">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--gradient-1)] to-[var(--gradient-2)] flex items-center justify-center text-white font-display font-bold text-xl">
-              S
-            </div>
+            <Logo size={48} className="text-[var(--text-primary)]" />
             <h1 className="font-display text-2xl tracking-tight mt-2">
               Welcome to Scribe.ai
             </h1>
