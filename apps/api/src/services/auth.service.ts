@@ -8,26 +8,112 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 
-const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
-
-export interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-}
-
-export interface GoogleUserInfo {
+export interface OAuthUserInfo {
   email: string;
   name: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   oauthId: string;
 }
+
+/**
+ * Verify a GitHub authorization code and extract user info.
+ */
+export async function verifyGithubCode(code: string): Promise<OAuthUserInfo> {
+  const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+  const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+
+  try {
+    // 1. Exchange code for access token
+    const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: GITHUB_CLIENT_ID,
+        client_secret: GITHUB_CLIENT_SECRET,
+        code,
+      }),
+    });
+
+    const tokenData = await tokenRes.json();
+    if (!tokenData.access_token) throw new Error('GitHub token exchange failed');
+
+    // 2. Get user profile
+    const userRes = await fetch('https://api.github.com/user', {
+      headers: { Authorization: `token ${tokenData.access_token}` },
+    });
+    const userData = await userRes.json();
+
+    // 3. Get primary email
+    const emailsRes = await fetch('https://api.github.com/user/emails', {
+      headers: { Authorization: `token ${tokenData.access_token}` },
+    });
+    const emails = await emailsRes.json();
+    const primaryEmail = emails.find((e: any) => e.primary)?.email || emails[0]?.email;
+
+    return {
+      email: primaryEmail,
+      name: userData.name || userData.login,
+      avatarUrl: userData.avatar_url,
+      oauthId: String(userData.id),
+    };
+  } catch (err) {
+    logger.error({ err }, 'Failed to verify GitHub code');
+    throw new Error('Invalid GitHub credential');
+  }
+}
+
+/**
+ * Verify a LinkedIn authorization code and extract user info.
+ */
+export async function verifyLinkedinCode(code: string, redirectUri: string): Promise<OAuthUserInfo> {
+  const LINKEDIN_CLIENT_ID = process.env.LINKEDIN_CLIENT_ID;
+  const LINKEDIN_CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
+
+  try {
+    // 1. Exchange code for access token
+    const tokenRes = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: redirectUri,
+        client_id: LINKEDIN_CLIENT_ID!,
+        client_secret: LINKEDIN_CLIENT_SECRET!,
+      }),
+    });
+
+    const tokenData = await tokenRes.json();
+    if (!tokenData.access_token) throw new Error('LinkedIn token exchange failed');
+
+    // 2. Get user profile and email
+    const userRes = await fetch('https://api.linkedin.com/v2/userinfo', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+    const userData = await userRes.json();
+
+    return {
+      email: userData.email,
+      name: userData.name,
+      avatarUrl: userData.picture,
+      oauthId: userData.sub,
+    };
+  } catch (err) {
+    logger.error({ err }, 'Failed to verify LinkedIn code');
+    throw new Error('Invalid LinkedIn credential');
+  }
+}
+
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 /**
  * Verify a Google ID token (from the frontend Google Sign-In)
  * and extract user information.
  */
-export async function verifyGoogleToken(credential: string): Promise<GoogleUserInfo> {
+export async function verifyGoogleToken(credential: string): Promise<OAuthUserInfo> {
   // ─── Dev Mode Bypass ──────────────────────────────────────────────────────
   if (process.env.NODE_ENV === 'development' && credential === 'dev-mode-token') {
     return {
@@ -63,27 +149,40 @@ export async function verifyGoogleToken(credential: string): Promise<GoogleUserI
  * Find or create a user from OAuth info.
  * Creates a Profile record automatically on first login.
  */
-export async function findOrCreateUser(info: GoogleUserInfo, provider: string) {
+export async function findOrCreateUser(info: OAuthUserInfo, provider: string) {
   let user = await prisma.user.findUnique({
     where: { oauthId: info.oauthId },
     include: { profile: true },
   });
 
   if (!user) {
-    user = await prisma.user.create({
-      data: {
-        email: info.email,
-        name: info.name,
-        avatarUrl: info.avatarUrl,
-        oauthProvider: provider,
-        oauthId: info.oauthId,
-        profile: {
-          create: {}, // Create empty profile on signup
-        },
-      },
-      include: { profile: true },
+    // Also check by email to merge accounts if needed
+    const existingByEmail = await prisma.user.findUnique({
+      where: { email: info.email },
     });
-    logger.info({ userId: user.id, email: user.email }, 'New user created via OAuth');
+
+    if (existingByEmail) {
+      user = await prisma.user.update({
+        where: { id: existingByEmail.id },
+        data: { oauthId: info.oauthId, oauthProvider: provider },
+        include: { profile: true },
+      });
+    } else {
+      user = await prisma.user.create({
+        data: {
+          email: info.email,
+          name: info.name,
+          avatarUrl: info.avatarUrl,
+          oauthProvider: provider,
+          oauthId: info.oauthId,
+          profile: {
+            create: {}, // Create empty profile on signup
+          },
+        },
+        include: { profile: true },
+      });
+    }
+    logger.info({ userId: user.id, email: user.email }, `New user created via ${provider}`);
   }
 
   return user;
