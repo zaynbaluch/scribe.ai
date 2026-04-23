@@ -123,17 +123,24 @@ export default function PortfolioPage() {
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5">
           <h3 className="text-sm font-semibold mb-3">Portfolio URL</h3>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <div className="flex-1 flex items-center gap-2 bg-[var(--bg-elevated)] px-3 py-2 rounded-lg border border-[var(--border-subtle)] focus-within:border-[var(--border-focus)] transition-colors">
-              <span className="text-[10px] md:text-xs text-[var(--text-muted)] whitespace-nowrap hidden xs:inline">
-                {typeof window !== 'undefined' ? window.location.origin.replace(/^https?:\/\//, '') : ''}/p/
-              </span>
-              <input value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                placeholder="your-slug" maxLength={40}
-                className="flex-1 bg-transparent text-sm font-mono focus:outline-none min-w-0" />
+            <div className="flex-1 flex flex-col gap-1.5">
+              <div className="flex items-center gap-2 bg-[var(--bg-elevated)] px-3 py-2 rounded-lg border border-[var(--border-subtle)] focus-within:border-[var(--border-focus)] transition-colors">
+                <span className="text-[10px] md:text-xs text-[var(--text-muted)] whitespace-nowrap hidden xs:inline">
+                  {typeof window !== 'undefined' ? window.location.origin.replace(/^https?:\/\//, '') : ''}/p/
+                </span>
+                <input value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                  placeholder="your-slug" maxLength={40}
+                  className="flex-1 bg-transparent text-sm font-mono focus:outline-none min-w-0" />
+              </div>
+              {slug && (
+                <p className="text-[10px] text-[var(--text-muted)] px-1 truncate">
+                  Final URL: <span className="text-[var(--gradient-2)]">{typeof window !== 'undefined' ? window.location.origin : ''}/p/{slug}</span>
+                </p>
+              )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:mt-[-20px]">
               <button onClick={saveSlug}
-                className="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-medium bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:opacity-90 transition-opacity">
+                className="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-medium bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:opacity-90 transition-opacity whitespace-nowrap">
                 Save
               </button>
               {config.slug && (

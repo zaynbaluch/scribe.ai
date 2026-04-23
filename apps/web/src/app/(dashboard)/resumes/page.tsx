@@ -48,11 +48,11 @@ export default function ResumesPage() {
           <h1 className="font-display text-2xl tracking-tight">Your Resumes</h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">{resumes.length} resume{resumes.length !== 1 ? 's' : ''}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           {/* Sort */}
           <div className="relative">
             <select value={sort} onChange={(e) => setSort(e.target.value as any)}
-              className="appearance-none pl-3 pr-7 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs text-[var(--text-secondary)] focus:outline-none cursor-pointer">
+              className="appearance-none pl-3 pr-7 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[10px] sm:text-xs text-[var(--text-secondary)] focus:outline-none cursor-pointer">
               <option value="updatedAt">Last Edited</option>
               <option value="name">Name</option>
               <option value="atsScore">ATS Score</option>
@@ -61,9 +61,9 @@ export default function ResumesPage() {
           </div>
 
           <button onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:opacity-90 transition-opacity">
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:opacity-90 transition-opacity shadow-lg shadow-[var(--gradient-1)]/20">
             <Plus size={16} />
-            New Resume
+            <span>New <span className="hidden sm:inline">Resume</span></span>
           </button>
         </div>
       </div>

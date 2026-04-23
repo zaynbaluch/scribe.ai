@@ -49,7 +49,7 @@ export default function TailorPage() {
   return (
     <div className="max-w-[1100px] mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-8">
         <div className="flex items-center gap-3">
           {step !== 'input' && (
             <button onClick={reset}
@@ -57,7 +57,7 @@ export default function TailorPage() {
               <ArrowLeft size={18} />
             </button>
           )}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 whitespace-nowrap">
             <Sparkles size={18} className="text-[var(--gradient-2)]" />
             <h1 className="font-display text-2xl tracking-tight">AI Tailoring</h1>
           </div>
@@ -65,10 +65,10 @@ export default function TailorPage() {
 
         {/* Resume selector */}
         {step === 'input' && resumes.filter(r => !r.isTailored).length > 0 && (
-          <div className="sm:ml-auto w-full sm:w-auto">
+          <div className="sm:ml-auto w-full sm:w-auto sm:max-w-[200px]">
             <select value={selectedResumeId}
               onChange={(e) => { setSelectedResumeId(e.target.value); setResumeId(e.target.value); }}
-              className="w-full sm:w-auto px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs focus:outline-none focus:border-[var(--border-focus)]">
+              className="w-full sm:w-auto px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs focus:outline-none focus:border-[var(--border-focus)] truncate">
               {resumes.filter(r => !r.isTailored).map((r) => (
                 <option key={r.id} value={r.id}>{r.name}</option>
               ))}

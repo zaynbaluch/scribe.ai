@@ -61,13 +61,13 @@ export default function CoverLettersPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-display text-2xl tracking-tight mb-2">Cover Letters</h1>
-          <p className="text-[var(--text-muted)] text-sm">View and manage AI-generated cover letters for your applications.</p>
+          <p className="text-[var(--text-muted)] text-sm hidden sm:block">View and manage AI-generated cover letters for your applications.</p>
         </div>
         <button 
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white text-sm font-medium hover:opacity-90 transition-opacity shadow-lg shadow-[var(--gradient-1)]/20"
+          className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white text-xs sm:text-sm font-medium hover:opacity-90 transition-opacity shadow-lg shadow-[var(--gradient-1)]/20"
         >
-          <PenLine size={16} /> Create Custom
+          <PenLine size={16} /> <span>Create <span className="hidden sm:inline">Custom</span></span>
         </button>
       </div>
 
