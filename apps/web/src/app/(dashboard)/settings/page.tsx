@@ -2,13 +2,14 @@
 
 import { useTheme } from 'next-themes';
 import { User, Palette, Shield, LogOut } from 'lucide-react';
+import { useAuthStore } from '@/stores/auth-store';
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { logout } = useAuthStore();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+    logout();
   };
 
   return (
