@@ -37,3 +37,7 @@ uploads/
 
 # Turborepo
 .turbo/
+
+# Extension Build Artifacts
+apps/extension/.output/
+apps/extension/.wxt/
