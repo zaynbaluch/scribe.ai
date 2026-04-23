@@ -7,8 +7,8 @@ import { useApplicationStore } from '@/stores/application-store';
 import dynamic from 'next/dynamic';
 
 // Lazy load Recharts to avoid SSR issues
-const BarChart = dynamic(() => import('recharts').then((m) => m.BarChart), { ssr: false });
-const Bar = dynamic(() => import('recharts').then((m) => m.Bar), { ssr: false });
+const AreaChart = dynamic(() => import('recharts').then((m) => m.AreaChart), { ssr: false });
+const Area = dynamic(() => import('recharts').then((m) => m.Area), { ssr: false });
 const XAxis = dynamic(() => import('recharts').then((m) => m.XAxis), { ssr: false });
 const YAxis = dynamic(() => import('recharts').then((m) => m.YAxis), { ssr: false });
 const Tooltip = dynamic(() => import('recharts').then((m) => m.Tooltip), { ssr: false });
@@ -85,15 +85,29 @@ export default function DashboardPage() {
           {mounted && stats?.weeklyActivity && stats.weeklyActivity.some((w) => w.count > 0) ? (
             <div style={{ width: '100%', height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.weeklyActivity}>
+                <AreaChart data={stats.weeklyActivity}>
+                  <defs>
+                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--gradient-2)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--gradient-2)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
                   <XAxis dataKey="week" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip
                     contentStyle={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '8px', fontSize: '12px' }}
                     labelStyle={{ color: 'var(--text-primary)' }}
                   />
-                  <Bar dataKey="count" fill="var(--gradient-2)" radius={[4, 4, 0, 0]} name="Applications" />
-                </BarChart>
+                  <Area 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke="var(--gradient-2)" 
+                    fillOpacity={1} 
+                    fill="url(#colorCount)" 
+                    strokeWidth={2}
+                    name="Applications" 
+                  />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           ) : (

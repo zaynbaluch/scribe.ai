@@ -26,9 +26,9 @@ interface PortfolioConfig {
 }
 
 const TEMPLATES = [
-  { id: 'developer', label: 'Developer', desc: 'Clean, code-focused layout' },
-  { id: 'designer', label: 'Designer', desc: 'Visual, portfolio-forward layout' },
-  { id: 'executive', label: 'Executive', desc: 'Professional, corporate layout' },
+  { id: 'modern', label: 'Modern', desc: 'Sleek, dark, accent-focused layout' },
+  { id: 'classic', label: 'Classic', desc: 'Centered, traditional, serif-style layout' },
+  { id: 'minimal', label: 'Minimal', desc: 'Ultra-clean, whitespace-heavy layout' },
 ];
 
 const SECTIONS = [

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Plus, Trash2, GripVertical, Eye, EyeOff } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, Trash2, Eye, EyeOff, Calendar } from 'lucide-react';
+import CustomDatePicker from '@/components/ui/custom-date-picker';
 
 interface ContentEditorProps {
   profile: any;
@@ -98,6 +99,26 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                       }}
                       className="w-full bg-transparent text-xs text-[var(--text-muted)] focus:outline-none"
                     />
+                    <div className="grid grid-cols-2 gap-4">
+                      <CustomDatePicker 
+                        label="From" 
+                        value={exp.startDate || ''} 
+                        onChange={(v) => {
+                          const newExps = [...profile.experiences];
+                          newExps[idx].startDate = v;
+                          updateProfile('experiences', newExps);
+                        }} 
+                      />
+                      <CustomDatePicker 
+                        label="To" 
+                        value={exp.endDate || ''} 
+                        onChange={(v) => {
+                          const newExps = [...profile.experiences];
+                          newExps[idx].endDate = v;
+                          updateProfile('experiences', newExps);
+                        }} 
+                      />
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -186,28 +207,54 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                     {proj.visible === false ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
-                <input 
-                  type="text" 
-                  value={proj.techStack?.join(', ') || ''} 
-                  placeholder="Tech Stack (comma separated)"
-                  onChange={(e) => {
-                    const newProjs = [...profile.projects];
-                    newProjs[idx].techStack = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                    updateProfile('projects', newProjs);
-                  }}
-                  className="w-full bg-transparent text-[10px] text-[var(--text-muted)] focus:outline-none"
-                />
-                <textarea 
-                  value={proj.description || ''} 
-                  placeholder="Description"
-                  rows={2}
-                  onChange={(e) => {
-                    const newProjs = [...profile.projects];
-                    newProjs[idx].description = e.target.value;
-                    updateProfile('projects', newProjs);
-                  }}
-                  className="w-full px-2 py-1.5 rounded bg-[var(--bg-elevated)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--gradient-2)] resize-none"
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <CustomDatePicker 
+                    label="Started" 
+                    value={proj.startDate || ''} 
+                    onChange={(v) => {
+                      const newProjs = [...profile.projects];
+                      newProjs[idx].startDate = v;
+                      updateProfile('projects', newProjs);
+                    }} 
+                  />
+                  <CustomDatePicker 
+                    label="Ended" 
+                    value={proj.endDate || ''} 
+                    onChange={(v) => {
+                      const newProjs = [...profile.projects];
+                      newProjs[idx].endDate = v;
+                      updateProfile('projects', newProjs);
+                    }} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Technologies / Stack</label>
+                  <input 
+                    type="text" 
+                    value={proj.techStack?.join(', ') || ''} 
+                    placeholder="e.g. React, Node.js, PostgreSQL"
+                    onChange={(e) => {
+                      const newProjs = [...profile.projects];
+                      newProjs[idx].techStack = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                      updateProfile('projects', newProjs);
+                    }}
+                    className="w-full bg-transparent text-xs text-[var(--text-primary)] focus:outline-none border-b border-[var(--grid-line)] pb-1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Project Description</label>
+                  <textarea 
+                    value={proj.description || ''} 
+                    placeholder="Briefly describe the project..."
+                    rows={2}
+                    onChange={(e) => {
+                      const newProjs = [...profile.projects];
+                      newProjs[idx].description = e.target.value;
+                      updateProfile('projects', newProjs);
+                    }}
+                    className="w-full px-2 py-1.5 rounded bg-[var(--bg-elevated)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--gradient-2)] resize-none"
+                  />
+                </div>
                 <div>
                   <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Key Features / Bullets</label>
                   <div className="space-y-2">

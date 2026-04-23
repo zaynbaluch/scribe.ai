@@ -66,18 +66,24 @@ export default function TailorDiffView({ suggestions, onAccept, onReject, onAcce
               }`}
             >
               {/* Header */}
-              {s.experienceTitle && (
-                <div className="px-4 pt-3 pb-1">
-                  <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
-                    {s.section} · {s.experienceTitle}{s.company ? ` at ${s.company}` : ''}
+              <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                    s.section === 'experience' ? 'bg-blue-500/10 text-blue-500' :
+                    s.section === 'projects' ? 'bg-purple-500/10 text-purple-500' :
+                    'bg-amber-500/10 text-amber-500'
+                  }`}>
+                    {s.section}
+                  </span>
+                  <span className="text-[10px] font-medium text-[var(--text-primary)]">
+                    {s.experienceTitle || (s as any).projectName || (s.type === 'summary' ? 'Professional Summary' : '')}
+                    {s.company ? ` at ${s.company}` : ''}
                   </span>
                 </div>
-              )}
-              {s.type === 'summary' && (
-                <div className="px-4 pt-3 pb-1">
-                  <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">Summary</span>
-                </div>
-              )}
+                <span className="text-[10px] font-mono text-[var(--text-muted)] italic">
+                  {s.type}
+                </span>
+              </div>
 
               {/* Side by side */}
               <div className="grid grid-cols-2 gap-0 divide-x divide-[var(--grid-line)]">

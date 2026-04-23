@@ -22,16 +22,17 @@ def tailor_bullet(original: str, jd_context: str, keywords: List[str], job_title
     keyword_str = ", ".join(keywords[:10])
     system = (
         "You are an expert resume writer. Rewrite the bullet point to better match the job description. "
-        "Keep the core achievement but naturally incorporate relevant keywords. "
-        "Use strong action verbs and quantify impact where possible. "
-        "Keep it concise (1-2 lines). Return ONLY the rewritten bullet, no explanations."
+        "CRITICAL INSTRUCTIONS:\n"
+        "1. Use PAST TENSE for all actions (e.g., 'Leveraged', 'Developed', 'Managed').\n"
+        "2. DO NOT invent new skills or experiences. Only rephrase existing information.\n"
+        "3. Use strong action verbs and quantify impact.\n"
+        "4. Keep it concise. Return ONLY the rewritten bullet."
     )
     prompt = (
-        f"Job Title: {job_title}\n"
+        f"Target Role: {job_title}\n"
         f"Key Skills: {keyword_str}\n"
-        f"JD Context: {jd_context[:500]}\n\n"
         f"Original bullet: {original}\n\n"
-        f"Rewritten bullet:"
+        f"Tailored bullet (PAST TENSE):"
     )
 
     try:
@@ -134,16 +135,17 @@ def tailor_resume(profile: Dict[str, Any], jd_keywords: Dict, jd_text: str) -> D
             # We add a hint about the project tech stack if it's relevant
             system = (
                 "You are an expert resume writer. Rewrite the provided project description to better match the target role. "
-                "CRITICAL INSTRUCTION: DO NOT write a summary of the role. DO NOT write about what the company is seeking. "
-                "You MUST ONLY rewrite the specific project description provided below. Highlight the relevant technologies and impact. "
-                "Keep it concise (1-3 sentences). Return ONLY the rewritten project description."
+                "CRITICAL INSTRUCTIONS:\n"
+                "1. Use PAST TENSE for all actions (e.g., 'Built', 'Implemented').\n"
+                "2. DO NOT invent new facts or tech stacks. Only use what is provided.\n"
+                "3. Highlight relevant technologies and impact.\n"
+                "4. Return ONLY the rewritten project description."
             )
             prompt = (
                 f"Target Role: {job_title}\n"
-                f"Key Skills: {', '.join(all_keywords[:10])}\n"
                 f"Project Tech Stack: {', '.join(tech_stack)}\n"
-                f"Original description to rewrite: {desc}\n\n"
-                f"Tailored project description:"
+                f"Original description: {desc}\n\n"
+                f"Tailored project description (PAST TENSE):"
             )
             try:
                 result = _get_llm().generate(prompt, system=system, temperature=0.6, max_tokens=300)

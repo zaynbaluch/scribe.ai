@@ -8,6 +8,7 @@ import CompletenessBar from '@/components/profile/completeness-bar';
 import SectionEditor from '@/components/profile/section-editor';
 import SkillTags from '@/components/profile/skill-tags';
 import ImportModal from '@/components/profile/import-modal';
+import CustomDatePicker from '@/components/ui/custom-date-picker';
 import Image from 'next/image';
 
 export default function ProfilePage() {
@@ -376,67 +377,7 @@ export default function ProfilePage() {
 
 // ─── Reusable input ─────────────────────────────────────────────────────────
 
-function CustomDatePicker({ label, value, onChange, mode = 'month' }: {
-  label: string; value: string; onChange: (v: string) => void; mode?: 'month' | 'date';
-}) {
-  // Parse YYYY-MM-DD or YYYY-MM
-  const parts = value.split('-');
-  const initialYear = parts[0] ? parseInt(parts[0]) : new Date().getFullYear();
-  const initialMonth = parts[1] ? parseInt(parts[1]) - 1 : 0;
-  const initialDay = parts[2] ? parseInt(parts[2]) : 1;
 
-  const years = Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i);
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
-
-  const handleUpdate = (y: number, m: number, d?: number) => {
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    if (mode === 'month') {
-      onChange(`${y}-${pad(m + 1)}`);
-    } else {
-      onChange(`${y}-${pad(m + 1)}-${pad(d || 1)}`);
-    }
-  };
-
-  return (
-    <div>
-      <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">{label}</label>
-      <div className="flex gap-2">
-        {mode === 'date' && (
-          <select 
-            value={initialDay} 
-            onChange={(e) => handleUpdate(initialYear, initialMonth, parseInt(e.target.value))}
-            className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-[var(--gradient-2)]"
-          >
-            {Array.from({ length: 31 }, (_, i) => (
-              <option key={i+1} value={i+1}>{i+1}</option>
-            ))}
-          </select>
-        )}
-        <select 
-          value={initialMonth} 
-          onChange={(e) => handleUpdate(initialYear, parseInt(e.target.value), initialDay)}
-          className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-[var(--gradient-2)]"
-        >
-          {months.map((m, i) => (
-            <option key={i} value={i}>{m}</option>
-          ))}
-        </select>
-        <select 
-          value={initialYear} 
-          onChange={(e) => handleUpdate(parseInt(e.target.value), initialMonth, initialDay)}
-          className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-[var(--gradient-2)]"
-        >
-          {years.map(y => (
-            <option key={y} value={y}>{y}</option>
-          ))}
-        </select>
-      </div>
-    </div>
-  );
-}
 
 function InputField({ label, value, onChange, placeholder, type = 'text' }: {
   label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string;
