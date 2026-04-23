@@ -96,6 +96,56 @@ export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
 });
 
 /**
+ * POST /api/auth/github
+ */
+export const githubLogin = asyncHandler(async (req: Request, res: Response) => {
+  const { code } = req.body;
+
+  const githubUser = await authService.verifyGithubCode(code);
+  const user = await authService.findOrCreateUser(githubUser, 'github');
+  const tokens = authService.generateTokenPair(user.id, user.email);
+
+  res.json({
+    success: true,
+    data: {
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        plan: user.plan,
+      },
+    },
+  });
+});
+
+/**
+ * POST /api/auth/linkedin
+ */
+export const linkedinLogin = asyncHandler(async (req: Request, res: Response) => {
+  const { code, redirectUri } = req.body;
+
+  const linkedinUser = await authService.verifyLinkedinCode(code, redirectUri);
+  const user = await authService.findOrCreateUser(linkedinUser, 'linkedin');
+  const tokens = authService.generateTokenPair(user.id, user.email);
+
+  res.json({
+    success: true,
+    data: {
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        plan: user.plan,
+      },
+    },
+  });
+});
+
+/**
  * POST /api/auth/refresh
  * Refresh the access token using a valid refresh token.
  */

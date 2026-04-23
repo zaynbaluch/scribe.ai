@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, FileText, LayoutDashboard, Target, Briefcase, Zap, Globe, Terminal } from 'lucide-react';
+import Logo from '@/components/ui/logo';
 
 export default function Home() {
   return (
@@ -14,9 +15,7 @@ export default function Home() {
       {/* Navigation */}
       <header className="sticky top-0 h-16 flex items-center justify-between px-6 md:px-12 z-50 bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded bg-gradient-to-br from-[var(--gradient-1)] to-[var(--gradient-2)] flex items-center justify-center text-white font-display font-bold text-sm">
-            S
-          </div>
+          <Logo size={24} className="text-white" />
           <span className="font-display font-bold text-xl tracking-tight">Scribe.ai</span>
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm text-[#a1a1aa] font-medium">
@@ -166,9 +165,7 @@ export default function Home() {
       <footer className="border-t border-white/10 py-12 px-6 md:px-12">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-gradient-to-br from-[var(--gradient-1)] to-[var(--gradient-2)] flex items-center justify-center text-white font-display font-bold text-[10px]">
-              S
-            </div>
+            <Logo size={18} className="text-white" />
             <span className="font-display font-bold tracking-tight">Scribe.ai</span>
           </div>
           <div className="text-sm text-[#71717a]">
