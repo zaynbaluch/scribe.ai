@@ -7,7 +7,7 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'SAVE_JOB') {
       saveJob(message.jobData)
-        .then(response => sendResponse({ success: true, data: response }))
+        .then(response => sendResponse(response))
         .catch(err => sendResponse({ success: false, error: err.message }));
       return true; // Indicate async response
     }
@@ -15,7 +15,7 @@ export default defineBackground(() => {
 });
 
 async function saveJob(jobData: any) {
-  const { token } = await browser.storage.local.get('scribe_access_token');
+  const { scribe_access_token: token } = await browser.storage.local.get('scribe_access_token');
   if (!token) {
     throw new Error('Not logged in. Please log in via the extension popup.');
   }

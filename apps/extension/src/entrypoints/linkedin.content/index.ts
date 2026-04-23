@@ -2,75 +2,131 @@ import { defineContentScript } from 'wxt/sandbox';
 import './style.css';
 
 export default defineContentScript({
-  matches: ['*://*.linkedin.com/jobs/view/*', '*://*.linkedin.com/jobs/collections/*'],
+  matches: ['*://*.linkedin.com/jobs/*', '*://*.linkedin.com/jobs/view/*', '*://*.linkedin.com/jobs/collections/*'],
   main() {
     console.log('Scribe.ai LinkedIn script injected');
 
-    // Setup an observer to watch for job detail container
-    const observer = new MutationObserver(() => {
-      const jobTitleEl = document.querySelector('.job-details-jobs-unified-top-card__job-title, .t-24.t-bold');
-      if (jobTitleEl && !document.querySelector('#scribe-save-btn')) {
-        injectButton(jobTitleEl);
+    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      console.log('Scribe.ai message received:', message);
+      
+      if (message.action === 'PING') {
+        sendResponse({ success: true });
+        return true;
       }
-    });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+      if (message.action === 'SCAN_JOB') {
+        try {
+          const jobData = scrapeLinkedInJob();
+          console.log('Scribe.ai scraped data:', jobData);
+          if (!jobData.title || !jobData.rawDescription) {
+            const missing = !jobData.title ? 'Title' : 'Description';
+            console.error(`Scribe.ai: Missing ${missing}`);
+            sendResponse({ success: false, error: `Could not capture ${missing}. Please ensure the job is fully loaded and visible.` });
+          } else {
+            sendResponse({ success: true, jobData });
+          }
+        } catch (err: any) {
+          console.error('Scribe.ai scrape error:', err);
+          sendResponse({ success: false, error: err.message });
+        }
+      }
+      return true;
+    });
   },
 });
 
-function injectButton(anchorEl: Element) {
-  const container = document.createElement('div');
-  container.id = 'scribe-save-btn';
-  container.style.marginTop = '10px';
-  container.style.marginBottom = '10px';
 
-  const btn = document.createElement('button');
-  btn.className = 'scribe-btn';
-  btn.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-    Save to Scribe.ai
-  `;
-
-  btn.onclick = async () => {
-    btn.disabled = true;
-    btn.innerHTML = 'Saving...';
-    
-    try {
-      const jobData = scrapeLinkedInJob();
-      const response = await browser.runtime.sendMessage({ action: 'SAVE_JOB', jobData });
-      
-      if (response.success) {
-        btn.innerHTML = '✓ Saved!';
-        btn.style.background = '#10b981';
-      } else {
-        throw new Error(response.error);
-      }
-    } catch (err: any) {
-      alert(`Scribe.ai Error: ${err.message}`);
-      btn.innerHTML = 'Save to Scribe.ai';
-      btn.disabled = false;
-    }
-  };
-
-  container.appendChild(btn);
-  
-  // Insert near the title
-  if (anchorEl.parentElement) {
-    anchorEl.parentElement.appendChild(container);
-  }
-}
 
 function scrapeLinkedInJob() {
-  const title = document.querySelector('.job-details-jobs-unified-top-card__job-title, .t-24.t-bold')?.textContent?.trim() || '';
-  const company = document.querySelector('.job-details-jobs-unified-top-card__company-name, .job-details-jobs-unified-top-card__primary-description a')?.textContent?.trim() || '';
+  // Try multiple selectors for title
+  const titleSelectors = [
+    '.job-details-jobs-unified-top-card__job-title',
+    '.top-card-layout__title',
+    'h1.top-card-layout__title',
+    '.jobs-unified-top-card__job-title',
+    'h1.t-24',
+    '.t-24.t-bold',
+    'h2.t-24',
+    'main h1',
+    'h1'
+  ];
+
+  let title = '';
+  for (const selector of titleSelectors) {
+    const el = document.querySelector(selector);
+    if (el && el.textContent?.trim()) {
+      title = el.textContent.trim();
+      console.log(`Scribe.ai: Found title using selector: ${selector} -> "${title}"`);
+      break;
+    }
+  }
+
+  // Try multiple selectors for company
+  const companySelectors = [
+    '.job-details-jobs-unified-top-card__company-name',
+    '.topcard__org-name-link',
+    '.topcard__flavor--black-link',
+    '.jobs-unified-top-card__company-name',
+    '.job-details-jobs-unified-top-card__primary-description a',
+    '.jobs-unified-top-card__primary-description a',
+    '.top-card-layout__company-name',
+    'a[href*="/company/"]'
+  ];
+
+  let company = '';
+  for (const selector of companySelectors) {
+    const el = document.querySelector(selector);
+    if (el && el.textContent?.trim()) {
+      company = el.textContent.trim();
+      console.log(`Scribe.ai: Found company using selector: ${selector} -> "${company}"`);
+      break;
+    }
+  }
   
-  // Location can be tricky, usually next to company
+  // Location
   let location = '';
-  const locationEl = document.querySelector('.job-details-jobs-unified-top-card__primary-description span:nth-child(2)');
+  const locationEl = document.querySelector('.job-details-jobs-unified-top-card__primary-description span:nth-child(2), .jobs-unified-top-card__primary-description span:nth-child(2)');
   if (locationEl) location = locationEl.textContent?.trim() || '';
 
-  const descriptionEl = document.querySelector('#job-details, .jobs-description__content');
-  const rawDescription = descriptionEl?.textContent?.trim() || '';
+  // Exhaustive list of description selectors
+  const descriptionSelectors = [
+    '#job-details',
+    '.jobs-description__content',
+    '.jobs-description-content__text',
+    '.show-more-less-html__markup',
+    '.jobs-box__html-content',
+    '.description__text',
+    '.job-view-main-content'
+  ];
+
+  let rawDescription = '';
+  for (const selector of descriptionSelectors) {
+    const el = document.querySelector(selector);
+    if (el && el.textContent?.trim()) {
+      rawDescription = el.textContent.trim();
+      console.log(`Scribe.ai: Found description using selector: ${selector}`);
+      break;
+    }
+  }
+
+  // Aggressive fallback if still not found
+  if (!rawDescription) {
+    console.log('Scribe.ai: Specific selectors failed, trying aggressive fallback...');
+    const containers = Array.from(document.querySelectorAll('div.relative, div.mt4, article, section'));
+    const candidates = containers
+      .map(el => ({
+        el,
+        text: el.textContent?.trim() || '',
+        length: el.textContent?.trim().length || 0
+      }))
+      .filter(c => c.length > 500 && c.length < 15000 && (c.el as HTMLElement).offsetParent !== null)
+      .sort((a, b) => b.length - a.length);
+
+    if (candidates.length > 0) {
+      rawDescription = candidates[0].text;
+      console.log('Scribe.ai: Using fallback candidate with length:', candidates[0].length);
+    }
+  }
 
   return {
     title,
