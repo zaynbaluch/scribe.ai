@@ -17,6 +17,8 @@ interface AuthState {
   isLoading: boolean;
 
   loginWithGoogle: (credential: string) => Promise<void>;
+  loginWithGithub: (code: string) => Promise<void>;
+  loginWithLinkedin: (code: string, redirectUri: string) => Promise<void>;
   logout: () => void;
   fetchUser: () => Promise<void>;
   setLoading: (loading: boolean) => void;
@@ -33,6 +35,38 @@ export const useAuthStore = create<AuthState>((set) => ({
       const data = await api.post(
         '/api/auth/google',
         { credential },
+        { skipAuth: true }
+      );
+      setTokens(data.accessToken, data.refreshToken);
+      set({ user: data.user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  loginWithGithub: async (code: string) => {
+    set({ isLoading: true });
+    try {
+      const data = await api.post(
+        '/api/auth/github',
+        { code },
+        { skipAuth: true }
+      );
+      setTokens(data.accessToken, data.refreshToken);
+      set({ user: data.user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  loginWithLinkedin: async (code: string, redirectUri: string) => {
+    set({ isLoading: true });
+    try {
+      const data = await api.post(
+        '/api/auth/linkedin',
+        { code, redirectUri },
         { skipAuth: true }
       );
       setTokens(data.accessToken, data.refreshToken);

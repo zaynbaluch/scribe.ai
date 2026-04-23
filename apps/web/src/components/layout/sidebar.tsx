@@ -17,6 +17,7 @@ import {
   Sparkles,
   Wand2,
 } from 'lucide-react';
+import Logo from '@/components/ui/logo';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -51,9 +52,7 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
     >
       {/* Logo */}
       <div className="h-14 flex items-center px-4 border-b border-[var(--grid-line-strong)]">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--gradient-1)] to-[var(--gradient-2)] flex items-center justify-center text-white font-display font-bold text-sm flex-shrink-0">
-          S
-        </div>
+        <Logo size={24} className="text-[var(--text-primary)]" />
         {(!collapsed || isMobile) && (
           <span className="ml-3 font-display font-bold text-lg tracking-tight whitespace-nowrap">
             Scribe.ai
