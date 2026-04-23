@@ -1,8 +1,8 @@
 // Bold Statement — Strong visual hierarchy, accent background bars
 #import "../shared/lib.typ": *
 
-#let data = if sys.inputs.at("data", default: none) != none {
-  json.decode(sys.inputs.data)
+#let data = if sys.inputs.at("dataPath", default: none) != none {
+  json(sys.inputs.dataPath)
 } else {
   json("data.json")
 }
@@ -29,19 +29,28 @@
 
 // ─── Header ─────────────────────────────────────────────────────────────────
 #block(fill: accent, inset: (x: 16pt, y: 14pt), radius: 4pt, width: 100%)[
-  #text(size: 24pt, weight: "bold", fill: white)[#profile.at("name", default: "Your Name")]
-  #if profile.at("headline", default: "") != "" {
-    linebreak()
-    text(size: 11pt, fill: white.darken(15%))[#profile.headline]
-  }
-  #v(0.3em)
-  #set text(fill: white.darken(20%), size: 9pt)
-  #let items = ()
-  #if profile.at("email", default: "") != "" { items.push(profile.email) }
-  #if profile.at("phone", default: "") != "" { items.push(profile.phone) }
-  #if profile.at("location", default: "") != "" { items.push(profile.location) }
-  #if profile.at("website", default: "") != "" { items.push(profile.website) }
-  #items.join([ #sym.bar.v ])
+  #stack(
+    dir: ltr,
+    spacing: 1fr,
+    align(left + horizon)[
+      #text(size: 24pt, weight: "bold", fill: white)[#profile.at("name", default: "Your Name")]
+      #if profile.at("headline", default: "") != "" {
+        linebreak()
+        text(size: 11pt, fill: white.darken(15%))[#profile.headline]
+      }
+      #v(0.3em)
+      #set text(fill: white.darken(20%), size: 9pt)
+      #let items = ()
+      #if profile.at("email", default: "") != "" { items.push(profile.email) }
+      #if profile.at("phone", default: "") != "" { items.push(profile.phone) }
+      #if profile.at("location", default: "") != "" { items.push(profile.location) }
+      #if profile.at("website", default: "") != "" { items.push(profile.website) }
+      #items.join([ #sym.bar.v ])
+    ],
+    if data.at("showQrCode", default: false) {
+      qr-code-block(data.at("qrImagePath", default: ""), size: 45pt)
+    }
+  )
 ]
 
 #v(0.5em)

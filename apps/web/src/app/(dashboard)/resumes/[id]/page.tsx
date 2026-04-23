@@ -37,9 +37,11 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   const [localShowQrCode, setLocalShowQrCode] = useState(true);
   const [activeTab, setActiveTab] = useState<'design' | 'content'>('design');
 
-  // Sidebar Resizing State
-  const [sidebarWidth, setSidebarWidth] = useState(360);
+  // Sidebar Resizing Refs & State
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const isResizingRef = useRef(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(360);
   const minWidth = 280;
   const maxWidth = 600;
 
@@ -64,24 +66,37 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
     }
   }, [activeResume]);
 
-  // Handle resizing
+  // Handle resizing with direct DOM manipulation for performance (zero lag)
   const startResizing = useCallback((e: React.MouseEvent) => {
+    isResizingRef.current = true;
     setIsResizing(true);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
     e.preventDefault();
   }, []);
 
   const stopResizing = useCallback(() => {
-    setIsResizing(false);
+    if (isResizingRef.current) {
+      isResizingRef.current = false;
+      setIsResizing(false);
+      document.body.style.cursor = 'default';
+      document.body.style.userSelect = 'auto';
+      
+      // Persist the final width to React state
+      if (sidebarRef.current) {
+        setSidebarWidth(sidebarRef.current.offsetWidth);
+      }
+    }
   }, []);
 
   const resize = useCallback((e: MouseEvent) => {
-    if (isResizing) {
+    if (isResizingRef.current && sidebarRef.current) {
       const newWidth = e.clientX;
       if (newWidth >= minWidth && newWidth <= maxWidth) {
-        setSidebarWidth(newWidth);
+        sidebarRef.current.style.width = `${newWidth}px`;
       }
     }
-  }, [isResizing]);
+  }, []);
 
   useEffect(() => {
     window.addEventListener('mousemove', resize);
@@ -190,6 +205,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         {/* Controls Panel */}
         <div 
+          ref={sidebarRef}
           className="flex-shrink-0 md:border-r border-b md:border-b-0 border-[var(--grid-line-strong)] flex flex-col max-h-[50vh] md:max-h-full bg-[var(--bg-surface)] z-10"
           style={{ width: typeof window !== 'undefined' && window.innerWidth >= 768 ? `${sidebarWidth}px` : '100%' }}
         >
@@ -268,6 +284,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
 
         {/* Preview Panel */}
         <div className="flex-1 overflow-auto bg-[var(--bg-elevated)]/30 relative">
+          {isResizing && <div className="absolute inset-0 z-40 bg-transparent" />}
           <ResumePreview
             profile={localProfile}
             templateId={localTemplateId}
