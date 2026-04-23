@@ -11,6 +11,7 @@ interface StyleControlsProps {
     marginLeft?: number;
     marginRight?: number;
     showProfileImage?: boolean;
+    qrSize?: number;
   };
   hasAvatar?: boolean;
   onChange: (styles: any) => void;
