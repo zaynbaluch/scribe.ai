@@ -10,16 +10,18 @@ datasource db {
 // ─── User ───────────────────────────────────────────────────────────────────────
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  name          String
-  avatarUrl     String?
-  oauthProvider String   // google, linkedin, github
-  oauthId       String   @unique
-  plan          String   @default("free") // free, pro, lifetime
-  vanitySlug    String?  @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id               String   @id @default(uuid())
+  email            String   @unique
+  name             String
+  avatarUrl        String?
+  passwordHash     String?
+  oauthProvider    String?  // google, linkedin, github
+  oauthId          String?  @unique
+  twoFactorEnabled Boolean  @default(true) // Default to true for security as requested
+  plan             String   @default("free") // free, pro, lifetime
+  vanitySlug       String?  @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   profile      Profile?
   resumes      Resume[]
@@ -27,6 +29,17 @@ model User {
   jobs         Job[]
   applications Application[]
   portfolio    Portfolio?
+}
+
+model VerificationCode {
+  id        String   @id @default(uuid())
+  email     String
+  code      String
+  type      String   // "2fa", "reset", "verify"
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
 }
 
 // ─── Profile ────────────────────────────────────────────────────────────────────

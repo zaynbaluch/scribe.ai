@@ -18,15 +18,36 @@ const transporter = nodemailer.createTransport({
 
 const FROM = process.env.EMAIL_FROM || 'noreply@scribe.local';
 
-export async function sendEmail(to: string, subject: string, html: string) {
+export async function sendEmail(to: string, subject: string, html: string, attachments: any[] = []) {
   try {
-    const info = await transporter.sendMail({ from: FROM, to, subject, html });
+    const info = await transporter.sendMail({ 
+      from: FROM, 
+      to, 
+      subject, 
+      html,
+      attachments: [
+        {
+          filename: 'logo.png',
+          path: '../../web/public/logo.png', // Relative to the project root or adjust path accordingly
+          cid: 'scribe-logo'
+        },
+        ...attachments
+      ]
+    });
     logger.info({ to, subject, messageId: info.messageId }, 'Email sent');
     return info;
   } catch (err) {
     logger.error({ err, to, subject }, 'Failed to send email');
     throw err;
   }
+}
+
+/**
+ * Send a 2FA Verification Code email.
+ */
+export async function send2FACode(to: string, code: string) {
+  const html = TWO_FACTOR_HTML.replace(/{{code}}/g, code);
+  return sendEmail(to, `🔒 ${code} is your Scribe.ai verification code`, html);
 }
 
 /**
@@ -66,9 +87,49 @@ export async function sendFollowUpNudge(to: string, name: string, jobTitle: stri
 
 // ─── Pre-compiled Email Templates (inline for simplicity) ───────────────────
 
+const TWO_FACTOR_HTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
+    body { font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e4e4e7; margin: 0; padding: 0; }
+    .container { max-width: 480px; margin: 40px auto; background: #18181b; border-radius: 20px; padding: 40px; border: 1px solid #27272a; text-align: center; }
+    .logo { width: 40px; height: 40px; margin-bottom: 24px; }
+    .title { font-size: 24px; font-weight: 700; color: #ffffff; margin-bottom: 8px; letter-spacing: -0.02em; }
+    .subtitle { color: #a1a1aa; font-size: 14px; margin-bottom: 32px; }
+    .code-box { background: #09090b; border: 1px solid #3f3f46; border-radius: 12px; padding: 24px; margin-bottom: 32px; }
+    .code { font-size: 32px; font-weight: 700; color: #818cf8; letter-spacing: 0.2em; font-family: monospace; }
+    .footer { color: #52525b; font-size: 12px; margin-top: 40px; border-top: 1px solid #27272a; padding-top: 24px; }
+    .brand { font-weight: 600; color: #818cf8; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="cid:scribe-logo" alt="Scribe.ai Logo" class="logo">
+    <div class="title">Security Verification</div>
+    <div class="subtitle">Use the code below to complete your sign in.</div>
+    
+    <div class="code-box">
+      <div class="code">{{code}}</div>
+    </div>
+    
+    <p style="color: #a1a1aa; font-size: 13px; line-height: 1.6; margin-bottom: 0;">
+      This code will expire in 10 minutes. If you didn't request this code, you can safely ignore this email.
+    </p>
+    
+    <div class="footer">
+      <span class="brand">Scribe.ai</span> — Your career story, intelligently told.
+    </div>
+  </div>
+</body>
+</html>
+`;
+
 const DEADLINE_REMINDER_HTML = `
 <!DOCTYPE html><html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e4e4e7; padding: 40px;">
-<div style="max-width: 520px; margin: 0 auto; background: #18181b; border-radius: 16px; padding: 32px; border: 1px solid #27272a;">
+<div style="max-width: 520px; margin: 0 auto; background: #18181b; border-radius: 16px; padding: 32px; border: 1px solid #27272a; text-align: center;">
+  <img src="cid:scribe-logo" alt="Scribe.ai Logo" style="width: 32px; height: 32px; margin-bottom: 16px;">
   <h2 style="margin: 0 0 8px; color: #fafafa;">⏰ Deadline Approaching</h2>
   <p style="color: #a1a1aa; margin: 0 0 24px; font-size: 14px;">Hi {{name}},</p>
   <p style="color: #d4d4d8; font-size: 14px; line-height: 1.6;">
@@ -82,7 +143,8 @@ const DEADLINE_REMINDER_HTML = `
 
 const FOLLOW_UP_HTML = `
 <!DOCTYPE html><html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e4e4e7; padding: 40px;">
-<div style="max-width: 520px; margin: 0 auto; background: #18181b; border-radius: 16px; padding: 32px; border: 1px solid #27272a;">
+<div style="max-width: 520px; margin: 0 auto; background: #18181b; border-radius: 16px; padding: 32px; border: 1px solid #27272a; text-align: center;">
+  <img src="cid:scribe-logo" alt="Scribe.ai Logo" style="width: 32px; height: 32px; margin-bottom: 16px;">
   <h2 style="margin: 0 0 8px; color: #fafafa;">👋 Time to Follow Up?</h2>
   <p style="color: #a1a1aa; margin: 0 0 24px; font-size: 14px;">Hi {{name}},</p>
   <p style="color: #d4d4d8; font-size: 14px; line-height: 1.6;">

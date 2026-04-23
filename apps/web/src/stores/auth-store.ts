@@ -17,12 +17,14 @@ interface AuthState {
   isLoading: boolean;
 
   loginWithGoogle: (credential: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ requires2FA: boolean }>;
+  verify2FA: (email: string, code: string) => Promise<void>;
   logout: () => void;
   fetchUser: () => Promise<void>;
   setLoading: (loading: boolean) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isAuthenticated: false,
   isLoading: true,
@@ -35,6 +37,35 @@ export const useAuthStore = create<AuthState>((set) => ({
         { credential },
         { skipAuth: true }
       );
+      setTokens(data.accessToken, data.refreshToken);
+      set({ user: data.user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  login: async (email, password) => {
+    set({ isLoading: true });
+    try {
+      const data = await api.post('/api/auth/login', { email, password }, { skipAuth: true });
+      if (data.requires2FA) {
+        set({ isLoading: false });
+        return { requires2FA: true };
+      }
+      setTokens(data.accessToken, data.refreshToken);
+      set({ user: data.user, isAuthenticated: true, isLoading: false });
+      return { requires2FA: false };
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  verify2FA: async (email, code) => {
+    set({ isLoading: true });
+    try {
+      const data = await api.post('/api/auth/verify-2fa', { email, code }, { skipAuth: true });
       setTokens(data.accessToken, data.refreshToken);
       set({ user: data.user, isAuthenticated: true, isLoading: false });
     } catch (error) {

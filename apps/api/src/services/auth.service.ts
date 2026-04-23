@@ -1,7 +1,10 @@
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import logger from '../lib/logger';
+import { send2FACode } from './email.service';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-dev-jwt-secret-change-in-prod';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
@@ -57,6 +60,83 @@ export async function verifyGoogleToken(credential: string): Promise<GoogleUserI
     logger.error({ err }, 'Failed to verify Google token');
     throw new Error('Invalid Google credential');
   }
+}
+
+/**
+ * Register a new user with email and password.
+ */
+export async function registerWithEmailPassword(email: string, password: string, name: string) {
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) throw new Error('Email already in use');
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const user = await prisma.user.create({
+    data: {
+      email,
+      name,
+      passwordHash,
+      twoFactorEnabled: true,
+      profile: { create: {} },
+    },
+  });
+
+  return user;
+}
+
+/**
+ * Login with email and password - triggers 2FA if enabled.
+ */
+export async function loginWithEmailPassword(email: string, password: string) {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !user.passwordHash) throw new Error('Invalid credentials');
+
+  const isValid = await bcrypt.compare(password, user.passwordHash);
+  if (!isValid) throw new Error('Invalid credentials');
+
+  if (user.twoFactorEnabled) {
+    const code = crypto.randomInt(100000, 999999).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+    await prisma.verificationCode.create({
+      data: {
+        email,
+        code,
+        type: '2fa',
+        expiresAt,
+      },
+    });
+
+    await send2FACode(email, code);
+    return { requires2FA: true };
+  }
+
+  return { user, tokens: generateTokenPair(user.id, user.email) };
+}
+
+/**
+ * Verify a 2FA code and return tokens.
+ */
+export async function verify2FACode(email: string, code: string) {
+  const verification = await prisma.verificationCode.findFirst({
+    where: {
+      email,
+      code,
+      type: '2fa',
+      expiresAt: { gt: new Date() },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (!verification) throw new Error('Invalid or expired code');
+
+  // Delete code after use
+  await prisma.verificationCode.delete({ where: { id: verification.id } });
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) throw new Error('User not found');
+
+  return { user, tokens: generateTokenPair(user.id, user.email) };
 }
 
 /**

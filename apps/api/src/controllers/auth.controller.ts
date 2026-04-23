@@ -4,6 +4,70 @@ import { createError, asyncHandler } from '../middleware/error-handler.middlewar
 import logger from '../lib/logger';
 
 /**
+ * POST /api/auth/register
+ */
+export const register = asyncHandler(async (req: Request, res: Response) => {
+  const { email, password, name } = req.body;
+  if (!email || !password || !name) throw createError('Missing fields', 400);
+
+  const user = await authService.registerWithEmailPassword(email, password, name);
+  res.status(201).json({ success: true, data: { id: user.id, email: user.email } });
+});
+
+/**
+ * POST /api/auth/login
+ */
+export const login = asyncHandler(async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  if (!email || !password) throw createError('Missing fields', 400);
+
+  const result = await authService.loginWithEmailPassword(email, password);
+
+  if ('requires2FA' in result) {
+    return res.json({ success: true, data: { requires2FA: true, email } });
+  }
+
+  const { user, tokens } = result;
+  res.json({
+    success: true,
+    data: {
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        plan: user.plan,
+      },
+    },
+  });
+});
+
+/**
+ * POST /api/auth/verify-2fa
+ */
+export const verify2FA = asyncHandler(async (req: Request, res: Response) => {
+  const { email, code } = req.body;
+  if (!email || !code) throw createError('Missing fields', 400);
+
+  const { user, tokens } = await authService.verify2FACode(email, code);
+
+  res.json({
+    success: true,
+    data: {
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        plan: user.plan,
+      },
+    },
+  });
+});
+
+/**
  * POST /api/auth/google
  * Exchange a Google ID token for our JWT access + refresh tokens.
  */
