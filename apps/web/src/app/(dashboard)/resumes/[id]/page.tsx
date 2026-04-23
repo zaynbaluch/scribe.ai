@@ -91,7 +91,8 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
 
   const resize = useCallback((e: MouseEvent) => {
     if (isResizingRef.current && sidebarRef.current) {
-      const newWidth = e.clientX;
+      const rect = sidebarRef.current.getBoundingClientRect();
+      const newWidth = e.clientX - rect.left;
       if (newWidth >= minWidth && newWidth <= maxWidth) {
         sidebarRef.current.style.width = `${newWidth}px`;
       }
