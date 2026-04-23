@@ -162,7 +162,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
               <>
                 <TemplatePicker templates={templates} selected={localTemplateId} onSelect={handleTemplateChange} />
                 <div className="border-t border-[var(--grid-line)]" />
-                <StyleControls styles={localStyles} hasAvatar={!!profile?.imageUrl} onChange={handleStylesChange} />
+                <StyleControls styles={localStyles} hasAvatar={!!localProfile?.imageUrl} onChange={handleStylesChange} />
                 <div className="border-t border-[var(--grid-line)]" />
                 <SectionToggles
                   sectionOrder={localSectionOrder}

@@ -178,8 +178,10 @@ function renderSections(order: string[], profile: any, vis: Record<string, boole
         </SectionBlock>;
       case 'experience':
         if (!profile.experiences?.length) return null;
+        const visibleExperiences = profile.experiences.filter((e: any) => e.visible !== false);
+        if (visibleExperiences.length === 0) return null;
         return <SectionBlock key={section} title="Experience" accentColor={accent} templateId={templateId}>
-          {profile.experiences.map((exp: any, i: number) => (
+          {visibleExperiences.map((exp: any, i: number) => (
             <div key={i} className="mb-2">
               <div className="flex justify-between">
                 <div>
@@ -199,8 +201,10 @@ function renderSections(order: string[], profile: any, vis: Record<string, boole
         </SectionBlock>;
       case 'education':
         if (!profile.education?.length) return null;
+        const visibleEducation = profile.education.filter((e: any) => e.visible !== false);
+        if (visibleEducation.length === 0) return null;
         return <SectionBlock key={section} title="Education" accentColor={accent} templateId={templateId}>
-          {profile.education.map((e: any, i: number) => (
+          {visibleEducation.map((e: any, i: number) => (
             <div key={i} className="flex justify-between mb-1">
               <div>
                 <span className="text-[10px] font-bold">{e.degree}{e.field ? ` in ${e.field}` : ''}</span>
@@ -229,11 +233,25 @@ function renderSections(order: string[], profile: any, vis: Record<string, boole
         </SectionBlock>;
       case 'projects':
         if (!profile.projects?.length) return null;
+        const visibleProjects = profile.projects.filter((p: any) => p.visible !== false);
+        if (visibleProjects.length === 0) return null;
         return <SectionBlock key={section} title="Projects" accentColor={accent} templateId={templateId}>
-          {profile.projects.map((p: any, i: number) => (
+          {visibleProjects.map((p: any, i: number) => (
             <div key={i} className="mb-1.5">
-              <span className="text-[10px] font-bold">{p.name}</span>
-              {p.description && <div className="text-[9px] text-gray-600">{p.description}</div>}
+              <div className="flex justify-between items-baseline">
+                <span className="text-[10px] font-bold">{p.name}</span>
+                {p.techStack?.length > 0 && (
+                  <span className="text-[8px] text-gray-400 italic">{p.techStack.join(', ')}</span>
+                )}
+              </div>
+              {p.description && <div className="text-[9px] text-gray-600 leading-tight">{p.description}</div>}
+              {p.bullets?.length > 0 && (
+                <ul className="list-disc ml-3 mt-0.5">
+                  {p.bullets.map((b: string, bi: number) => (
+                    <li key={bi} className="text-[9px] text-gray-600 leading-tight">{b}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
         </SectionBlock>;

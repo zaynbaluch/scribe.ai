@@ -104,7 +104,11 @@
     if projs.len() > 0 {
       section-heading("Projects", accent: accent, style: "classic")
       for p in projs {
-        entry-header(p.at("name", default: ""), none, "")
+        entry-header(
+          p.at("name", default: ""),
+          if p.at("techStack", default: ()).len() > 0 { p.techStack.join(", ") } else { none },
+          if p.at("url", default: "") != "" { p.url } else { "" }
+        )
         if p.at("description", default: "") != "" { text(size: 9.5pt)[#p.description] }
         if p.at("bullets", default: ()).len() > 0 { bullet-list(p.bullets) }
         v(0.2em)

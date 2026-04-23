@@ -11,5 +11,6 @@ router.get('/', controller.getCoverLetters);
 router.get('/:id', controller.getCoverLetter);
 router.patch('/:id', controller.updateCoverLetter);
 router.delete('/:id', controller.deleteCoverLetter);
+router.get('/:id/export/:format', controller.exportCoverLetter);
 
 export default router;

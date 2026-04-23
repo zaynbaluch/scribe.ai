@@ -44,6 +44,41 @@ export const exportResume = asyncHandler(async (req: Request, res: Response) => 
 });
 
 /**
+ * GET /api/cover-letters/:id/export/:format
+ */
+export const exportCoverLetter = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const id = req.params.id as string;
+  const format = req.params.format as string;
+
+  switch (format) {
+    case 'pdf': {
+      const pdfBuffer = await exportService.exportCoverLetterPdf(userId, id);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="cover-letter.pdf"`);
+      res.send(pdfBuffer);
+      break;
+    }
+    case 'docx': {
+      const docxBuffer = await exportService.exportCoverLetterDocx(userId, id);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.setHeader('Content-Disposition', `attachment; filename="cover-letter.docx"`);
+      res.send(docxBuffer);
+      break;
+    }
+    case 'txt': {
+      const text = await exportService.exportCoverLetterTxt(userId, id);
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Disposition', `attachment; filename="cover-letter.txt"`);
+      res.send(text);
+      break;
+    }
+    default:
+      throw createError(`Unsupported format: ${format}`, 400, 'INVALID_FORMAT');
+  }
+});
+
+/**
  * GET /api/templates
  */
 export const getTemplates = asyncHandler(async (_req: Request, res: Response) => {

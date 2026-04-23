@@ -116,12 +116,15 @@
     #if projs.len() > 0 and vis.at("projects", default: true) != false {
       section-heading("Projects", accent: accent, style: "modern")
       for p in projs {
-        text(weight: "semibold", size: 9.5pt)[#p.at("name", default: "")]
-        if p.at("description", default: "") != "" {
-          linebreak()
-          text(size: 9pt)[#p.description]
-        }
-        v(0.2em)
+        entry-header(
+          p.at("name", default: ""),
+          if p.at("techStack", default: ()).len() > 0 { p.techStack.join(", ") } else { none },
+          if p.at("url", default: "") != "" { p.url } else { "" },
+          accent: accent
+        )
+        if p.at("description", default: "") != "" { text(size: 9pt)[#p.description] }
+        if p.at("bullets", default: ()).len() > 0 { bullet-list(p.bullets) }
+        v(0.25em)
       }
     }
   ],

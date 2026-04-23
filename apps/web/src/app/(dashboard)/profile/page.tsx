@@ -210,9 +210,9 @@ export default function ProfilePage() {
             <InputField label="Job Title" value={item.title} onChange={(v) => onChange({ title: v })} placeholder="e.g. Software Engineer" />
             <InputField label="Company" value={item.company} onChange={(v) => onChange({ company: v })} placeholder="e.g. TechCorp" />
             <InputField label="Location" value={item.location || ''} onChange={(v) => onChange({ location: v })} placeholder="e.g. Remote" />
-            <div className="flex items-center gap-4">
-              <InputField label="Start Date" value={item.startDate?.slice(0, 10) || ''} onChange={(v) => onChange({ startDate: v })} type="date" />
-              {!item.current && <InputField label="End Date" value={item.endDate?.slice(0, 10) || ''} onChange={(v) => onChange({ endDate: v })} type="date" />}
+            <div className="grid grid-cols-2 gap-4">
+              <CustomDatePicker label="Start Date" value={item.startDate || ''} onChange={(v) => onChange({ startDate: v })} mode="month" />
+              {!item.current && <CustomDatePicker label="End Date" value={item.endDate || ''} onChange={(v) => onChange({ endDate: v })} mode="month" />}
             </div>
             <label className="col-span-full flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" checked={item.current || false} onChange={(e) => onChange({ current: e.target.checked, endDate: e.target.checked ? null : item.endDate })} className="rounded" />
@@ -241,8 +241,8 @@ export default function ProfilePage() {
             <InputField label="Degree" value={item.degree} onChange={(v) => onChange({ degree: v })} placeholder="e.g. BS Computer Science" />
             <InputField label="Field of Study" value={item.field || ''} onChange={(v) => onChange({ field: v })} placeholder="e.g. Computer Science" />
             <InputField label="GPA" value={item.gpa || ''} onChange={(v) => onChange({ gpa: v })} placeholder="e.g. 3.8/4.0" />
-            <InputField label="Start Date" value={item.startDate?.slice(0, 10) || ''} onChange={(v) => onChange({ startDate: v })} type="date" />
-            <InputField label="End Date" value={item.endDate?.slice(0, 10) || ''} onChange={(v) => onChange({ endDate: v })} type="date" />
+            <CustomDatePicker label="Start Date" value={item.startDate || ''} onChange={(v) => onChange({ startDate: v })} mode="month" />
+            <CustomDatePicker label="End Date" value={item.endDate || ''} onChange={(v) => onChange({ endDate: v })} mode="month" />
           </div>
         )}
       />
@@ -298,8 +298,8 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InputField label="Project Name" value={item.name} onChange={(v) => onChange({ name: v })} placeholder="e.g. Scribe.ai" />
             <InputField label="URL" value={item.url || ''} onChange={(v) => onChange({ url: v })} placeholder="https://github.com/..." />
-            <InputField label="Start Date" value={item.startDate?.slice(0, 10) || ''} onChange={(v) => onChange({ startDate: v })} type="date" />
-            <InputField label="End Date" value={item.endDate?.slice(0, 10) || ''} onChange={(v) => onChange({ endDate: v })} type="date" />
+            <CustomDatePicker label="Start Date" value={item.startDate || ''} onChange={(v) => onChange({ startDate: v })} mode="month" />
+            <CustomDatePicker label="End Date" value={item.endDate || ''} onChange={(v) => onChange({ endDate: v })} mode="month" />
             <div className="col-span-full">
               <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Tech Stack (comma separated)</label>
               <input type="text" value={item.techStack?.join(', ') || ''} onChange={(e) => onChange({ techStack: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} placeholder="React, Node.js, Typescript"
@@ -324,10 +324,10 @@ export default function ProfilePage() {
         createEmpty={() => ({ name: '', issuer: '', date: '', url: '' })}
         renderForm={(item, onChange) => (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <InputField label="Certification Name" value={item.name} onChange={(v) => onChange({ name: v })} placeholder="e.g. AWS Solutions Architect" />
-            <InputField label="Issuer" value={item.issuer} onChange={(v) => onChange({ issuer: v })} placeholder="e.g. Amazon" />
-            <InputField label="Date" value={item.date?.slice(0, 7) || ''} onChange={(v) => onChange({ date: v })} type="month" />
-            <InputField label="URL" value={item.url || ''} onChange={(v) => onChange({ url: v })} placeholder="Credential URL" />
+            <InputField label="Name" value={item.name} onChange={(v) => onChange({ name: v })} placeholder="e.g. AWS Certified Developer" />
+            <InputField label="Issuer" value={item.issuer} onChange={(v) => onChange({ issuer: v })} placeholder="e.g. Amazon Web Services" />
+            <CustomDatePicker label="Date" value={item.date || ''} onChange={(v) => onChange({ date: v })} mode="date" />
+            <InputField label="URL" value={item.url || ''} onChange={(v) => onChange({ url: v })} placeholder="Verification link" />
           </div>
         )}
       />
@@ -342,10 +342,10 @@ export default function ProfilePage() {
         createEmpty={() => ({ title: '', venue: '', date: '', url: '' })}
         renderForm={(item, onChange) => (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <InputField label="Title" value={item.title} onChange={(v) => onChange({ title: v })} placeholder="e.g. Research Paper on AI" />
-            <InputField label="Venue/Publisher" value={item.venue || ''} onChange={(v) => onChange({ venue: v })} placeholder="e.g. IEEE" />
-            <InputField label="Date" value={item.date?.slice(0, 7) || ''} onChange={(v) => onChange({ date: v })} type="month" />
-            <InputField label="URL" value={item.url || ''} onChange={(v) => onChange({ url: v })} placeholder="Link to publication" />
+            <InputField label="Title" value={item.title} onChange={(v) => onChange({ title: v })} placeholder="e.g. Multi-agent AI systems" />
+            <InputField label="Publisher" value={item.venue} onChange={(v) => onChange({ venue: v })} placeholder="e.g. IEEE" />
+            <CustomDatePicker label="Date" value={item.date || ''} onChange={(v) => onChange({ date: v })} mode="date" />
+            <InputField label="URL" value={item.url || ''} onChange={(v) => onChange({ url: v })} placeholder="Paper link" />
           </div>
         )}
       />
@@ -362,8 +362,8 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InputField label="Role" value={item.role} onChange={(v) => onChange({ role: v })} placeholder="e.g. Mentor" />
             <InputField label="Organization" value={item.organization} onChange={(v) => onChange({ organization: v })} placeholder="e.g. Red Cross" />
-            <InputField label="Start Date" value={item.startDate?.slice(0, 10) || ''} onChange={(v) => onChange({ startDate: v })} type="date" />
-            <InputField label="End Date" value={item.endDate?.slice(0, 10) || ''} onChange={(v) => onChange({ endDate: v })} type="date" />
+            <CustomDatePicker label="Start Date" value={item.startDate || ''} onChange={(v) => onChange({ startDate: v })} mode="month" />
+            <CustomDatePicker label="End Date" value={item.endDate || ''} onChange={(v) => onChange({ endDate: v })} mode="month" />
           </div>
         )}
       />
@@ -375,6 +375,68 @@ export default function ProfilePage() {
 }
 
 // ─── Reusable input ─────────────────────────────────────────────────────────
+
+function CustomDatePicker({ label, value, onChange, mode = 'month' }: {
+  label: string; value: string; onChange: (v: string) => void; mode?: 'month' | 'date';
+}) {
+  // Parse YYYY-MM-DD or YYYY-MM
+  const parts = value.split('-');
+  const initialYear = parts[0] ? parseInt(parts[0]) : new Date().getFullYear();
+  const initialMonth = parts[1] ? parseInt(parts[1]) - 1 : 0;
+  const initialDay = parts[2] ? parseInt(parts[2]) : 1;
+
+  const years = Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i);
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+
+  const handleUpdate = (y: number, m: number, d?: number) => {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    if (mode === 'month') {
+      onChange(`${y}-${pad(m + 1)}`);
+    } else {
+      onChange(`${y}-${pad(m + 1)}-${pad(d || 1)}`);
+    }
+  };
+
+  return (
+    <div>
+      <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1.5">{label}</label>
+      <div className="flex gap-2">
+        {mode === 'date' && (
+          <select 
+            value={initialDay} 
+            onChange={(e) => handleUpdate(initialYear, initialMonth, parseInt(e.target.value))}
+            className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-[var(--gradient-2)]"
+          >
+            {Array.from({ length: 31 }, (_, i) => (
+              <option key={i+1} value={i+1}>{i+1}</option>
+            ))}
+          </select>
+        )}
+        <select 
+          value={initialMonth} 
+          onChange={(e) => handleUpdate(initialYear, parseInt(e.target.value), initialDay)}
+          className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-[var(--gradient-2)]"
+        >
+          {months.map((m, i) => (
+            <option key={i} value={i}>{m}</option>
+          ))}
+        </select>
+        <select 
+          value={initialYear} 
+          onChange={(e) => handleUpdate(parseInt(e.target.value), initialMonth, initialDay)}
+          className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-[var(--gradient-2)]"
+        >
+          {years.map(y => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
 
 function InputField({ label, value, onChange, placeholder, type = 'text' }: {
   label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string;

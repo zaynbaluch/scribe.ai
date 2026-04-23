@@ -13,6 +13,7 @@ interface CoverLetterEditorProps {
 
 export default function CoverLetterEditor({ content, onChange, onAiRewrite }: CoverLetterEditorProps) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Placeholder.configure({

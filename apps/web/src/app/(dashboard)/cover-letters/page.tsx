@@ -6,6 +6,7 @@ import { FileText, Calendar, Building2, Trash2, PenLine } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import CreateCoverLetterModal from '@/components/cover-letter/create-modal';
+import ExportDropdown from '@/components/cover-letter/export-dropdown';
 
 interface CoverLetter {
   id: string;
@@ -129,15 +130,24 @@ export default function CoverLettersPage() {
             <>
               <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] flex justify-between items-center">
                 <h2 className="font-medium text-sm">{selectedLetter.title}</h2>
-                <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText(selectedLetter.content);
-                    toast.success('Copied to clipboard');
-                  }}
-                  className="px-3 py-1.5 text-xs bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded hover:bg-[var(--bg-surface)] transition-colors"
-                >
-                  Copy Text
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => router.push(`/cover-letters/${selectedLetter.id}`)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded hover:bg-[var(--bg-surface)] transition-colors text-[var(--text-primary)]"
+                  >
+                    <PenLine size={12} /> Edit
+                  </button>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedLetter.content);
+                      toast.success('Copied to clipboard');
+                    }}
+                    className="px-3 py-1.5 text-xs bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded hover:bg-[var(--bg-surface)] transition-colors"
+                  >
+                    Copy Text
+                  </button>
+                  <ExportDropdown id={selectedLetter.id} />
+                </div>
               </div>
               <div className="p-8 overflow-y-auto flex-1 font-serif text-sm leading-relaxed whitespace-pre-wrap text-[var(--text-secondary)]">
                 {selectedLetter.content}

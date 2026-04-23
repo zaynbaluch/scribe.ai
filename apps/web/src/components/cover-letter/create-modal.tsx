@@ -28,8 +28,9 @@ export default function CreateCoverLetterModal({ isOpen, onClose, onCreated }: C
   const fetchData = async () => {
     try {
       const resumesData = await api.get<any[]>('/api/resumes');
-      setResumes(resumesData);
-      if (resumesData.length > 0) setSelectedResumeId(resumesData[0].id);
+      const baseResumes = resumesData.filter(r => !r.isTailored);
+      setResumes(baseResumes);
+      if (baseResumes.length > 0) setSelectedResumeId(baseResumes[0].id);
     } catch (error) {
       toast.error('Failed to load resumes');
     }
@@ -97,7 +98,7 @@ export default function CreateCoverLetterModal({ isOpen, onClose, onCreated }: C
             >
               <option value="" disabled>Select a resume</option>
               {resumes.map(r => (
-                <option key={r.id} value={r.id}>{r.name} {r.isTailored ? '(Tailored)' : ''}</option>
+                <option key={r.id} value={r.id}>{r.name}</option>
               ))}
             </select>
           </div>

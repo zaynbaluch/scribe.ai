@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Plus, Trash2, GripVertical } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, Trash2, GripVertical, Eye, EyeOff } from 'lucide-react';
 
 interface ContentEditorProps {
   profile: any;
@@ -110,7 +110,11 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                           rows={2}
                           onChange={(e) => {
                             const newExps = [...profile.experiences];
-                            newExps[idx].bullets[bIdx] = e.target.value;
+                            const exp = { ...newExps[idx] };
+                            const bullets = [...(exp.bullets || [])];
+                            bullets[bIdx] = e.target.value;
+                            exp.bullets = bullets;
+                            newExps[idx] = exp;
                             updateProfile('experiences', newExps);
                           }}
                           className="flex-1 px-2 py-1.5 rounded bg-[var(--bg-elevated)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--gradient-2)] resize-none"
@@ -158,17 +162,30 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
           <div className="p-4 space-y-6 bg-[var(--bg-base)]">
             {profile.projects?.map((proj: any, idx: number) => (
               <div key={idx} className="space-y-3 p-3 rounded-lg border border-[var(--grid-line)] bg-[var(--bg-surface)]">
-                <input 
-                  type="text" 
-                  value={proj.name || ''} 
-                  placeholder="Project Name"
-                  onChange={(e) => {
-                    const newProjs = [...profile.projects];
-                    newProjs[idx].name = e.target.value;
-                    updateProfile('projects', newProjs);
-                  }}
-                  className="w-full bg-transparent font-medium text-sm focus:outline-none"
-                />
+                <div className="flex justify-between items-center gap-3">
+                  <input 
+                    type="text" 
+                    value={proj.name || ''} 
+                    placeholder="Project Name"
+                    onChange={(e) => {
+                      const newProjs = [...profile.projects];
+                      newProjs[idx] = { ...newProjs[idx], name: e.target.value };
+                      updateProfile('projects', newProjs);
+                    }}
+                    className="flex-1 bg-transparent font-medium text-sm focus:outline-none"
+                  />
+                  <button 
+                    onClick={() => {
+                      const newProjs = [...profile.projects];
+                      newProjs[idx] = { ...newProjs[idx], visible: proj.visible === false };
+                      updateProfile('projects', newProjs);
+                    }}
+                    className={`p-1.5 rounded-lg transition-colors ${proj.visible === false ? 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]' : 'text-[var(--gradient-2)] hover:bg-[var(--gradient-2)]/10'}`}
+                    title={proj.visible === false ? "Hidden in resume" : "Visible in resume"}
+                  >
+                    {proj.visible === false ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
                 <input 
                   type="text" 
                   value={proj.techStack?.join(', ') || ''} 
@@ -201,7 +218,11 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                           rows={2}
                           onChange={(e) => {
                             const newProjs = [...profile.projects];
-                            newProjs[idx].bullets[bIdx] = e.target.value;
+                            const projItem = { ...newProjs[idx] };
+                            const bullets = [...(projItem.bullets || [])];
+                            bullets[bIdx] = e.target.value;
+                            projItem.bullets = bullets;
+                            newProjs[idx] = projItem;
                             updateProfile('projects', newProjs);
                           }}
                           className="flex-1 px-2 py-1.5 rounded bg-[var(--bg-elevated)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--gradient-2)] resize-none"

@@ -2,14 +2,50 @@
 
 import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Download } from 'lucide-react';
+import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import CoverLetterEditor from '@/components/cover-letter/cover-letter-editor';
+import ExportDropdown from '@/components/cover-letter/export-dropdown';
+import { api } from '@/lib/api-client';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 export default function CoverLetterDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const [content, setContent] = useState('<p>Loading...</p>');
+  const [content, setContent] = useState('');
   const [tone, setTone] = useState('formal');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCL = async () => {
+      try {
+        const res = await api.get<any>(`/api/cover-letters/${id}`);
+        setContent(res.content);
+        setTone(res.tone || 'formal');
+      } catch (err) {
+        toast.error('Failed to load cover letter');
+        router.push('/cover-letters');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCL();
+  }, [id, router]);
+
+  const handleSave = async () => {
+    try {
+      await api.patch(`/api/cover-letters/${id}`, { content, tone });
+      toast.success('Saved successfully');
+    } catch (err) {
+      toast.error('Save failed');
+    }
+  };
+
+  if (isLoading) return (
+    <div className="flex items-center justify-center h-[70vh]">
+      <Loader2 className="animate-spin text-[var(--gradient-2)]" />
+    </div>
+  );
 
   return (
     <div className="h-[calc(100vh-56px)] flex flex-col">
@@ -29,10 +65,7 @@ export default function CoverLetterDetailPage({ params }: { params: Promise<{ id
             <option value="conversational">Conversational</option>
             <option value="storytelling">Storytelling</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:opacity-90 transition-opacity">
-            <Download size={15} />
-            Export
-          </button>
+          <ExportDropdown id={id} />
         </div>
       </div>
 
