@@ -2,6 +2,7 @@
 Cover Letter Engine — LLM-powered cover letter generation.
 """
 from typing import Dict, Any
+import re
 from loguru import logger
 from app.providers.factory import get_llm_provider
 
@@ -12,6 +13,60 @@ def _get_llm():
     if _llm is None:
         _llm = get_llm_provider()
     return _llm
+
+
+def clean_cover_letter_body(text: str, name: str = "") -> str:
+    """
+    Remove common letter artifacts like salutations and sign-offs if they leak into the body.
+    """
+    lines = text.strip().split('\n')
+    if not lines:
+        return ""
+
+    # Remove salutations from the top
+    salutation_patterns = [
+        r'^Dear\s+.*?,?\s*$',
+        r'^To\s+Whom\s+It\s+May\s+Concern,?\s*$',
+        r'^Greetings,?\s*$',
+        r'^Hi\s+.*?,?\s*$',
+        r'^Hello,?\s*$',
+    ]
+    
+    while lines and any(re.match(p, lines[0].strip(), re.I) for p in salutation_patterns):
+        lines.pop(0)
+    
+    # Trim empty lines after salutation
+    while lines and not lines[0].strip():
+        lines.pop(0)
+
+    # Remove sign-offs from the bottom
+    signoff_patterns = [
+        r'^Sincerely,?\s*$',
+        r'^Regards,?\s*$',
+        r'^Best\s+regards,?\s*$',
+        r'^Best,?\s*$',
+        r'^Thank\s+you,?\s*$',
+        r'^Thanks,?\s*$',
+        r'^Yours\s+truly,?\s*$',
+    ]
+    
+    # Remove signature lines (usually the last 1-3 lines)
+    while lines:
+        last_line = lines[-1].strip()
+        if not last_line:
+            lines.pop()
+            continue
+        
+        is_signoff = any(re.match(p, last_line, re.I) for p in signoff_patterns)
+        is_name = name.lower() in last_line.lower() if name else False
+        
+        if is_signoff or is_name:
+            lines.pop()
+        else:
+            break
+
+    # Final trim
+    return '\n'.join(lines).strip()
 
 
 def generate_cover_letter(profile: Dict[str, Any], jd_keywords: Dict, jd_text: str, tone: str = "formal") -> str:
@@ -39,12 +94,14 @@ def generate_cover_letter(profile: Dict[str, Any], jd_keywords: Dict, jd_text: s
 
     system = (
         "You are an expert career coach and cover letter writer. "
-        "Write a targeted, compelling cover letter based on the applicant's profile and the job description. "
+        "Write a targeted, compelling cover letter body text based on the applicant's profile and the job description. "
         f"{tone_guidance} "
-        "Structure: 1. Strong opening (why them). 2. Highlight 1-2 highly relevant experiences matching the JD. "
-        "3. Cultural fit / enthusiasm. 4. Professional closing. "
-        "Return ONLY the cover letter text. Do not include placeholder blocks like [Company Address]. "
-        "Just write the content starting with 'Dear Hiring Manager,' or similar."
+        "STRICT INSTRUCTIONS:\n"
+        "1. DO NOT include any salutation (e.g., 'Dear Hiring Manager').\n"
+        "2. DO NOT include any sign-off (e.g., 'Sincerely', 'Regards').\n"
+        "3. DO NOT include your name or signature at the end.\n"
+        "4. Return ONLY the body paragraphs (usually 3-4 paragraphs).\n"
+        "5. START IMMEDIATELY with the first sentence of the introduction."
     )
 
     prompt = (
@@ -54,12 +111,12 @@ def generate_cover_letter(profile: Dict[str, Any], jd_keywords: Dict, jd_text: s
         f"Target Role: {job_title}\n"
         f"Job Keywords: {keyword_str}\n"
         f"Job Description Snippet: {jd_context}\n\n"
-        f"Cover Letter:"
+        "Write the cover letter body paragraphs only:"
     )
 
     try:
         result = llm.generate(prompt, system=system, temperature=0.7, max_tokens=600)
-        return result.strip()
+        return clean_cover_letter_body(result.strip(), name=name)
     except Exception as e:
         logger.error(f"Failed to generate cover letter: {e}")
-        return "Dear Hiring Manager,\n\nI am writing to express my interest in the position. Please find my resume attached.\n\nSincerely,\n" + name
+        return "I am writing to express my interest in the position. Please find my resume attached."

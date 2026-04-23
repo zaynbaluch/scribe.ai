@@ -51,6 +51,7 @@ interface TailorState {
   acceptAll: () => void;
   rejectAll: () => void;
   applyToResume: () => Promise<void>;
+  sendTailoredEmail: () => Promise<void>;
   reset: () => void;
 }
 
@@ -165,6 +166,20 @@ export const useTailorStore = create<TailorState>((set, get) => ({
       set({ step: 'success', newResumeId: tailoredResume.id, newCoverLetterId: createdCoverLetterId });
     } catch (err: any) {
       set({ error: err.message || 'Failed to apply changes' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  sendTailoredEmail: async () => {
+    const { newResumeId, jobId } = get();
+    if (!newResumeId || !jobId) return;
+    set({ isLoading: true });
+    try {
+      await api.post('/api/tailor/send-email', { resumeId: newResumeId, jobId });
+      toast.success("Tailored documents sent to your email!");
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send email');
     } finally {
       set({ isLoading: false });
     }

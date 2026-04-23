@@ -1,4 +1,8 @@
-#let data = json.decode(sys.inputs.data)
+#let data = if sys.inputs.at("dataPath", default: none) != none {
+  json(sys.inputs.dataPath)
+} else {
+  json("data.json")
+}
 
 #set page(
   margin: (x: 1in, y: 1in),

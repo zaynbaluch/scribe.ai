@@ -42,7 +42,7 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
         {expandedSection === 'basic' && (
           <div className="p-4 space-y-4 bg-[var(--bg-base)]">
             <div>
-              <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Headline</label>
+              <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1 font-semibold">Headline</label>
               <input 
                 type="text" 
                 value={profile.headline || ''} 
@@ -51,7 +51,7 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
               />
             </div>
             <div>
-              <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Professional Summary</label>
+              <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1 font-semibold">Professional Summary</label>
               <textarea 
                 value={profile.summary || ''} 
                 onChange={(e) => updateProfile('summary', e.target.value)}
@@ -73,9 +73,9 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
           {expandedSection === 'experience' ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         </button>
         {expandedSection === 'experience' && (
-          <div className="p-4 space-y-6 bg-[var(--bg-base)]">
+          <div className="p-4 space-y-8 bg-[var(--bg-base)]">
             {profile.experiences?.map((exp: any, idx: number) => (
-              <div key={idx} className="space-y-3 p-3 rounded-lg border border-[var(--grid-line)] bg-[var(--bg-surface)]">
+              <div key={idx} className="space-y-5 p-4 rounded-xl border border-[var(--grid-line)] bg-[var(--bg-surface)]">
                 <div className="flex justify-between items-start">
                   <div className="flex-1 space-y-3">
                     <input 
@@ -87,7 +87,7 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                         newExps[idx].title = e.target.value;
                         updateProfile('experiences', newExps);
                       }}
-                      className="w-full bg-transparent font-medium text-sm focus:outline-none"
+                      className="w-full bg-transparent font-semibold text-base text-[var(--text-primary)] focus:outline-none"
                     />
                     <input 
                       type="text" 
@@ -98,9 +98,9 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                         newExps[idx].company = e.target.value;
                         updateProfile('experiences', newExps);
                       }}
-                      className="w-full bg-transparent text-xs text-[var(--text-muted)] focus:outline-none"
+                      className="w-full bg-transparent text-sm text-[var(--text-muted)] focus:outline-none"
                     />
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-4 pt-1">
                       <CustomDatePicker 
                         label="From" 
                         value={exp.startDate || ''} 
@@ -123,7 +123,7 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Description</label>
+                  <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1 font-semibold">Description</label>
                   <textarea 
                     value={exp.description || ''} 
                     onChange={(e) => {
@@ -132,10 +132,10 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                       updateProfile('experiences', newExps);
                     }}
                     rows={2}
-                    className="w-full px-2 py-1.5 rounded bg-[var(--bg-elevated)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--gradient-2)] resize-none"
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--bg-elevated)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--gradient-2)] resize-none"
                   />
                 </div>
-                <div>
+                <div className="pt-2">
                   <BulletsEditor 
                     bullets={exp.bullets || []} 
                     onChange={(bullets) => {
@@ -161,9 +161,9 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
           {expandedSection === 'projects' ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         </button>
         {expandedSection === 'projects' && (
-          <div className="p-4 space-y-6 bg-[var(--bg-base)]">
+          <div className="p-4 space-y-8 bg-[var(--bg-base)]">
             {profile.projects?.map((proj: any, idx: number) => (
-              <div key={idx} className="space-y-3 p-3 rounded-lg border border-[var(--grid-line)] bg-[var(--bg-surface)]">
+              <div key={idx} className="space-y-5 p-4 rounded-xl border border-[var(--grid-line)] bg-[var(--bg-surface)]">
                 <div className="flex justify-between items-center gap-3">
                   <input 
                     type="text" 
@@ -174,7 +174,7 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                       newProjs[idx] = { ...newProjs[idx], name: e.target.value };
                       updateProfile('projects', newProjs);
                     }}
-                    className="flex-1 bg-transparent font-medium text-sm focus:outline-none"
+                    className="flex-1 bg-transparent font-semibold text-base text-[var(--text-primary)] focus:outline-none"
                   />
                   <button 
                     onClick={() => {
@@ -185,12 +185,12 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                     className={`p-1.5 rounded-lg transition-colors ${proj.visible === false ? 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]' : 'text-[var(--gradient-2)] hover:bg-[var(--gradient-2)]/10'}`}
                     title={proj.visible === false ? "Hidden in resume" : "Visible in resume"}
                   >
-                    {proj.visible === false ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {proj.visible === false ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Technologies / Stack</label>
+                  <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1 font-semibold">Technologies / Stack</label>
                   <input 
                     type="text" 
                     value={proj.techStack?.join(', ') || ''} 
@@ -200,11 +200,11 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                       newProjs[idx].techStack = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
                       updateProfile('projects', newProjs);
                     }}
-                    className="w-full bg-transparent text-xs text-[var(--text-primary)] focus:outline-none border-b border-[var(--grid-line)] pb-1"
+                    className="w-full bg-transparent text-sm text-[var(--text-primary)] focus:outline-none border-b border-[var(--grid-line)] pb-1"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Project Description</label>
+                  <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1 font-semibold">Project Description</label>
                   <textarea 
                     value={proj.description || ''} 
                     placeholder="Briefly describe the project..."
@@ -214,10 +214,10 @@ export default function ContentEditor({ profile, onChange }: ContentEditorProps)
                       newProjs[idx].description = e.target.value;
                       updateProfile('projects', newProjs);
                     }}
-                    className="w-full px-2 py-1.5 rounded bg-[var(--bg-elevated)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--gradient-2)] resize-none"
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--bg-elevated)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--gradient-2)] resize-none"
                   />
                 </div>
-                <div>
+                <div className="pt-2">
                   <BulletsEditor 
                     bullets={proj.bullets || []} 
                     onChange={(bullets) => {

@@ -80,6 +80,17 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
       },
     });
 
+    // Sync with User model if name or imageUrl changed
+    if (data.name !== undefined || data.imageUrl !== undefined) {
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          name: data.name !== undefined ? data.name : undefined,
+          avatarUrl: data.imageUrl !== undefined ? data.imageUrl : undefined,
+        }
+      });
+    }
+
     // Replace experiences
     if (data.experiences !== undefined) {
       await tx.experience.deleteMany({ where: { profileId } });

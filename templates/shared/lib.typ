@@ -7,6 +7,26 @@
 #let scribe-violet = rgb("#7C3AED")
 #let scribe-cyan = rgb("#06B6D4")
 
+// ─── Helper: QR Code ────────────────────────────────────────────────────────
+
+#let qr-code-block(image-path, size: 40pt) = {
+  if image-path == none or image-path == "" { return none }
+  
+  block(width: size, spacing: 0.4em)[
+    #align(center)[
+      #block(
+        inset: 1pt,
+        radius: 1pt,
+        stroke: 0.3pt + luma(220),
+        fill: white,
+        image(image-path, width: size - 2pt)
+      )
+      #v(-0.3em)
+      #text(size: 4.5pt, fill: luma(60), weight: "bold", tracking: 0.15em)[PORTFOLIO]
+    ]
+  ]
+}
+
 // ─── Helper: Section Heading ────────────────────────────────────────────────
 
 #let section-heading(title, accent: scribe-violet, style: "modern") = {

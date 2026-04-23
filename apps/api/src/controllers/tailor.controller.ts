@@ -40,3 +40,16 @@ export const generateCoverLetter = asyncHandler(async (req: Request, res: Respon
   const result = await tailorService.generateCoverLetter(userId, { resumeId, jobId, tone });
   res.json({ success: true, data: result });
 });
+
+export const sendTailoredEmail = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const { resumeId, jobId } = req.body;
+
+  if (!resumeId || !jobId) {
+    res.status(400).json({ success: false, error: { message: 'resumeId and jobId are required' } });
+    return;
+  }
+
+  await tailorService.sendTailoredEmail(userId, resumeId, jobId);
+  res.json({ success: true, message: 'Tailored application sent to your email' });
+});

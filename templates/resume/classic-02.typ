@@ -1,7 +1,11 @@
 // Classic Professional — Traditional layout, horizontal rules, serif feel
 #import "../shared/lib.typ": *
 
-#let data = json("data.json")
+#let data = if sys.inputs.at("dataPath", default: none) != none {
+  json(sys.inputs.dataPath)
+} else {
+  json("data.json")
+}
 #let styles = data.at("styles", default: (:))
 #let accent = rgb(styles.at("accentColor", default: "#1a1a2e"))
 #let font = styles.at("font", default: "Georgia")
@@ -24,9 +28,11 @@
 )
 
 // ─── Header ─────────────────────────────────────────────────────────────────
+#let has-qr = data.at("showQrCode", default: false)
 #grid(
-  columns: (1fr, auto),
-  align: (left, right),
+  columns: (1fr, if has-qr { auto } else { none }, auto),
+  column-gutter: 1em,
+  align: (left, right, right),
   [
     #text(size: 24pt, weight: "bold")[#profile.at("name", default: "Your Name")]
     #v(0.15em)
@@ -34,6 +40,9 @@
       text(size: 11pt, fill: luma(60), style: "italic")[#profile.headline]
     }
   ],
+  if has-qr {
+    qr-code-block(data.at("qrImagePath", default: ""), size: 45pt)
+  },
   [
     #set text(size: 9pt, fill: luma(80))
     #if profile.at("email", default: "") != "" { profile.email; linebreak() }

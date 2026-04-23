@@ -31,8 +31,9 @@ export async function createResume(userId: string, data: CreateResumeInput) {
   });
 
   const snapshot = {
-    name: user?.name || '',
-    email: user?.email || '',
+    name: (profile.name && profile.name.trim()) ? profile.name : (user?.name || ''),
+    email: (profile.email && profile.email.trim()) ? profile.email : (user?.email || ''),
+    imageUrl: profile.imageUrl,
     summary: profile.summary,
     headline: profile.headline,
     location: profile.location,

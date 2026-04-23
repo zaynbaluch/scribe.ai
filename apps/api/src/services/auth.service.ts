@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import logger from '../lib/logger';
-import { send2FACode } from './email.service';
+import { send2FACode, sendVerificationEmail, sendPasswordResetEmail } from './email.service';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-dev-jwt-secret-change-in-prod';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
@@ -189,12 +189,103 @@ export async function registerWithEmailPassword(email: string, password: string,
       email,
       name,
       passwordHash,
-      twoFactorEnabled: true,
-      profile: { create: {} },
+      twoFactorEnabled: false,
+      emailVerified: false,
+      profile: { create: { name } },
     },
   });
 
+  // Generate verification code
+  const code = crypto.randomInt(100000, 999999).toString();
+  await prisma.verificationCode.create({
+    data: {
+      email,
+      code,
+      type: 'email_verification',
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+    },
+  });
+
+  await sendVerificationEmail(email, code);
+
   return user;
+}
+
+/**
+ * Verify email code for registration.
+ */
+export async function verifyEmailCode(email: string, code: string) {
+  const verification = await prisma.verificationCode.findFirst({
+    where: {
+      email,
+      code,
+      type: 'email_verification',
+      expiresAt: { gt: new Date() },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (!verification) throw new Error('Invalid or expired verification code');
+
+  await prisma.user.update({
+    where: { email },
+    data: { emailVerified: true },
+  });
+
+  await prisma.verificationCode.delete({ where: { id: verification.id } });
+
+  return true;
+}
+
+/**
+ * Request password reset.
+ */
+export async function requestPasswordReset(email: string) {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    // Return true even if user not found for security (prevent email enumeration)
+    return true;
+  }
+
+  const code = crypto.randomInt(100000, 999999).toString();
+  await prisma.verificationCode.create({
+    data: {
+      email,
+      code,
+      type: 'password_reset',
+      expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
+    },
+  });
+
+  await sendPasswordResetEmail(email, code);
+  return true;
+}
+
+/**
+ * Reset password using verification code.
+ */
+export async function resetPassword(email: string, code: string, passwordNew: string) {
+  const verification = await prisma.verificationCode.findFirst({
+    where: {
+      email,
+      code,
+      type: 'password_reset',
+      expiresAt: { gt: new Date() },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (!verification) throw new Error('Invalid or expired reset code');
+
+  const passwordHash = await bcrypt.hash(passwordNew, 10);
+  await prisma.user.update({
+    where: { email },
+    data: { passwordHash },
+  });
+
+  await prisma.verificationCode.delete({ where: { id: verification.id } });
+
+  return true;
 }
 
 /**
@@ -203,6 +294,10 @@ export async function registerWithEmailPassword(email: string, password: string,
 export async function loginWithEmailPassword(email: string, password: string) {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !user.passwordHash) throw new Error('Invalid credentials');
+
+  if (!user.emailVerified) {
+    throw new Error('Please verify your email address before logging in');
+  }
 
   const isValid = await bcrypt.compare(password, user.passwordHash);
   if (!isValid) throw new Error('Invalid credentials');
@@ -266,14 +361,34 @@ export async function findOrCreateUser(info: OAuthUserInfo, provider: string) {
     // Also check by email to merge accounts if needed
     const existingByEmail = await prisma.user.findUnique({
       where: { email: info.email },
+      include: { profile: true },
     });
 
     if (existingByEmail) {
+      // Link OAuth to existing email account
       user = await prisma.user.update({
         where: { id: existingByEmail.id },
-        data: { oauthId: info.oauthId, oauthProvider: provider },
+        data: { 
+          oauthId: info.oauthId, 
+          oauthProvider: provider,
+          // Only update name/avatar if they are currently null
+          name: existingByEmail.name || info.name,
+          avatarUrl: existingByEmail.avatarUrl || info.avatarUrl,
+          profile: existingByEmail.profile ? {
+            update: {
+              name: existingByEmail.profile.name || info.name,
+              imageUrl: existingByEmail.profile.imageUrl || info.avatarUrl,
+            }
+          } : {
+            create: {
+              name: info.name,
+              imageUrl: info.avatarUrl,
+            }
+          }
+        },
         include: { profile: true },
       });
+      logger.info({ userId: user.id, email: user.email, provider }, 'Linked OAuth provider to existing email account');
     } else {
       user = await prisma.user.create({
         data: {
@@ -282,14 +397,17 @@ export async function findOrCreateUser(info: OAuthUserInfo, provider: string) {
           avatarUrl: info.avatarUrl,
           oauthProvider: provider,
           oauthId: info.oauthId,
-          profile: {
-            create: {}, // Create empty profile on signup
+          profile: { 
+            create: { 
+              name: info.name, 
+              imageUrl: info.avatarUrl 
+            } 
           },
         },
         include: { profile: true },
       });
+      logger.info({ userId: user.id, email: user.email, provider }, 'Created new user via OAuth');
     }
-    logger.info({ userId: user.id, email: user.email }, `New user created via ${provider}`);
   }
 
   return user;
@@ -350,18 +468,27 @@ export function generateTokenPair(userId: string, email: string): TokenPair {
 
 /**
  * Get user by ID (for /auth/me).
+ * Prioritizes profile name and image over account defaults.
  */
 export async function getUserById(userId: string) {
-  return prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      avatarUrl: true,
-      plan: true,
-      vanitySlug: true,
-      createdAt: true,
-    },
+    include: {
+      profile: {
+        select: { name: true, imageUrl: true }
+      }
+    }
   });
+
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.profile?.name || user.name,
+    avatarUrl: user.profile?.imageUrl || user.avatarUrl,
+    plan: user.plan,
+    vanitySlug: user.vanitySlug,
+    createdAt: user.createdAt,
+  };
 }

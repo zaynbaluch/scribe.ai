@@ -1,7 +1,14 @@
 import prisma from '../lib/prisma';
 import logger from '../lib/logger';
 import { compilePdf, compileCoverLetterPdf } from './typst.service';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, ImageRun } from 'docx';
+import * as QRCode from 'qrcode';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import * as os from 'os';
+
+const TEMPLATES_DIR = path.resolve(process.cwd(), '../../templates');
+const TMP_QR_DIR = path.join(TEMPLATES_DIR, 'tmp');
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr || dateStr === 'null' || dateStr === 'undefined' || dateStr === '0') return '';
@@ -15,14 +22,56 @@ function formatDate(dateStr: string | null | undefined): string {
 }
 
 /**
+ * Converts basic HTML (from TipTap) to Typst-friendly markup.
+ */
+function htmlToTypst(html: string): string {
+  if (!html) return '';
+  
+  let text = html;
+
+  // Handle line breaks and paragraphs
+  text = text.replace(/<br\s*\/?>/g, '\n');
+  text = text.replace(/<\/p>/g, '\n\n');
+  text = text.replace(/<p>/g, '');
+
+  // Bold and Italic
+  text = text.replace(/<(strong|b)>(.*?)<\/(strong|b)>/g, '*$2*');
+  text = text.replace(/<(em|i)>(.*?)<\/(em|i)>/g, '_$2_');
+
+  // Lists
+  text = text.replace(/<ul>/g, '\n');
+  text = text.replace(/<\/ul>/g, '\n');
+  text = text.replace(/<li>(.*?)<\/li>/g, '- $1\n');
+
+  // Remove remaining HTML tags
+  text = text.replace(/<[^>]*>/g, '');
+
+  // Decode common HTML entities
+  const entities: Record<string, string> = {
+    '&nbsp;': ' ',
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#39;': "'",
+  };
+  
+  Object.entries(entities).forEach(([entity, replacement]) => {
+    text = text.replace(new RegExp(entity, 'g'), replacement);
+  });
+
+  return text.trim();
+}
+
+/**
  * Export a resume as PDF via Typst compilation.
  */
 export async function exportPdf(userId: string, resumeId: string): Promise<Buffer> {
   const resume = await getResumeWithValidation(userId, resumeId);
 
-  const snapshot = { ...resume.baseProfileSnapshot as any };
-  if (!snapshot) {
-    throw new Error('Resume has no profile snapshot. Please recreate it.');
+  const snapshot = { ...((resume.tailoredContent as any) || (resume.baseProfileSnapshot as any)) };
+  if (!snapshot || Object.keys(snapshot).length === 0) {
+    throw new Error('Resume has no content. Please create your profile first.');
   }
 
   // Filter invisible items
@@ -30,14 +79,49 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
   if (snapshot.education) snapshot.education = snapshot.education.filter((e: any) => e.visible !== false);
   if (snapshot.projects) snapshot.projects = snapshot.projects.filter((p: any) => p.visible !== false);
 
-  const pdfBuffer = await compilePdf(resume.templateId, {
-    profile: snapshot,
-    styles: resume.customStyles || {},
-    sectionOrder: resume.sectionOrder,
-    sectionVisibility: (resume.sectionVisibility as any) || {},
-  });
+  const vanitySlug = (resume as any).user?.vanitySlug || 'me';
+  const portfolioUrl = `https://scribe.ai/p/${vanitySlug}`;
 
-  return pdfBuffer;
+  let qrImagePath: string | undefined;
+  let qrFileName: string | undefined;
+
+  if (resume.showQrCode !== false) {
+    try {
+      // Ensure tmp dir exists inside TEMPLATES_DIR so Typst can access it (due to --root)
+      await fs.mkdir(TMP_QR_DIR, { recursive: true });
+      
+      qrFileName = `qr-${resume.id}-${Date.now()}.png`;
+      qrImagePath = path.join(TMP_QR_DIR, qrFileName);
+      
+      await QRCode.toFile(qrImagePath, portfolioUrl, {
+        margin: 1,
+        width: 200,
+        color: { dark: '#000000', light: '#ffffff' }
+      });
+    } catch (err) {
+      logger.error({ err }, 'Failed to generate QR image for PDF');
+    }
+  }
+
+  try {
+    const pdfBuffer = await compilePdf(resume.templateId, {
+      profile: snapshot,
+      styles: resume.customStyles || {},
+      sectionOrder: resume.sectionOrder,
+      sectionVisibility: (resume.sectionVisibility as any) || {},
+      showQrCode: !!qrImagePath,
+      // Pass path relative to TEMPLATES_DIR root for Typst
+      qrImagePath: qrFileName ? `/tmp/${qrFileName}` : undefined,
+    });
+
+    return pdfBuffer;
+  } finally {
+    if (qrImagePath) {
+      try {
+        await fs.unlink(qrImagePath);
+      } catch {}
+    }
+  }
 }
 
 /**
@@ -56,13 +140,42 @@ export async function exportDocx(userId: string, resumeId: string): Promise<Buff
   const vis = (resume.sectionVisibility as any) || {};
   const sections: any[] = [];
 
+  // Header and QR Code logic for DOCX
+  let qrImageRun: ImageRun | null = null;
+  if (resume.showQrCode !== false) {
+    try {
+      const vanitySlug = (resume as any).user?.vanitySlug || 'me';
+      const portfolioUrl = `https://scribe.ai/p/${vanitySlug}`;
+      const qrBuffer = await QRCode.toBuffer(portfolioUrl, {
+        margin: 1,
+        width: 100,
+        color: { dark: '#000000', light: '#ffffff' }
+      });
+      
+      qrImageRun = new ImageRun({
+        data: qrBuffer,
+        transformation: { width: 50, height: 50 },
+        floating: {
+          horizontalPosition: { relative: 'margin', offset: 4500000 }, // roughly right side
+          verticalPosition: { relative: 'margin', offset: 0 },
+        }
+      });
+    } catch (err) {
+      logger.error({ err }, 'Failed to generate QR for DOCX');
+    }
+  }
+
   // Header
   sections.push(
     new Paragraph({
-      children: [new TextRun({ text: profile.name || 'Your Name', bold: true, size: 32, font: 'Calibri' })],
+      children: [
+        new TextRun({ text: profile.name || 'Your Name', bold: true, size: 32, font: 'Calibri' }),
+        ...(qrImageRun ? [qrImageRun] : [])
+      ],
       alignment: AlignmentType.CENTER,
     })
   );
+  
   if (profile.headline) {
     sections.push(new Paragraph({
       children: [new TextRun({ text: profile.headline, italics: true, size: 22, color: '666666', font: 'Calibri' })],
@@ -260,7 +373,7 @@ export async function exportCoverLetterPdf(userId: string, id: string): Promise<
 
   return compileCoverLetterPdf('default', {
     profile,
-    content: cl.content
+    content: htmlToTypst(cl.content)
   });
 }
 
@@ -359,6 +472,7 @@ function createDocxHeading(text: string) {
 async function getResumeWithValidation(userId: string, resumeId: string) {
   const resume = await prisma.resume.findFirst({
     where: { id: resumeId, userId },
+    include: { user: true }
   });
   if (!resume) throw new Error('Resume not found');
   return resume;

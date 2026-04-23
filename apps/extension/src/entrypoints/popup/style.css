@@ -3,8 +3,27 @@
 @tailwind utilities;
 
 @layer base {
+  html, body {
+    width: 350px;
+    min-height: 450px;
+    margin: 0;
+    padding: 0;
+    background-color: #050508;
+    color: #FFFFFF;
+    overflow-x: hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
   :root {
-    --bg-surface: #0a0a0f;
-    --text-primary: #e4e4e7;
+    --bg-surface: #0a0a0c;
+    --text-primary: #FFFFFF;
+    --gradient-1: #FF3366;
+    --gradient-2: #7C3AED;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'Instrument Serif', 'Fraunces', serif;
   }
 }

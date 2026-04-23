@@ -1,7 +1,11 @@
 // Minimalist — Ultra-clean, no color accents, maximum readability
 #import "../shared/lib.typ": *
 
-#let data = json("data.json")
+#let data = if sys.inputs.at("dataPath", default: none) != none {
+  json(sys.inputs.dataPath)
+} else {
+  json("data.json")
+}
 #let styles = data.at("styles", default: (:))
 #let font = styles.at("font", default: "Inter")
 #let fsize = float(styles.at("fontSize", default: 11)) * 1pt
@@ -23,19 +27,28 @@
 )
 
 // ─── Header ─────────────────────────────────────────────────────────────────
-#text(size: 26pt, weight: "light", tracking: 0.02em)[#profile.at("name", default: "Your Name")]
-#v(0.15em)
-#if profile.at("headline", default: "") != "" {
-  text(size: 10pt, fill: luma(100))[#profile.headline]
-  v(0.15em)
-}
-#contact-row(
-  email: profile.at("email", default: none),
-  phone: profile.at("phone", default: none),
-  location: profile.at("location", default: none),
-  website: profile.at("website", default: none),
-  linkedin: profile.at("linkedin", default: none),
-  github: profile.at("github", default: none),
+#stack(
+  dir: ltr,
+  spacing: 1fr,
+  align(left + horizon)[
+    #text(size: 26pt, weight: "light", tracking: 0.02em)[#profile.at("name", default: "Your Name")]
+    #v(0.15em)
+    #if profile.at("headline", default: "") != "" {
+      text(size: 10pt, fill: luma(100))[#profile.headline]
+      v(0.15em)
+    }
+    #contact-row(
+      email: profile.at("email", default: none),
+      phone: profile.at("phone", default: none),
+      location: profile.at("location", default: none),
+      website: profile.at("website", default: none),
+      linkedin: profile.at("linkedin", default: none),
+      github: profile.at("github", default: none),
+    )
+  ],
+  if data.at("showQrCode", default: false) {
+    qr-code-block(data.at("qrImagePath", default: ""), size: 40pt)
+  }
 )
 #v(0.5em)
 

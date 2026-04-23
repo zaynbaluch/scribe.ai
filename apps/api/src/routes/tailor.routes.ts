@@ -8,5 +8,6 @@ router.use(requireAuth);
 router.post('/analyze', tailorController.analyzeJob);
 router.post('/tailor', tailorController.tailorResume);
 router.post('/cover-letter', tailorController.generateCoverLetter);
+router.post('/send-email', tailorController.sendTailoredEmail);
 
 export default router;
