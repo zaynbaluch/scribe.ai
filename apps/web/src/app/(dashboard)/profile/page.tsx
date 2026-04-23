@@ -104,7 +104,7 @@ export default function ProfilePage() {
     if (parsed.certifications?.length) merged.certifications = parsed.certifications;
 
     update(merged).then(() => {
-      setLocalProfile(prev => ({ ...prev, ...merged }));
+      setLocalProfile((prev: any) => ({ ...prev, ...merged }));
       toast.success('Imported data saved to profile');
       fetch();
     }).catch(() => toast.error('Failed to save imported data'));
