@@ -452,18 +452,27 @@ export function generateTokenPair(userId: string, email: string): TokenPair {
 
 /**
  * Get user by ID (for /auth/me).
+ * Prioritizes profile name and image over account defaults.
  */
 export async function getUserById(userId: string) {
-  return prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      avatarUrl: true,
-      plan: true,
-      vanitySlug: true,
-      createdAt: true,
-    },
+    include: {
+      profile: {
+        select: { name: true, imageUrl: true }
+      }
+    }
   });
+
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.profile?.name || user.name,
+    avatarUrl: user.profile?.imageUrl || user.avatarUrl,
+    plan: user.plan,
+    vanitySlug: user.vanitySlug,
+    createdAt: user.createdAt,
+  };
 }

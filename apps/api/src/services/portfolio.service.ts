@@ -117,7 +117,10 @@ export async function getPublicPortfolio(slug: string) {
   const { passwordHash, ...safePortfolio } = user.portfolio;
 
   return {
-    user: { name: user.name, avatarUrl: user.avatarUrl },
+    user: { 
+      name: user.profile?.name || user.name, 
+      avatarUrl: user.profile?.imageUrl || user.avatarUrl 
+    },
     portfolio: { ...safePortfolio, hasPassword: !!passwordHash },
     profile: user.profile,
   };

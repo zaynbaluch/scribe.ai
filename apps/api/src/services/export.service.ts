@@ -22,6 +22,48 @@ function formatDate(dateStr: string | null | undefined): string {
 }
 
 /**
+ * Converts basic HTML (from TipTap) to Typst-friendly markup.
+ */
+function htmlToTypst(html: string): string {
+  if (!html) return '';
+  
+  let text = html;
+
+  // Handle line breaks and paragraphs
+  text = text.replace(/<br\s*\/?>/g, '\n');
+  text = text.replace(/<\/p>/g, '\n\n');
+  text = text.replace(/<p>/g, '');
+
+  // Bold and Italic
+  text = text.replace(/<(strong|b)>(.*?)<\/(strong|b)>/g, '*$2*');
+  text = text.replace(/<(em|i)>(.*?)<\/(em|i)>/g, '_$2_');
+
+  // Lists
+  text = text.replace(/<ul>/g, '\n');
+  text = text.replace(/<\/ul>/g, '\n');
+  text = text.replace(/<li>(.*?)<\/li>/g, '- $1\n');
+
+  // Remove remaining HTML tags
+  text = text.replace(/<[^>]*>/g, '');
+
+  // Decode common HTML entities
+  const entities: Record<string, string> = {
+    '&nbsp;': ' ',
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#39;': "'",
+  };
+  
+  Object.entries(entities).forEach(([entity, replacement]) => {
+    text = text.replace(new RegExp(entity, 'g'), replacement);
+  });
+
+  return text.trim();
+}
+
+/**
  * Export a resume as PDF via Typst compilation.
  */
 export async function exportPdf(userId: string, resumeId: string): Promise<Buffer> {
@@ -331,7 +373,7 @@ export async function exportCoverLetterPdf(userId: string, id: string): Promise<
 
   return compileCoverLetterPdf('default', {
     profile,
-    content: cl.content
+    content: htmlToTypst(cl.content)
   });
 }
 

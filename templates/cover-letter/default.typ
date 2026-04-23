@@ -1,5 +1,5 @@
-#let data = if sys.inputs.at("data", default: none) != none {
-  json.decode(sys.inputs.data)
+#let data = if sys.inputs.at("dataPath", default: none) != none {
+  json(sys.inputs.dataPath)
 } else {
   json("data.json")
 }

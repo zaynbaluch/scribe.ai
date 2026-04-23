@@ -2,6 +2,7 @@
 Cover Letter Generator — LLM-powered cover letter creation with tone control.
 """
 from typing import Dict, Any, Optional, Generator
+import re
 from loguru import logger
 from app.providers.factory import get_llm_provider
 
@@ -18,6 +19,60 @@ TONE_INSTRUCTIONS = {
     "conversational": "Write in a warm, conversational tone. Be personable while remaining professional. Show enthusiasm naturally.",
     "storytelling": "Write in a narrative, storytelling style. Open with a compelling hook and weave the candidate's experience into a story.",
 }
+
+
+def clean_cover_letter_body(text: str, name: str = "") -> str:
+    """
+    Remove common letter artifacts like salutations and sign-offs if they leak into the body.
+    """
+    lines = text.strip().split('\n')
+    if not lines:
+        return ""
+
+    # Remove salutations from the top
+    salutation_patterns = [
+        r'^Dear\s+.*?,?\s*$',
+        r'^To\s+Whom\s+It\s+May\s+Concern,?\s*$',
+        r'^Greetings,?\s*$',
+        r'^Hi\s+.*?,?\s*$',
+        r'^Hello,?\s*$',
+    ]
+    
+    while lines and any(re.match(p, lines[0].strip(), re.I) for p in salutation_patterns):
+        lines.pop(0)
+    
+    # Trim empty lines after salutation
+    while lines and not lines[0].strip():
+        lines.pop(0)
+
+    # Remove sign-offs from the bottom
+    signoff_patterns = [
+        r'^Sincerely,?\s*$',
+        r'^Regards,?\s*$',
+        r'^Best\s+regards,?\s*$',
+        r'^Best,?\s*$',
+        r'^Thank\s+you,?\s*$',
+        r'^Thanks,?\s*$',
+        r'^Yours\s+truly,?\s*$',
+    ]
+    
+    # Remove signature lines (usually the last 1-3 lines)
+    while lines:
+        last_line = lines[-1].strip()
+        if not last_line:
+            lines.pop()
+            continue
+        
+        is_signoff = any(re.match(p, last_line, re.I) for p in signoff_patterns)
+        is_name = name.lower() in last_line.lower() if name else False
+        
+        if is_signoff or is_name:
+            lines.pop()
+        else:
+            break
+
+    # Final trim
+    return '\n'.join(lines).strip()
 
 
 def generate_cover_letter(
@@ -49,12 +104,14 @@ def generate_cover_letter(
 
     system = (
         f"You are an expert cover letter writer. {tone_instruction}\n"
-        "Write a compelling cover letter that:\n"
-        "1. Opens with a strong hook related to the company or role\n"
-        "2. Highlights 2-3 most relevant experiences/achievements\n"
-        "3. Shows knowledge of the company and role requirements\n"
-        "4. Closes with confidence and a clear call to action\n"
-        "Format: 3-4 paragraphs. Return ONLY the letter body (no date/address/signature block)."
+        "The user has ALREADY written the header, date, salutation ('Dear Hiring Manager,'), "
+        "and the closing ('Sincerely, [Name]').\n"
+        "Your task is ONLY to write the body paragraphs that go BETWEEN the greeting and the closing.\n"
+        "STRICT RULES:\n"
+        "1. DO NOT include ANY greeting or salutation.\n"
+        "2. DO NOT include ANY sign-off or name.\n"
+        "3. START IMMEDIATELY with the first sentence of the letter body.\n"
+        "4. Output 3-4 professional paragraphs."
     )
 
     prompt = (
@@ -63,13 +120,12 @@ def generate_cover_letter(
         f"Key Requirements: {', '.join(required[:8])}\n\n"
         f"Candidate Summary: {summary}\n\n"
         f"Key Experience:\n" + "\n".join(exp_highlights) + "\n\n"
-        f"Job Description Excerpt:\n{jd_text[:600]}\n\n"
-        f"Write the cover letter body:"
+        f"Write ONLY the body paragraphs (nothing else):"
     )
 
     try:
         result = llm.generate(prompt, system=system, temperature=0.7, max_tokens=800)
-        return result.strip()
+        return clean_cover_letter_body(result.strip(), name=name)
     except Exception as e:
         logger.error(f"Cover letter generation failed: {e}")
         return f"[Error generating cover letter: {str(e)}]"
@@ -95,7 +151,7 @@ def stream_cover_letter(
 
     system = (
         f"You are an expert cover letter writer. {tone_instruction}\n"
-        "Write a compelling 3-4 paragraph cover letter body. No date/address/signature."
+        "Write ONLY the body paragraphs. NO greeting, NO signature. Just the text between them."
     )
 
     prompt = (
@@ -104,10 +160,12 @@ def stream_cover_letter(
         f"Target: {job_title} at {company}\n"
         f"Requirements: {', '.join(required[:8])}\n"
         f"JD: {jd_text[:400]}\n\n"
-        f"Cover letter:"
+        f"Body paragraphs:"
     )
 
     try:
+        # Note: Streaming doesn't easily allow post-processing the whole text,
+        # but the prompt should be sufficient for most cases.
         yield from llm.stream(prompt, system=system, temperature=0.7, max_tokens=800)
     except Exception as e:
         logger.error(f"Cover letter streaming failed: {e}")
