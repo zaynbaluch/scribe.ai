@@ -59,9 +59,12 @@ export default function Topbar({ sidebarWidth, isMobile, onMobileMenuToggle }: T
         )}
         {/* Greeting */}
         <h2 className="font-display text-base md:text-lg tracking-tight text-[var(--text-primary)]">
-          {getGreeting()},{' '}
-          <span className="text-[var(--text-secondary)]">
+          <span className="text-[var(--text-primary)]">
+            {getGreeting()},{' '}
+          
+          <span className="font-semibold">
             {user?.name?.split(' ')[0] || 'there'}
+          </span>
           </span>
         </h2>
       </div>

@@ -26,10 +26,10 @@ export default function ProfilePage() {
 
   useEffect(() => { fetch(); }, [fetch]);
   useEffect(() => { 
-    if (profile) {
+    if (profile && !localProfile) {
       setLocalProfile(profile); 
     }
-  }, [profile]);
+  }, [profile, localProfile]);
 
   const saveProfile = async (dataToSave: any) => {
     try {

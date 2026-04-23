@@ -97,17 +97,40 @@ export default function StyleControls({ styles, hasAvatar = true, onChange }: St
         </div>
       </div>
       {/* Toggle options */}
-      <div className="pt-3 border-t border-[var(--grid-line)] flex flex-col gap-2">
-        <label className={`flex items-center gap-2 cursor-pointer group ${!hasAvatar ? 'opacity-50' : ''}`}>
-          <input type="checkbox"
+      <div className="pt-3 border-t border-[var(--grid-line)] space-y-3">
+        {/* Profile Image Toggle */}
+        <div className={`flex items-center justify-between p-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] transition-all ${!hasAvatar ? 'opacity-40 grayscale-[0.5]' : ''}`}>
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-[var(--text-secondary)]">Profile Image</span>
+            <span className="text-[10px] text-[var(--text-muted)]">
+              {hasAvatar ? 'Show your photo in the header' : 'Upload photo in Profile first'}
+            </span>
+          </div>
+          <button 
             disabled={!hasAvatar}
-            checked={styles.showProfileImage ?? false}
-            onChange={(e) => onChange({ ...styles, showProfileImage: e.target.checked })}
-            className="w-3.5 h-3.5 rounded-sm border-[var(--border-subtle)] text-[var(--gradient-2)] focus:ring-[var(--gradient-2)]/20 disabled:cursor-not-allowed" />
-          <span className="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">
-            Show Profile Image {!hasAvatar && '(Requires uploaded avatar)'}
-          </span>
-        </label>
+            onClick={() => update('showProfileImage', !styles.showProfileImage)}
+            className={`w-8 h-4 rounded-full transition-all relative ${styles.showProfileImage && hasAvatar ? 'bg-[var(--gradient-2)]' : 'bg-gray-600'} ${!hasAvatar ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+          >
+            <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${styles.showProfileImage && hasAvatar ? 'left-[18px]' : 'left-0.5'}`} />
+          </button>
+        </div>
+
+        {/* QR Code Size Slider */}
+        <div className="space-y-1.5 px-1">
+          <div className="flex justify-between items-center">
+            <label className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">QR Code Size</label>
+            <span className="text-[10px] font-mono text-[var(--text-secondary)]">{styles.qrSize || 40}px</span>
+          </div>
+          <input 
+            type="range" 
+            min={30} 
+            max={80} 
+            step={2} 
+            value={styles.qrSize || 40}
+            onChange={(e) => update('qrSize', parseInt(e.target.value))}
+            className="w-full h-1 appearance-none rounded-full bg-[var(--bg-elevated)] accent-[var(--gradient-2)] cursor-pointer" 
+          />
+        </div>
       </div>
     </div>
   );

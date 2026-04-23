@@ -132,7 +132,7 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
               )}
             </div>
           ) : (
-            <div className="text-center mb-4 flex flex-col items-center relative pr-14 pl-14">
+            <div className="text-center mb-4 flex flex-col items-center relative px-10">
               {customStyles?.showProfileImage && profile.imageUrl && (
                 <img src={profile.imageUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover border border-gray-200 mb-2" />
               )}
@@ -142,14 +142,21 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
             </div>
           )}
 
-          {/* QR Code (Floating) */}
+          {/* QR Code (Integrated in Header) */}
           {(showQrCode ?? profile.showQrCode) !== false && (
-            <div className="absolute top-4 right-4 flex flex-col items-center gap-0.5 opacity-100 z-50">
+            <div 
+              className="absolute flex flex-col items-center gap-0.5 z-10"
+              style={{ 
+                width: customStyles?.qrSize || 40,
+                top: marginY,
+                right: marginX
+              }}
+            >
               <div className="p-0.5 bg-white border border-gray-100 shadow-sm rounded-sm">
                 <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`https://scribe.ai/p/${profile.user?.vanitySlug || 'me'}`)}&format=svg&ecc=H`} 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://scribe.ai/p/${profile.user?.vanitySlug || 'me'}`)}&format=svg&ecc=H`} 
                   alt="Portfolio QR"
-                  className="w-10 h-10"
+                  className="w-full h-auto"
                 />
               </div>
               <span className="text-[5px] text-gray-500 font-bold tracking-widest uppercase">Portfolio</span>

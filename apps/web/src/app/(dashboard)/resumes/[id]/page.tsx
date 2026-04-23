@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback, use } from 'react';
+import { useEffect, useState, useCallback, use, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Shield, Palette, Type, Layout } from 'lucide-react';
 import { useResumeStore } from '@/stores/resume-store';
+import { useProfileStore } from '@/stores/profile-store';
 import { useDebounce } from '@/hooks/use-debounce';
 import TemplatePicker from '@/components/resume/template-picker';
 import StyleControls from '@/components/resume/style-controls';
@@ -18,6 +19,11 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   const { id } = use(params);
   const router = useRouter();
   const { activeResume, templates, isLoading, isSaving, fetchResume, fetchTemplates, updateResume } = useResumeStore();
+  const { profile: globalProfile, fetch: fetchGlobalProfile } = useProfileStore();
+
+  useEffect(() => {
+    if (!globalProfile) fetchGlobalProfile();
+  }, []);
 
   // Local state for instant UI updates
   const [localName, setLocalName] = useState('');
@@ -36,9 +42,11 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
     if (templates.length === 0) fetchTemplates();
   }, [id]);
 
+  const lastIdRef = useRef<string | null>(null);
+
   // Sync from server to local state
   useEffect(() => {
-    if (activeResume) {
+    if (activeResume && activeResume.id !== lastIdRef.current) {
       setLocalName(activeResume.name);
       setLocalTemplateId(activeResume.templateId);
       setLocalStyles(activeResume.customStyles || {});
@@ -46,6 +54,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
       setLocalVisibility(activeResume.sectionVisibility || {});
       setLocalShowQrCode(activeResume.showQrCode !== false);
       setLocalProfile(activeResume.baseProfileSnapshot);
+      lastIdRef.current = activeResume.id;
     }
   }, [activeResume]);
 
@@ -87,6 +96,13 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   const handleQrToggle = (show: boolean) => {
     setLocalShowQrCode(show);
     debouncedSave({ showQrCode: show });
+  };
+
+  const handleSyncProfile = () => {
+    if (!globalProfile) return;
+    setLocalProfile({ ...globalProfile });
+    debouncedSave({ baseProfileSnapshot: globalProfile });
+    toast.success('Synced with latest profile data');
   };
 
   if (isLoading || !activeResume || !localProfile) {
@@ -169,7 +185,18 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
               <>
                 <TemplatePicker templates={templates} selected={localTemplateId} onSelect={handleTemplateChange} />
                 <div className="border-t border-[var(--grid-line)]" />
-                <StyleControls styles={localStyles} hasAvatar={!!localProfile?.imageUrl} onChange={handleStylesChange} />
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-xs text-[var(--text-muted)] uppercase tracking-wider font-semibold">Resume Design</h4>
+                  <button onClick={handleSyncProfile}
+                    className="text-[10px] text-[var(--gradient-2)] hover:underline flex items-center gap-1">
+                    <Save size={10} /> Sync from Profile
+                  </button>
+                </div>
+                <StyleControls 
+                  styles={localStyles} 
+                  hasAvatar={!!localProfile?.imageUrl || !!globalProfile?.imageUrl} 
+                  onChange={handleStylesChange} 
+                />
                 <div className="border-t border-[var(--grid-line)]" />
                 <div className="flex items-center justify-between p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)]">
                   <span className="text-xs font-medium">Show QR Code</span>
