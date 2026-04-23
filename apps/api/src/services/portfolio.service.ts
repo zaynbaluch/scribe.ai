@@ -85,10 +85,7 @@ export async function updateSlug(userId: string, slug: string) {
 export async function getPublicPortfolio(slug: string) {
   const user = await prisma.user.findFirst({
     where: { vanitySlug: slug },
-    select: {
-      id: true,
-      name: true,
-      avatarUrl: true,
+    include: {
       portfolio: true,
       profile: {
         include: {

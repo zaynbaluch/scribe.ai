@@ -191,7 +191,7 @@ export async function registerWithEmailPassword(email: string, password: string,
       passwordHash,
       twoFactorEnabled: false,
       emailVerified: false,
-      profile: { create: {} },
+      profile: { create: { name } },
     },
   });
 
@@ -374,6 +374,17 @@ export async function findOrCreateUser(info: OAuthUserInfo, provider: string) {
           // Only update name/avatar if they are currently null
           name: existingByEmail.name || info.name,
           avatarUrl: existingByEmail.avatarUrl || info.avatarUrl,
+          profile: existingByEmail.profile ? {
+            update: {
+              name: existingByEmail.profile.name || info.name,
+              imageUrl: existingByEmail.profile.imageUrl || info.avatarUrl,
+            }
+          } : {
+            create: {
+              name: info.name,
+              imageUrl: info.avatarUrl,
+            }
+          }
         },
         include: { profile: true },
       });
@@ -386,7 +397,12 @@ export async function findOrCreateUser(info: OAuthUserInfo, provider: string) {
           avatarUrl: info.avatarUrl,
           oauthProvider: provider,
           oauthId: info.oauthId,
-          profile: { create: {} },
+          profile: { 
+            create: { 
+              name: info.name, 
+              imageUrl: info.avatarUrl 
+            } 
+          },
         },
         include: { profile: true },
       });
