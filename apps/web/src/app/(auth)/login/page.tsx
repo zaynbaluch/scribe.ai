@@ -301,7 +301,7 @@ export default function LoginPage() {
 
                 <button
                   onClick={() => setView('email')}
-                  className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
+                  className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-xl bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-purple-500/20 active:scale-[0.98]"
                 >
                   <Mail size={18} />
                   Continue with Email
@@ -321,7 +321,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@company.com"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-indigo-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--gradient-1)] transition-all"
                     />
                   </div>
                 </div>
@@ -332,7 +332,7 @@ export default function LoginPage() {
                     <button 
                       type="button" 
                       onClick={() => setView('forgot-password')}
-                      className="text-[10px] text-indigo-400 hover:underline"
+                      className="text-[10px] text-[var(--gradient-1)] hover:underline"
                     >
                       Forgot password?
                     </button>
@@ -345,7 +345,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-indigo-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--gradient-1)] transition-all"
                     />
                   </div>
                 </div>
@@ -353,14 +353,14 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 mt-4 px-5 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98] disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 mt-4 px-5 py-3 rounded-xl bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-purple-500/20 active:scale-[0.98] disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 className="animate-spin" size={18} /> : 'Sign In'}
                   {!isLoading && <ArrowRight size={18} />}
                 </button>
                 
                 <p className="text-center text-xs text-[var(--text-muted)] mt-2">
-                  Don't have an account? <button onClick={() => setView('register')} type="button" className="text-indigo-400 hover:underline">Create one</button>
+                  Don't have an account? <button onClick={() => setView('register')} type="button" className="text-[var(--gradient-1)] hover:underline">Create one</button>
                 </p>
               </form>
             )}
@@ -377,7 +377,7 @@ export default function LoginPage() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Zayn Baluch"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-indigo-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--gradient-1)] transition-all"
                     />
                   </div>
                 </div>
@@ -392,7 +392,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@company.com"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-indigo-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--gradient-1)] transition-all"
                     />
                   </div>
                 </div>
@@ -407,7 +407,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Min. 8 characters"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-indigo-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--gradient-1)] transition-all"
                     />
                   </div>
                 </div>
@@ -415,14 +415,14 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 mt-4 px-5 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98] disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 mt-4 px-5 py-3 rounded-xl bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-purple-500/20 active:scale-[0.98] disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 className="animate-spin" size={18} /> : 'Create Account'}
                   {!isLoading && <ArrowRight size={18} />}
                 </button>
                 
                 <p className="text-center text-xs text-[var(--text-muted)] mt-2">
-                  Already have an account? <button onClick={() => setView('email')} type="button" className="text-indigo-400 hover:underline">Sign in</button>
+                  Already have an account? <button onClick={() => setView('email')} type="button" className="text-[var(--gradient-1)] hover:underline">Sign in</button>
                 </p>
               </form>
             )}
@@ -439,7 +439,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@company.com"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-indigo-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--gradient-1)] transition-all"
                     />
                   </div>
                 </div>
@@ -447,14 +447,14 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 mt-4 px-5 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98] disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 mt-4 px-5 py-3 rounded-xl bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-purple-500/20 active:scale-[0.98] disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 className="animate-spin" size={18} /> : 'Send Recovery Code'}
                   {!isLoading && <ArrowRight size={18} />}
                 </button>
                 
                 <p className="text-center text-xs text-[var(--text-muted)] mt-2">
-                  Remember your password? <button onClick={() => setView('email')} type="button" className="text-indigo-400 hover:underline">Sign in</button>
+                  Remember your password? <button onClick={() => setView('email')} type="button" className="text-[var(--gradient-1)] hover:underline">Sign in</button>
                 </p>
               </form>
             )}
@@ -471,7 +471,7 @@ export default function LoginPage() {
                       value={digit}
                       onChange={e => handleOtpChange(i, e.target.value)}
                       onKeyDown={e => handleKeyDown(i, e)}
-                      className="w-12 h-14 text-center text-2xl font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                      className="w-12 h-14 text-center text-2xl font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] focus:outline-none focus:border-[var(--gradient-1)] focus:ring-1 focus:ring-[var(--gradient-1)] transition-all"
                     />
                   ))}
                 </div>
@@ -486,7 +486,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Min. 8 characters"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-indigo-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--gradient-1)] transition-all"
                     />
                   </div>
                 </div>
@@ -494,7 +494,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading || otp.some(v => !v) || !password}
-                  className="w-full flex items-center justify-center gap-2 mt-4 px-5 py-3 rounded-xl bg-amber-600 text-white text-sm font-semibold hover:bg-amber-500 transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98] disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 mt-4 px-5 py-3 rounded-xl bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-purple-500/20 active:scale-[0.98] disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 className="animate-spin" size={18} /> : 'Reset Password'}
                   {!isLoading && <ShieldCheck size={18} />}
@@ -514,7 +514,7 @@ export default function LoginPage() {
                       value={digit}
                       onChange={e => handleOtpChange(i, e.target.value)}
                       onKeyDown={e => handleKeyDown(i, e)}
-                      className="w-12 h-14 text-center text-2xl font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                      className="w-12 h-14 text-center text-2xl font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20 text-[var(--text-primary)] focus:outline-none focus:border-[var(--gradient-1)] focus:ring-1 focus:ring-[var(--gradient-1)] transition-all"
                     />
                   ))}
                 </div>
@@ -522,14 +522,14 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading || otp.some(v => !v)}
-                  className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white text-sm font-semibold transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:shadow-none ${view === 'verify-email' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20' : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/20'}`}
+                  className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white text-sm font-semibold transition-all shadow-lg shadow-purple-500/20 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none hover:opacity-90"
                 >
                   {isLoading ? <Loader2 className="animate-spin" size={18} /> : view === 'verify-email' ? 'Verify Account' : 'Verify & Continue'}
                   {!isLoading && (view === 'verify-email' ? <ShieldCheck size={18} /> : <ShieldCheck size={18} />)}
                 </button>
 
                 <p className="text-center text-xs text-[var(--text-muted)]">
-                  Didn't receive a code? <button type="button" className="text-indigo-400 hover:underline">Resend code</button>
+                  Didn't receive a code? <button type="button" className="text-[var(--gradient-1)] hover:underline">Resend code</button>
                 </p>
               </form>
             )}
