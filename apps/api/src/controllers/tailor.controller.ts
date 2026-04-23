@@ -4,14 +4,14 @@ import { asyncHandler } from '../middleware/error-handler.middleware';
 
 export const analyzeJob = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.userId;
-  const { resumeId, text, url, title, company } = req.body;
+  const { resumeId, text, url, title, company, jobId } = req.body;
 
   if (!resumeId) {
     res.status(400).json({ success: false, error: { message: 'resumeId is required' } });
     return;
   }
 
-  const result = await tailorService.analyzeJob(userId, resumeId, { text, url, title, company });
+  const result = await tailorService.analyzeJob(userId, resumeId, { text, url, title, company, jobId });
   res.json({ success: true, data: result });
 });
 

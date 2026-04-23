@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Sparkles, Mail, CheckCircle2 } from 'lucide-react';
 import { useTailorStore } from '@/stores/tailor-store';
 import { useResumeStore } from '@/stores/resume-store';
@@ -19,6 +19,9 @@ export default function TailorPage() {
     acceptAll, rejectAll, applyToResume, sendTailoredEmail, reset,
   } = useTailorStore();
 
+  const searchParams = useSearchParams();
+  const jobIdFromQuery = searchParams.get('jobId');
+
   const [selectedResumeId, setSelectedResumeId] = useState('');
 
   useEffect(() => { fetchResumes(); }, [fetchResumes]);
@@ -33,7 +36,16 @@ export default function TailorPage() {
     if (error) toast.error(error);
   }, [error]);
 
-  const handleAnalyze = (input: { text?: string; url?: string }) => {
+  // Handle auto-analysis from jobId query param
+  const autoAnalyzeTriggered = useRef(false);
+  useEffect(() => {
+    if (jobIdFromQuery && selectedResumeId && step === 'input' && !isLoading && !error && !autoAnalyzeTriggered.current) {
+      autoAnalyzeTriggered.current = true;
+      handleAnalyze({ jobId: jobIdFromQuery });
+    }
+  }, [jobIdFromQuery, selectedResumeId, step, error]);
+
+  const handleAnalyze = (input: { text?: string; url?: string; jobId?: string }) => {
     if (!selectedResumeId) {
       toast.error('Select a resume first');
       return;

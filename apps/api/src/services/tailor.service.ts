@@ -11,6 +11,7 @@ interface AnalyzeInput {
   url?: string;
   title?: string;
   company?: string;
+  jobId?: string;
 }
 
 /**
@@ -18,6 +19,15 @@ interface AnalyzeInput {
  */
 export async function analyzeJob(userId: string, resumeId: string, input: AnalyzeInput) {
   let jdText = input.text || '';
+  let jobId = input.jobId;
+
+  // If jobId provided, load it first
+  if (jobId && !jdText) {
+    const existingJob = await prisma.job.findFirst({ where: { id: jobId, userId } });
+    if (existingJob) {
+      jdText = existingJob.rawDescription;
+    }
+  }
 
   // If URL provided, fetch text first
   if (input.url && !jdText) {
@@ -86,21 +96,31 @@ export async function analyzeJob(userId: string, resumeId: string, input: Analyz
   }
 
   // Create/update job record
-  const job = await jobService.createJob(userId, {
-    title: input.title || parsedKeywords.title || 'Untitled Position',
-    company: input.company || parsedKeywords.company || 'Unknown Company',
-    rawDescription: jdText,
-    url: input.url || '',
-    source: input.url ? 'linkedin' : 'manual',
-  });
+  let job;
+  if (jobId) {
+    job = await jobService.updateJob(userId, jobId, {
+      parsedKeywords,
+      companyTone: parsedKeywords.tone,
+      matchScore: matchResult.score,
+      matchBreakdown: matchResult,
+    });
+  } else {
+    job = await jobService.createJob(userId, {
+      title: input.title || parsedKeywords.title || 'Untitled Position',
+      company: input.company || parsedKeywords.company || 'Unknown Company',
+      rawDescription: jdText,
+      url: input.url || '',
+      source: input.url ? 'linkedin' : 'manual',
+    });
 
-  // Update job with parsed data
-  await jobService.updateJob(userId, job.id, {
-    parsedKeywords,
-    companyTone: parsedKeywords.tone,
-    matchScore: matchResult.score,
-    matchBreakdown: matchResult,
-  });
+    // Update job with parsed data
+    await jobService.updateJob(userId, job.id, {
+      parsedKeywords,
+      companyTone: parsedKeywords.tone,
+      matchScore: matchResult.score,
+      matchBreakdown: matchResult,
+    });
+  }
 
   // Update resume match score
   await prisma.resume.update({

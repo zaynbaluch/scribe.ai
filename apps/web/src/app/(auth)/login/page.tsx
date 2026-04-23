@@ -467,7 +467,7 @@ export default function LoginPage() {
                       key={i}
                       type="text"
                       inputMode="numeric"
-                      ref={el => otpRefs.current[i] = el}
+                      ref={el => { otpRefs.current[i] = el; }}
                       value={digit}
                       onChange={e => handleOtpChange(i, e.target.value)}
                       onKeyDown={e => handleKeyDown(i, e)}
@@ -510,7 +510,7 @@ export default function LoginPage() {
                       key={i}
                       type="text"
                       inputMode="numeric"
-                      ref={el => otpRefs.current[i] = el}
+                      ref={el => { otpRefs.current[i] = el; }}
                       value={digit}
                       onChange={e => handleOtpChange(i, e.target.value)}
                       onKeyDown={e => handleKeyDown(i, e)}

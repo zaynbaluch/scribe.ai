@@ -49,6 +49,45 @@ export default function SettingsPage() {
           </div>
         </section>
 
+        {/* Browser Extension */}
+        <section className="p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[var(--grid-line)]">
+            <div className="p-2 bg-[var(--bg-elevated)] rounded-lg text-[var(--gradient-1)]">
+              <Shield size={20} />
+            </div>
+            <div>
+              <h2 className="text-lg font-medium">Browser Extension</h2>
+              <p className="text-xs text-[var(--text-muted)]">Link the Scribe.ai extension to save jobs instantly.</p>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="p-4 rounded-xl bg-[var(--bg-base)] border border-[var(--grid-line)]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Access Token</span>
+                <button 
+                  onClick={() => {
+                    const token = localStorage.getItem('scribe_access_token');
+                    if (token) {
+                      navigator.clipboard.writeText(token);
+                      alert('Token copied to clipboard!');
+                    }
+                  }}
+                  className="text-xs text-[var(--gradient-2)] hover:underline font-medium"
+                >
+                  Copy Token
+                </button>
+              </div>
+              <div className="font-mono text-[10px] text-[var(--text-muted)] break-all bg-[var(--bg-elevated)] p-2 rounded border border-[var(--border-subtle)]">
+                {typeof window !== 'undefined' ? localStorage.getItem('scribe_access_token')?.substring(0, 50) + '...' : '••••••••••••••••••••••••••••••••••••••••'}
+              </div>
+            </div>
+            <p className="text-[10px] text-[var(--text-muted)]">
+              Copy this token and paste it into the Scribe.ai browser extension popup to link your account.
+            </p>
+          </div>
+        </section>
+
         {/* Account Info placeholder */}
         <section className="p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] opacity-70">
           <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[var(--grid-line)]">

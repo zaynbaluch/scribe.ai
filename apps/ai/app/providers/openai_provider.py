@@ -9,8 +9,14 @@ class OpenAIProvider(LLMProvider):
     def __init__(self):
         self.model = os.getenv("LLM_MODEL", "gpt-4o-mini")
         self.api_key = os.getenv("LLM_API_KEY", "")
-        self.client = openai.OpenAI(api_key=self.api_key)
-        logger.info(f"Initialized OpenAIProvider with model {self.model}")
+        self.base_url = os.getenv("LLM_BASE_URL")
+        
+        client_kwargs = {"api_key": self.api_key}
+        if self.base_url:
+            client_kwargs["base_url"] = self.base_url
+            
+        self.client = openai.OpenAI(**client_kwargs)
+        logger.info(f"Initialized OpenAIProvider with model {self.model} (Base URL: {self.base_url})")
 
     def generate(self, prompt: str, system: Optional[str] = None, tools: Optional[list] = None, **kwargs) -> str:
         messages = []

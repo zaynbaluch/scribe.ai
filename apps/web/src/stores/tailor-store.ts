@@ -44,7 +44,7 @@ interface TailorState {
   setStep: (step: TailorState['step']) => void;
   setJdText: (text: string) => void;
   setResumeId: (id: string) => void;
-  analyzeJob: (resumeId: string, input: { text?: string; url?: string }) => Promise<void>;
+  analyzeJob: (resumeId: string, input: { text?: string; url?: string; jobId?: string }) => Promise<void>;
   tailorResume: (resumeId: string, jobId: string) => Promise<void>;
   acceptSuggestion: (index: number) => void;
   rejectSuggestion: (index: number) => void;
