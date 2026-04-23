@@ -6,6 +6,12 @@ import { googleLoginSchema, githubLoginSchema, linkedinLoginSchema, refreshToken
 
 const router = Router();
 
+router.post('/register', authController.register);
+router.post('/verify-email', authController.verifyEmail);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
+router.post('/login', authController.login);
+router.post('/verify-2fa', authController.verify2FA);
 router.post('/google', validate(googleLoginSchema), authController.googleLogin);
 router.post('/github', validate(githubLoginSchema), authController.githubLogin);
 router.post('/linkedin', validate(linkedinLoginSchema), authController.linkedinLogin);

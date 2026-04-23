@@ -2,7 +2,7 @@
 
 import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, Download, Loader2, Save } from 'lucide-react';
 import CoverLetterEditor from '@/components/cover-letter/cover-letter-editor';
 import ExportDropdown from '@/components/cover-letter/export-dropdown';
 import { api } from '@/lib/api-client';
@@ -65,6 +65,13 @@ export default function CoverLetterDetailPage({ params }: { params: Promise<{ id
             <option value="conversational">Conversational</option>
             <option value="storytelling">Storytelling</option>
           </select>
+          <button 
+            onClick={handleSave}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--gradient-2)] hover:opacity-90 text-white transition-all shadow-sm shadow-[var(--gradient-2)]/20"
+          >
+            <Save size={14} />
+            Save
+          </button>
           <ExportDropdown id={id} />
         </div>
       </div>

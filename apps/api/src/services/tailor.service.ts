@@ -1,6 +1,8 @@
 import logger from '../lib/logger';
 import prisma from '../lib/prisma';
 import * as jobService from './job.service';
+import * as emailService from './email.service';
+import * as exportService from './export.service';
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 
@@ -143,16 +145,82 @@ export async function tailorResume(userId: string, resumeId: string, jobId: stri
     if (!data.success) throw new Error('Tailoring failed');
 
     // Store tailored content on the resume
+    const tailoredData = sanitizeTailoredContent(data.data);
     await prisma.resume.update({
       where: { id: resumeId },
-      data: { tailoredContent: data.data },
+      data: { tailoredContent: tailoredData },
     });
 
-    return data.data;
+    return tailoredData;
   } catch (err: any) {
     logger.error({ err }, 'Resume tailoring failed');
     throw new Error(`Tailoring error: ${err.message}`);
   }
+}
+
+/**
+ * Sanitize AI-generated tailored content.
+ */
+function sanitizeTailoredContent(data: any) {
+  if (!data) return data;
+  const sanitized = { ...data };
+
+  // Sanitize summary
+  if (sanitized.summary) sanitized.summary = cleanAIString(sanitized.summary);
+
+  // Sanitize experiences
+  if (Array.isArray(sanitized.experiences)) {
+    sanitized.experiences = sanitized.experiences.map((exp: any) => ({
+      ...exp,
+      bullets: Array.isArray(exp.bullets) ? exp.bullets.map(cleanAIString) : exp.bullets
+    }));
+  }
+
+  // Sanitize projects
+  if (Array.isArray(sanitized.projects)) {
+    sanitized.projects = sanitized.projects.map((proj: any) => ({
+      ...proj,
+      bullets: Array.isArray(proj.bullets) ? proj.bullets.map(cleanAIString) : proj.bullets
+    }));
+  }
+
+  // Sanitize suggestions array (this is what the frontend mostly sees)
+  if (Array.isArray(sanitized.suggestions)) {
+    sanitized.suggestions = sanitized.suggestions.map((s: any) => ({
+      ...s,
+      tailored: cleanAIString(s.tailored),
+      original: cleanAIString(s.original)
+    }));
+  }
+
+  return sanitized;
+}
+
+/**
+ * Clean up strings from AI that might be wrapped in quotes or JSON-like artifacts.
+ */
+function cleanAIString(str: any): string {
+  if (typeof str !== 'string') return String(str || '');
+  let cleaned = str.trim();
+
+  // Remove leading/trailing quotes
+  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+
+  // If it looks like a JSON fragment from a bad AI response, try to extract the main text
+  if (cleaned.startsWith('{') && cleaned.includes(':')) {
+    try {
+      const parsed = JSON.parse(cleaned);
+      // If it's a simple object with one value, take that value
+      const values = Object.values(parsed);
+      if (values.length > 0) return String(values[0]);
+    } catch {
+      // Not valid JSON, just continue
+    }
+  }
+
+  return cleaned;
 }
 
 /**
@@ -207,7 +275,7 @@ export async function generateCoverLetter(userId: string, data: {
         resumeId: data.resumeId,
         jobId: data.jobId || null,
         title: clTitle,
-        content: result.content,
+        content: cleanAIString(result.content),
         tone: data.tone || 'formal',
       },
     });
@@ -217,4 +285,53 @@ export async function generateCoverLetter(userId: string, data: {
     logger.error({ err }, 'Cover letter generation failed');
     throw new Error(`Cover letter error: ${err.message}`);
   }
+}
+
+/**
+ * Send tailored documents via email.
+ */
+export async function sendTailoredEmail(userId: string, resumeId: string, jobId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || !user.email) throw new Error('User email not found');
+
+  const resume = await prisma.resume.findFirst({ where: { id: resumeId, userId } });
+  if (!resume) throw new Error('Resume not found');
+
+  const job = await prisma.job.findFirst({ where: { id: jobId, userId } });
+  if (!job) throw new Error('Job not found');
+
+  // Find latest cover letter for this job/resume
+  const coverLetter = await prisma.coverLetter.findFirst({
+    where: { jobId, resumeId, userId },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  // Generate Resume PDF
+  const profile = (resume.tailoredContent || resume.baseProfileSnapshot) as any;
+  if (!profile) throw new Error('No content found to send');
+
+  const resumePdf = await exportService.exportPdf(userId, resumeId);
+  
+  const attachments: any[] = [
+    {
+      filename: `Tailored_Resume_${job.company.replace(/\s+/g, '_')}.pdf`,
+      content: resumePdf,
+    }
+  ];
+
+  if (coverLetter) {
+    const clPdf = await exportService.exportCoverLetterPdf(userId, coverLetter.id);
+    attachments.push({
+      filename: `Cover_Letter_${job.company.replace(/\s+/g, '_')}.pdf`,
+      content: clPdf,
+    });
+  }
+
+  return emailService.sendTailoredDocs(
+    user.email,
+    user.name || 'there',
+    job.title,
+    job.company,
+    attachments
+  );
 }

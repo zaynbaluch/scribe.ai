@@ -9,6 +9,7 @@ const execFileAsync = promisify(execFile);
 
 const TYPST_BIN = process.env.TYPST_BIN || 'typst';
 const TEMPLATES_DIR = path.resolve(process.cwd(), '../../templates');
+const TMP_DIR = path.join(TEMPLATES_DIR, 'tmp');
 
 interface ResumeData {
   profile: any;
@@ -19,17 +20,15 @@ interface ResumeData {
 
 export async function compilePdf(templateId: string, data: ResumeData): Promise<Buffer> {
   const templatePath = path.join(TEMPLATES_DIR, 'resume', `${templateId}.typ`);
-  const dataPath = path.join(TEMPLATES_DIR, 'resume', 'data.json');
-  return runTypst(templatePath, dataPath, data);
+  return runTypst(templatePath, data);
 }
 
 export async function compileCoverLetterPdf(templateId: string, data: { profile: any; content: string }): Promise<Buffer> {
   const templatePath = path.join(TEMPLATES_DIR, 'cover-letter', `${templateId}.typ`);
-  const dataPath = path.join(TEMPLATES_DIR, 'cover-letter', 'data.json');
-  return runTypst(templatePath, dataPath, data);
+  return runTypst(templatePath, data);
 }
 
-async function runTypst(templatePath: string, dataPath: string, data: any): Promise<Buffer> {
+async function runTypst(templatePath: string, data: any): Promise<Buffer> {
   // Verify template exists
   try {
     await fs.access(templatePath);
@@ -37,31 +36,41 @@ async function runTypst(templatePath: string, dataPath: string, data: any): Prom
     throw new Error(`Template not found at ${templatePath}`);
   }
 
-  // Create temp directory for output
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'scribe-typst-'));
-  const outputPath = path.join(tmpDir, 'output.pdf');
+  // Ensure tmp dir exists inside TEMPLATES_DIR
+  await fs.mkdir(TMP_DIR, { recursive: true });
+
+  // Create temporary filenames
+  const id = Math.random().toString(36).substring(7);
+  const dataFileName = `data-${id}.json`;
+  const dataFilePath = path.join(TMP_DIR, dataFileName);
+  
+  // Create temp directory for output (can be outside templates if we use absolute output path)
+  const outputTmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'scribe-typst-'));
+  const outputPath = path.join(outputTmpDir, 'output.pdf');
 
   try {
-    // Compile using --input flag (thread-safe, no temp JSON file needed)
-    const { stderr } = await execFileAsync(TYPST_BIN, [
+    // Write data to a temp file instead of passing via --input to avoid Windows CLI length/escaping limits
+    await fs.writeFile(dataFilePath, JSON.stringify(data));
+
+    // Compile using --input path=... so templates can use json("/tmp/data-xxx.json")
+    await execFileAsync(TYPST_BIN, [
       'compile',
       '--root', TEMPLATES_DIR,
-      '--input', `data=${JSON.stringify(data)}`,
+      '--input', `dataPath=/tmp/${dataFileName}`,
       templatePath,
       outputPath,
     ], {
       timeout: 15000,
       cwd: TEMPLATES_DIR,
-      maxBuffer: 1024 * 1024 * 10, // 10MB buffer for large JSON inputs
     });
-
-    if (stderr) logger.warn({ stderr }, 'Typst compilation warnings');
 
     const pdfBuffer = await fs.readFile(outputPath);
     return pdfBuffer;
   } finally {
+    // Cleanup
     try {
-      await fs.rm(tmpDir, { recursive: true, force: true });
+      await fs.unlink(dataFilePath);
+      await fs.rm(outputTmpDir, { recursive: true, force: true });
     } catch {}
   }
 }

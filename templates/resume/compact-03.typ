@@ -1,7 +1,11 @@
 // Compact — Two-column layout, sidebar for skills/edu, main for experience
 #import "../shared/lib.typ": *
 
-#let data = json("data.json")
+#let data = if sys.inputs.at("dataPath", default: none) != none {
+  json(sys.inputs.dataPath)
+} else {
+  json("data.json")
+}
 #let styles = data.at("styles", default: (:))
 #let accent = rgb(styles.at("accentColor", default: "#7C3AED"))
 #let font = styles.at("font", default: "Inter")
@@ -25,17 +29,26 @@
 
 // ─── Header ─────────────────────────────────────────────────────────────────
 #block(fill: accent.lighten(90%), inset: (x: 12pt, y: 10pt), radius: 4pt, width: 100%)[
-  #text(size: 20pt, weight: "bold", fill: accent.darken(30%))[#profile.at("name", default: "Your Name")]
-  #if profile.at("headline", default: "") != "" {
-    linebreak()
-    text(size: 10pt, fill: luma(60))[#profile.headline]
-  }
-  #v(0.2em)
-  #contact-row(
-    email: profile.at("email", default: none),
-    phone: profile.at("phone", default: none),
-    location: profile.at("location", default: none),
-    website: profile.at("website", default: none),
+  #stack(
+    dir: ltr,
+    spacing: 1fr,
+    align(left + horizon)[
+      #text(size: 20pt, weight: "bold", fill: accent.darken(30%))[#profile.at("name", default: "Your Name")]
+      #if profile.at("headline", default: "") != "" {
+        linebreak()
+        text(size: 10pt, fill: luma(60))[#profile.headline]
+      }
+      #v(0.2em)
+      #contact-row(
+        email: profile.at("email", default: none),
+        phone: profile.at("phone", default: none),
+        location: profile.at("location", default: none),
+        website: profile.at("website", default: none),
+      )
+    ],
+    if data.at("showQrCode", default: false) {
+      qr-code-block(data.at("qrImagePath", default: ""), size: 40pt)
+    }
   )
 ]
 

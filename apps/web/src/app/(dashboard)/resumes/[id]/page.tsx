@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, use, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Shield, Palette, Type, Layout } from 'lucide-react';
+import { ArrowLeft, Save, Shield, Palette, Type, Layout, GripVertical } from 'lucide-react';
 import { useResumeStore } from '@/stores/resume-store';
 import { useProfileStore } from '@/stores/profile-store';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -37,6 +37,14 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   const [localShowQrCode, setLocalShowQrCode] = useState(true);
   const [activeTab, setActiveTab] = useState<'design' | 'content'>('design');
 
+  // Sidebar Resizing Refs & State
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const isResizingRef = useRef(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(360);
+  const minWidth = 280;
+  const maxWidth = 600;
+
   useEffect(() => {
     fetchResume(id);
     if (templates.length === 0) fetchTemplates();
@@ -57,6 +65,48 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
       lastIdRef.current = activeResume.id;
     }
   }, [activeResume]);
+
+  // Handle resizing with direct DOM manipulation for performance (zero lag)
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    isResizingRef.current = true;
+    setIsResizing(true);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    if (isResizingRef.current) {
+      isResizingRef.current = false;
+      setIsResizing(false);
+      document.body.style.cursor = 'default';
+      document.body.style.userSelect = 'auto';
+      
+      // Persist the final width to React state
+      if (sidebarRef.current) {
+        setSidebarWidth(sidebarRef.current.offsetWidth);
+      }
+    }
+  }, []);
+
+  const resize = useCallback((e: MouseEvent) => {
+    if (isResizingRef.current && sidebarRef.current) {
+      const rect = sidebarRef.current.getBoundingClientRect();
+      const newWidth = e.clientX - rect.left;
+      if (newWidth >= minWidth && newWidth <= maxWidth) {
+        sidebarRef.current.style.width = `${newWidth}px`;
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizing);
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [resize, stopResizing]);
 
   // Debounced save
   const debouncedSave = useDebounce((data: any) => {
@@ -153,9 +203,13 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Two-Panel Layout */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         {/* Controls Panel */}
-        <div className="w-full md:w-[320px] md:border-r border-b md:border-b-0 border-[var(--grid-line-strong)] flex flex-col flex-shrink-0 max-h-[50vh] md:max-h-full">
+        <div 
+          ref={sidebarRef}
+          className="flex-shrink-0 md:border-r border-b md:border-b-0 border-[var(--grid-line-strong)] flex flex-col max-h-[50vh] md:max-h-full bg-[var(--bg-surface)] z-10"
+          style={{ width: typeof window !== 'undefined' && window.innerWidth >= 768 ? `${sidebarWidth}px` : '100%' }}
+        >
           {/* Tab Switcher */}
           <div className="flex p-1 bg-[var(--bg-elevated)] border-b border-[var(--grid-line)]">
             <button
@@ -180,7 +234,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
             {activeTab === 'design' ? (
               <>
                 <TemplatePicker templates={templates} selected={localTemplateId} onSelect={handleTemplateChange} />
@@ -221,8 +275,17 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
+        {/* Resize Handle */}
+        <div 
+          onMouseDown={startResizing}
+          className={`hidden md:flex w-1.5 hover:w-2 bg-[var(--grid-line-strong)] hover:bg-[var(--gradient-2)] cursor-col-resize transition-all items-center justify-center group relative z-20 ${isResizing ? 'bg-[var(--gradient-2)] w-2' : ''}`}
+        >
+          <div className={`w-[1px] h-8 bg-[var(--border-subtle)] group-hover:bg-white/30 rounded-full ${isResizing ? 'bg-white/50' : ''}`} />
+        </div>
+
         {/* Preview Panel */}
-        <div className="flex-1 overflow-auto bg-[var(--bg-elevated)]/30">
+        <div className="flex-1 overflow-auto bg-[var(--bg-elevated)]/30 relative">
+          {isResizing && <div className="absolute inset-0 z-40 bg-transparent" />}
           <ResumePreview
             profile={localProfile}
             templateId={localTemplateId}
@@ -241,6 +304,22 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
         onClose={() => setAtsOpen(false)}
         onScoreUpdate={(score) => setLocalAtsScore(score)}
       />
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: var(--grid-line-strong);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: var(--text-muted);
+        }
+      `}</style>
     </div>
   );
 }

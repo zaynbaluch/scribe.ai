@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles, Mail, CheckCircle2 } from 'lucide-react';
 import { useTailorStore } from '@/stores/tailor-store';
 import { useResumeStore } from '@/stores/resume-store';
 import JobInputForm from '@/components/tailor/job-input-form';
@@ -16,7 +16,7 @@ export default function TailorPage() {
   const {
     step, matchResult, suggestions, isLoading, error, jobId, parsedKeywords,
     setResumeId, analyzeJob, tailorResume, acceptSuggestion, rejectSuggestion,
-    acceptAll, rejectAll, applyToResume, reset,
+    acceptAll, rejectAll, applyToResume, sendTailoredEmail, reset,
   } = useTailorStore();
 
   const [selectedResumeId, setSelectedResumeId] = useState('');
@@ -131,7 +131,7 @@ export default function TailorPage() {
           <p className="text-[var(--text-muted)] max-w-md mb-8">
             Your resume has been successfully tailored. We also automatically generated a Cover Letter for this job!
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4">
             <button 
               onClick={() => {
                 const { newResumeId } = useTailorStore.getState();
@@ -146,6 +146,14 @@ export default function TailorPage() {
               className="px-6 py-2.5 rounded-xl border border-[var(--border-strong)] bg-[var(--bg-elevated)] font-medium hover:bg-[var(--bg-surface-hover)] transition-colors"
             >
               View Cover Letter
+            </button>
+            <button 
+              onClick={sendTailoredEmail}
+              disabled={isLoading}
+              className="px-6 py-2.5 rounded-xl border border-[var(--gradient-1)] text-[var(--gradient-1)] font-medium hover:bg-[var(--gradient-1)]/5 transition-colors flex items-center gap-2 disabled:opacity-50"
+            >
+              <Mail size={18} />
+              Send to Email
             </button>
           </div>
         </div>
