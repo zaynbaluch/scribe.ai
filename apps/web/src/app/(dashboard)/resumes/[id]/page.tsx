@@ -305,7 +305,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
         onScoreUpdate={(score) => setLocalAtsScore(score)}
       />
 
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
         }
@@ -319,7 +319,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: var(--text-muted);
         }
-      `}</style>
+      ` }} />
     </div>
   );
 }
