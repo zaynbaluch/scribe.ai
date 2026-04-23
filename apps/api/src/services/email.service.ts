@@ -28,7 +28,7 @@ export async function sendEmail(to: string, subject: string, html: string, attac
       attachments: [
         {
           filename: 'logo.png',
-          path: '../../web/public/logo.png', // Relative to the project root or adjust path accordingly
+          path: '../../apps/web/public/logo.png', 
           cid: 'scribe-logo'
         },
         ...attachments
@@ -48,6 +48,22 @@ export async function sendEmail(to: string, subject: string, html: string, attac
 export async function send2FACode(to: string, code: string) {
   const html = TWO_FACTOR_HTML.replace(/{{code}}/g, code);
   return sendEmail(to, `🔒 ${code} is your Scribe.ai verification code`, html);
+}
+
+/**
+ * Send an Account Verification email for first-time signups.
+ */
+export async function sendVerificationEmail(to: string, code: string) {
+  const html = VERIFICATION_HTML.replace(/{{code}}/g, code);
+  return sendEmail(to, `🚀 Verify your Scribe.ai account — ${code}`, html);
+}
+
+/**
+ * Send a Password Reset email.
+ */
+export async function sendPasswordResetEmail(to: string, code: string) {
+  const html = RESET_PASSWORD_HTML.replace(/{{code}}/g, code);
+  return sendEmail(to, `🔑 Reset your Scribe.ai password — ${code}`, html);
 }
 
 /**
@@ -91,67 +107,201 @@ const TWO_FACTOR_HTML = `
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
-    body { font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e4e4e7; margin: 0; padding: 0; }
-    .container { max-width: 480px; margin: 40px auto; background: #18181b; border-radius: 20px; padding: 40px; border: 1px solid #27272a; text-align: center; }
-    .logo { width: 40px; height: 40px; margin-bottom: 24px; }
-    .title { font-size: 24px; font-weight: 700; color: #ffffff; margin-bottom: 8px; letter-spacing: -0.02em; }
-    .subtitle { color: #a1a1aa; font-size: 14px; margin-bottom: 32px; }
-    .code-box { background: #09090b; border: 1px solid #3f3f46; border-radius: 12px; padding: 24px; margin-bottom: 32px; }
-    .code { font-size: 32px; font-weight: 700; color: #818cf8; letter-spacing: 0.2em; font-family: monospace; }
-    .footer { color: #52525b; font-size: 12px; margin-top: 40px; border-top: 1px solid #27272a; padding-top: 24px; }
-    .brand { font-weight: 600; color: #818cf8; }
+    body { margin: 0; padding: 0; background-color: #050508; -webkit-text-size-adjust: 100%; }
+    .logo-img { filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2); }
+    @media only screen and (max-width: 480px) {
+      .hero-title { font-size: 28px !important; }
+      .code-display { font-size: 36px !important; }
+    }
   </style>
 </head>
-<body>
-  <div class="container">
-    <img src="cid:scribe-logo" alt="Scribe.ai Logo" class="logo">
-    <div class="title">Security Verification</div>
-    <div class="subtitle">Use the code below to complete your sign in.</div>
-    
-    <div class="code-box">
-      <div class="code">{{code}}</div>
-    </div>
-    
-    <p style="color: #a1a1aa; font-size: 13px; line-height: 1.6; margin-bottom: 0;">
-      This code will expire in 10 minutes. If you didn't request this code, you can safely ignore this email.
-    </p>
-    
-    <div class="footer">
-      <span class="brand">Scribe.ai</span> — Your career story, intelligently told.
-    </div>
-  </div>
+<body style="font-family: 'Outfit', Arial, sans-serif; background-color: #050508; color: #e4e4e7; margin: 0; padding: 0;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
+    <tr>
+      <td align="center" style="padding: 60px 24px;">
+        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
+        
+        <h1 class="hero-title" style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.03em;">Security Pin</h1>
+        <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 48px; line-height: 1.6; max-width: 320px;">Use the code below to securely sign in to your Scribe.ai account.</p>
+        
+        <div style="margin-bottom: 48px;">
+          <span class="code-display" style="font-size: 48px; font-weight: 700; color: #818cf8; letter-spacing: 0.2em; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 20px rgba(129, 140, 248, 0.3);">{{code}}</span>
+        </div>
+        
+        <p style="color: #52525b; font-size: 14px; line-height: 1.6; max-width: 380px; margin: 0 auto 60px;">
+          This verification code was requested for your account. If you didn't request this, please secure your account immediately.
+        </p>
+        
+        <div style="border-top: 1px solid #18181b; padding-top: 40px; color: #3f3f46; font-size: 12px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;">
+          Scribe.ai &copy; 2026 &bull; Intelligent Career Growth
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+
+const VERIFICATION_HTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
+    body { margin: 0; padding: 0; background-color: #050508; -webkit-text-size-adjust: 100%; }
+    .logo-img { filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2); }
+    @media only screen and (max-width: 480px) {
+      .hero-title { font-size: 28px !important; }
+      .code-display { font-size: 36px !important; }
+    }
+  </style>
+</head>
+<body style="font-family: 'Outfit', Arial, sans-serif; background-color: #050508; color: #e4e4e7; margin: 0; padding: 0;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
+    <tr>
+      <td align="center" style="padding: 60px 24px;">
+        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
+        
+        <div style="font-size: 14px; font-weight: 600; color: #10b981; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Welcome to the future</div>
+        <h1 class="hero-title" style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.03em;">Verify your account</h1>
+        <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 48px; line-height: 1.6; max-width: 320px;">Use the code below to verify your email and start your journey.</p>
+        
+        <div style="margin-bottom: 48px;">
+          <span class="code-display" style="font-size: 48px; font-weight: 700; color: #10b981; letter-spacing: 0.2em; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);">{{code}}</span>
+        </div>
+        
+        <p style="color: #52525b; font-size: 14px; line-height: 1.6; max-width: 380px; margin: 0 auto 60px;">
+          We're excited to have you on board. Scribe.ai is here to help you tell your career story intelligently.
+        </p>
+        
+        <div style="border-top: 1px solid #18181b; padding-top: 40px; color: #3f3f46; font-size: 12px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;">
+          Scribe.ai &copy; 2026 &bull; Intelligent Career Growth
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+
+const RESET_PASSWORD_HTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
+    body { margin: 0; padding: 0; background-color: #050508; -webkit-text-size-adjust: 100%; }
+    .logo-img { filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2); }
+    @media only screen and (max-width: 480px) {
+      .hero-title { font-size: 28px !important; }
+      .code-display { font-size: 36px !important; }
+    }
+  </style>
+</head>
+<body style="font-family: 'Outfit', Arial, sans-serif; background-color: #050508; color: #e4e4e7; margin: 0; padding: 0;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
+    <tr>
+      <td align="center" style="padding: 60px 24px;">
+        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
+        
+        <h1 class="hero-title" style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.03em;">Reset Password</h1>
+        <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 48px; line-height: 1.6; max-width: 320px;">Lost your access? No worries. Use the recovery code below to set a new password.</p>
+        
+        <div style="margin-bottom: 48px;">
+          <span class="code-display" style="font-size: 48px; font-weight: 700; color: #f59e0b; letter-spacing: 0.2em; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);">{{code}}</span>
+        </div>
+        
+        <p style="color: #52525b; font-size: 14px; line-height: 1.6; max-width: 380px; margin: 0 auto 60px;">
+          If you didn't request a password reset, you can safely ignore this email. Your account security is our priority.
+        </p>
+        
+        <div style="border-top: 1px solid #18181b; padding-top: 40px; color: #3f3f46; font-size: 12px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;">
+          Scribe.ai &copy; 2026 &bull; Intelligent Career Growth
+        </div>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
 `;
 
 const DEADLINE_REMINDER_HTML = `
-<!DOCTYPE html><html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e4e4e7; padding: 40px;">
-<div style="max-width: 520px; margin: 0 auto; background: #18181b; border-radius: 16px; padding: 32px; border: 1px solid #27272a; text-align: center;">
-  <img src="cid:scribe-logo" alt="Scribe.ai Logo" style="width: 32px; height: 32px; margin-bottom: 16px;">
-  <h2 style="margin: 0 0 8px; color: #fafafa;">⏰ Deadline Approaching</h2>
-  <p style="color: #a1a1aa; margin: 0 0 24px; font-size: 14px;">Hi {{name}},</p>
-  <p style="color: #d4d4d8; font-size: 14px; line-height: 1.6;">
-    Your application for <strong style="color: #818cf8;">{{jobTitle}}</strong> at <strong>{{company}}</strong> has a deadline on <strong style="color: #f59e0b;">{{deadline}}</strong>.
-  </p>
-  <p style="color: #a1a1aa; font-size: 14px; margin-top: 24px;">Make sure your resume is tailored and exported before the deadline!</p>
-  <a href="http://localhost:3000/applications" style="display: inline-block; margin-top: 24px; padding: 12px 24px; background: linear-gradient(135deg, #6366f1, #818cf8); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">View Application →</a>
-  <p style="color: #52525b; font-size: 11px; margin-top: 32px; border-top: 1px solid #27272a; padding-top: 16px;">Scribe.ai — Your AI-powered resume assistant</p>
-</div></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
+    body { margin: 0; padding: 0; background-color: #050508; -webkit-text-size-adjust: 100%; }
+    .logo-img { filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2); }
+    @media only screen and (max-width: 480px) {
+      .hero-title { font-size: 24px !important; }
+    }
+  </style>
+</head>
+<body style="font-family: 'Outfit', Arial, sans-serif; background-color: #050508; color: #e4e4e7; margin: 0; padding: 0;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
+    <tr>
+      <td align="center" style="padding: 60px 24px;">
+        <img src="cid:scribe-logo" alt="Scribe.ai" width="48" height="48" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
+        
+        <div style="font-size: 14px; font-weight: 600; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Action Required</div>
+        <h1 class="hero-title" style="font-size: 28px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.02em;">Deadline Approaching</h1>
+        <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 40px; line-height: 1.6; max-width: 380px;">
+          Hi {{name}}, your application for <strong style="color: #818cf8;">{{jobTitle}}</strong> at <strong>{{company}}</strong> is due on <strong style="color: #f59e0b;">{{deadline}}</strong>.
+        </p>
+        
+        <a href="http://localhost:3000/applications" style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #6366f1, #818cf8); color: white; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 15px; margin-bottom: 60px; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);">Finish Application →</a>
+        
+        <div style="border-top: 1px solid #18181b; padding-top: 40px; color: #3f3f46; font-size: 12px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;">
+          Scribe.ai &copy; 2026 &bull; Intelligent Career Growth
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
 `;
 
 const FOLLOW_UP_HTML = `
-<!DOCTYPE html><html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e4e4e7; padding: 40px;">
-<div style="max-width: 520px; margin: 0 auto; background: #18181b; border-radius: 16px; padding: 32px; border: 1px solid #27272a; text-align: center;">
-  <img src="cid:scribe-logo" alt="Scribe.ai Logo" style="width: 32px; height: 32px; margin-bottom: 16px;">
-  <h2 style="margin: 0 0 8px; color: #fafafa;">👋 Time to Follow Up?</h2>
-  <p style="color: #a1a1aa; margin: 0 0 24px; font-size: 14px;">Hi {{name}},</p>
-  <p style="color: #d4d4d8; font-size: 14px; line-height: 1.6;">
-    It's been <strong style="color: #f59e0b;">{{daysAgo}} days</strong> since you applied for <strong style="color: #818cf8;">{{jobTitle}}</strong> at <strong>{{company}}</strong>.
-  </p>
-  <p style="color: #a1a1aa; font-size: 14px;">A polite follow-up email can increase your response rate significantly. Consider reaching out to the hiring manager.</p>
-  <a href="http://localhost:3000/applications" style="display: inline-block; margin-top: 24px; padding: 12px 24px; background: linear-gradient(135deg, #6366f1, #818cf8); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">View Application →</a>
-  <p style="color: #52525b; font-size: 11px; margin-top: 32px; border-top: 1px solid #27272a; padding-top: 16px;">Scribe.ai — Your AI-powered resume assistant</p>
-</div></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
+    body { margin: 0; padding: 0; background-color: #050508; -webkit-text-size-adjust: 100%; }
+    .logo-img { filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2); }
+    @media only screen and (max-width: 480px) {
+      .hero-title { font-size: 24px !important; }
+    }
+  </style>
+</head>
+<body style="font-family: 'Outfit', Arial, sans-serif; background-color: #050508; color: #e4e4e7; margin: 0; padding: 0;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
+    <tr>
+      <td align="center" style="padding: 60px 24px;">
+        <img src="cid:scribe-logo" alt="Scribe.ai" width="48" height="48" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
+        
+        <div style="font-size: 14px; font-weight: 600; color: #818cf8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Stay Ahead</div>
+        <h1 class="hero-title" style="font-size: 28px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.02em;">Time to Follow Up?</h1>
+        <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 40px; line-height: 1.6; max-width: 380px;">
+          Hi {{name}}, it's been <strong style="color: #f59e0b;">{{daysAgo}} days</strong> since you applied for <strong style="color: #818cf8;">{{jobTitle}}</strong> at <strong>{{company}}</strong>.
+        </p>
+        
+        <a href="http://localhost:3000/applications" style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #6366f1, #818cf8); color: white; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 15px; margin-bottom: 60px; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);">Check Status →</a>
+        
+        <div style="border-top: 1px solid #18181b; padding-top: 40px; color: #3f3f46; font-size: 12px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;">
+          Scribe.ai &copy; 2026 &bull; Intelligent Career Growth
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
 `;

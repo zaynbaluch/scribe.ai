@@ -20,6 +20,10 @@ interface AuthState {
   loginWithGithub: (code: string) => Promise<void>;
   loginWithLinkedin: (code: string, redirectUri: string) => Promise<void>;
   login: (email: string, password: string) => Promise<{ requires2FA: boolean }>;
+  register: (email: string, password: string, name: string) => Promise<{ requiresVerification: boolean }>;
+  verifyEmail: (email: string, code: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string, code: string, passwordNew: string) => Promise<void>;
   verify2FA: (email: string, code: string) => Promise<void>;
   logout: () => void;
   fetchUser: () => Promise<void>;
@@ -90,6 +94,51 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       setTokens(data.accessToken, data.refreshToken);
       set({ user: data.user, isAuthenticated: true, isLoading: false });
       return { requires2FA: false };
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  register: async (email, password, name) => {
+    set({ isLoading: true });
+    try {
+      const data = await api.post('/api/auth/register', { email, password, name }, { skipAuth: true });
+      set({ isLoading: false });
+      return { requiresVerification: data.requiresVerification };
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  verifyEmail: async (email, code) => {
+    set({ isLoading: true });
+    try {
+      await api.post('/api/auth/verify-email', { email, code }, { skipAuth: true });
+      set({ isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  forgotPassword: async (email) => {
+    set({ isLoading: true });
+    try {
+      await api.post('/api/auth/forgot-password', { email }, { skipAuth: true });
+      set({ isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  resetPassword: async (email, code, password) => {
+    set({ isLoading: true });
+    try {
+      await api.post('/api/auth/reset-password', { email, code, password }, { skipAuth: true });
+      set({ isLoading: false });
     } catch (error) {
       set({ isLoading: false });
       throw error;

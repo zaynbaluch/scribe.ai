@@ -11,7 +11,40 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   if (!email || !password || !name) throw createError('Missing fields', 400);
 
   const user = await authService.registerWithEmailPassword(email, password, name);
-  res.status(201).json({ success: true, data: { id: user.id, email: user.email } });
+  res.status(201).json({ success: true, data: { id: user.id, email: user.email, requiresVerification: true } });
+});
+
+/**
+ * POST /api/auth/verify-email
+ */
+export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+  const { email, code } = req.body;
+  if (!email || !code) throw createError('Missing fields', 400);
+
+  await authService.verifyEmailCode(email, code);
+  res.json({ success: true, message: 'Email verified successfully' });
+});
+
+/**
+ * POST /api/auth/forgot-password
+ */
+export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  if (!email) throw createError('Email is required', 400);
+
+  await authService.requestPasswordReset(email);
+  res.json({ success: true, message: 'If an account exists, a reset code has been sent' });
+});
+
+/**
+ * POST /api/auth/reset-password
+ */
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { email, code, password } = req.body;
+  if (!email || !code || !password) throw createError('Missing fields', 400);
+
+  await authService.resetPassword(email, code, password);
+  res.json({ success: true, message: 'Password has been reset successfully' });
 });
 
 /**

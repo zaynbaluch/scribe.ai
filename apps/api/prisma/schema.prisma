@@ -17,7 +17,8 @@ model User {
   passwordHash     String?
   oauthProvider    String?  // google, linkedin, github
   oauthId          String?  @unique
-  twoFactorEnabled Boolean  @default(true) // Default to true for security as requested
+  twoFactorEnabled Boolean  @default(false)
+  emailVerified    Boolean  @default(false)
   plan             String   @default("free") // free, pro, lifetime
   vanitySlug       String?  @unique
   createdAt        DateTime @default(now())
@@ -32,10 +33,10 @@ model User {
 }
 
 model VerificationCode {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   email     String
   code      String
-  type      String   // "2fa", "reset", "verify"
+  type      String   // '2fa', 'email_verification', 'password_reset'
   expiresAt DateTime
   createdAt DateTime @default(now())
 
