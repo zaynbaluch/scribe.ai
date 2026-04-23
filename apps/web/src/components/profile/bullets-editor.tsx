@@ -56,7 +56,7 @@ export default function BulletsEditor({ label, bullets, onChange, placeholder }:
           <div key={index} className="flex items-start gap-2 group relative">
             <GripVertical size={14} className="mt-3 text-[var(--text-muted)] cursor-grab opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
             <textarea
-              ref={el => textareasRef.current[index] = el}
+              ref={el => { textareasRef.current[index] = el; }}
               value={bullet}
               onChange={(e) => handleChange(index, e.target.value)}
               placeholder={placeholder || "Add a key achievement or responsibility..."}
