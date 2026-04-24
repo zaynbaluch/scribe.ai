@@ -35,6 +35,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   const [atsOpen, setAtsOpen] = useState(false);
   const [localAtsScore, setLocalAtsScore] = useState<number | null>(null);
   const [localShowQrCode, setLocalShowQrCode] = useState(true);
+  const [localShowProfileImage, setLocalShowProfileImage] = useState(true);
   const [activeTab, setActiveTab] = useState<'design' | 'content'>('design');
 
   // Sidebar Resizing Refs & State
@@ -61,6 +62,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
       setLocalSectionOrder(activeResume.sectionOrder || ['summary', 'experience', 'skills', 'projects', 'education']);
       setLocalVisibility(activeResume.sectionVisibility || {});
       setLocalShowQrCode(activeResume.showQrCode !== false);
+      setLocalShowProfileImage((activeResume.customStyles as any)?.showProfileImage !== false);
       setLocalProfile(activeResume.baseProfileSnapshot);
       lastIdRef.current = activeResume.id;
     }
@@ -146,6 +148,13 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
   const handleQrToggle = (show: boolean) => {
     setLocalShowQrCode(show);
     debouncedSave({ showQrCode: show });
+  };
+
+  const handleProfileImageToggle = (show: boolean) => {
+    setLocalShowProfileImage(show);
+    const updatedStyles = { ...localStyles, showProfileImage: show };
+    setLocalStyles(updatedStyles);
+    debouncedSave({ customStyles: updatedStyles });
   };
 
   const handleSyncProfile = () => {
@@ -251,15 +260,30 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
                   hasAvatar={!!localProfile?.imageUrl || !!globalProfile?.imageUrl} 
                   onChange={handleStylesChange} 
                 />
-                <div className="border-t border-[var(--grid-line)]" />
-                <div className="flex items-center justify-between p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)]">
-                  <span className="text-xs font-medium">Show QR Code</span>
-                  <button 
-                    onClick={() => handleQrToggle(!localShowQrCode)}
-                    className={`w-8 h-4 rounded-full transition-colors relative ${localShowQrCode ? 'bg-[var(--gradient-2)]' : 'bg-gray-600'}`}
-                  >
-                    <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${localShowQrCode ? 'left-4.5' : 'left-0.5'}`} />
-                  </button>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)]">
+                    <span className="text-xs font-medium">Show QR Code</span>
+                    <button 
+                      onClick={() => handleQrToggle(!localShowQrCode)}
+                      className={`w-8 h-4 rounded-full transition-colors relative ${localShowQrCode ? 'bg-[var(--gradient-2)]' : 'bg-gray-600'}`}
+                    >
+                      <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${localShowQrCode ? 'left-4.5' : 'left-0.5'}`} />
+                    </button>
+                  </div>
+
+                  <div className={`flex items-center justify-between p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)] transition-all ${!localProfile?.imageUrl && !globalProfile?.imageUrl ? 'opacity-40 grayscale-[0.5]' : ''}`}>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-medium">Profile Image</span>
+                      <span className="text-[10px] text-[var(--text-muted)]">Show your photo in header</span>
+                    </div>
+                    <button 
+                      disabled={!localProfile?.imageUrl && !globalProfile?.imageUrl}
+                      onClick={() => handleProfileImageToggle(!localShowProfileImage)}
+                      className={`w-8 h-4 rounded-full transition-all relative ${localShowProfileImage && (localProfile?.imageUrl || globalProfile?.imageUrl) ? 'bg-[var(--gradient-2)]' : 'bg-gray-600'} ${!localProfile?.imageUrl && !globalProfile?.imageUrl ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                      <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${localShowProfileImage && (localProfile?.imageUrl || globalProfile?.imageUrl) ? 'left-4.5' : 'left-0.5'}`} />
+                    </button>
+                  </div>
                 </div>
                 <div className="border-t border-[var(--grid-line)]" />
                 <SectionToggles

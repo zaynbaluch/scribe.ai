@@ -99,25 +99,6 @@ export default function StyleControls({ styles, hasAvatar = true, onChange }: St
       </div>
       {/* Toggle options */}
       <div className="pt-3 border-t border-[var(--grid-line)] space-y-3">
-        {/* Profile Image Toggle */}
-        <div className={`flex items-center justify-between p-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] transition-all ${!hasAvatar ? 'opacity-40 grayscale-[0.5]' : ''}`}>
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-[var(--text-secondary)]">Profile Image</span>
-            <span className="text-[10px] text-[var(--text-muted)]">
-              {hasAvatar ? 'Show your photo in the header' : 'Upload photo in Profile first'}
-            </span>
-          </div>
-          <button 
-            disabled={!hasAvatar}
-            onClick={() => {
-              const current = styles.showProfileImage ?? true;
-              update('showProfileImage', !current);
-            }}
-            className={`w-8 h-4 rounded-full transition-all relative ${(styles.showProfileImage ?? true) && hasAvatar ? 'bg-[var(--gradient-2)]' : 'bg-gray-600'} ${!hasAvatar ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-          >
-            <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${(styles.showProfileImage ?? true) && hasAvatar ? 'left-[18px]' : 'left-0.5'}`} />
-          </button>
-        </div>
 
         {/* QR Code Size Slider */}
         <div className="space-y-1.5 px-1">
