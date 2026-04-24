@@ -109,11 +109,14 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
     try {
       await fs.mkdir(TMP_QR_DIR, { recursive: true });
       if (snapshot.imageUrl.startsWith('data:image')) {
-        const base64Data = snapshot.imageUrl.split(',')[1];
-        profileImageFileName = `profile-${resume.id}-${Date.now()}.png`;
+        const match = snapshot.imageUrl.match(/^data:image\/([a-zA-Z+]+);base64,/);
+        const ext = match ? match[1] : 'png';
+        profileImageFileName = `profile-${resume.id}-${Date.now()}.${ext}`;
         profileImagePath = path.join(TMP_QR_DIR, profileImageFileName);
+        
+        const base64Data = snapshot.imageUrl.split(',')[1];
         await fs.writeFile(profileImagePath, Buffer.from(base64Data, 'base64'));
-        logger.info({ resumeId: resume.id }, 'Saved base64 profile image');
+        logger.info({ resumeId: resume.id, ext }, 'Saved base64 profile image');
       } else {
         // Download from Supabase/External URL
         logger.info({ resumeId: resume.id, url: snapshot.imageUrl }, 'Downloading profile image from URL');

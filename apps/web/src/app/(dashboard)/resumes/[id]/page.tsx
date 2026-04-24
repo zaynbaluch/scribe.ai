@@ -110,10 +110,20 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
     };
   }, [resize, stopResizing]);
 
+  const [isSaving, setIsSaving] = useState(false);
+
   // Debounced save
   const debouncedSave = useDebounce((data: any) => {
-    updateResume(id, data).then(() => toast.success('Saved', { duration: 1500 })).catch(() => toast.error('Save failed'));
-  }, 1200);
+    setIsSaving(true);
+    updateResume(id, data)
+      .then(() => {
+        setTimeout(() => setIsSaving(false), 800);
+      })
+      .catch(() => {
+        toast.error('Save failed');
+        setIsSaving(false);
+      });
+  }, 500);
 
   const handleNameChange = (name: string) => {
     setLocalName(name);
@@ -208,6 +218,12 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
             <span className="hidden sm:inline">ATS Check</span>
           </button>
           <ExportDropdown resumeId={id} atsScore={localAtsScore ?? activeResume.atsScore ?? undefined} />
+          {isSaving && (
+            <div className="absolute -bottom-6 right-0 flex items-center gap-1.5 text-[10px] text-[var(--gradient-2)] font-medium animate-pulse">
+              <div className="w-1 h-1 rounded-full bg-[var(--gradient-2)]" />
+              Saving...
+            </div>
+          )}
         </div>
       </div>
 
