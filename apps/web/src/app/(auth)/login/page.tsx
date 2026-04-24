@@ -200,7 +200,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#050508] relative overflow-hidden" data-theme="dark">
+    <main className="min-h-screen bg-[#050508] relative overflow-hidden flex items-center justify-center" data-theme="dark">
       <Toaster theme="dark" position="bottom-right" toastOptions={{ style: { background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' } }} />
       {/* Ambient glow */}
       <div

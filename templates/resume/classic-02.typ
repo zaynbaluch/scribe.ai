@@ -31,18 +31,10 @@
 #let has-img = data.at("profileImagePath", default: "") != ""
 #let has-qr = data.at("showQrCode", default: false)
 
-// Absolute QR Code
-#if has-qr {
-  place(
-    top + right,
-    qr-code-block(data.at("qrImagePath", default: ""), size: 45pt)
-  )
-}
-
 #grid(
-  columns: (if has-img { 65pt } else { 0pt }, 1fr, auto),
+  columns: (if has-img { 65pt } else { 0pt }, 1fr, if has-qr { 60pt } else { 0pt }, auto),
   column-gutter: 1.5em,
-  align: (left + horizon, left + horizon, right + horizon),
+  align: (left + horizon, left + horizon, right + horizon, right + horizon),
   if has-img {
     profile-image-block(data.at("profileImagePath", default: ""), size: 55pt)
   } else { none },
@@ -53,6 +45,9 @@
       text(size: 11pt, fill: luma(60), style: "italic")[#profile.headline]
     }
   ],
+  if has-qr {
+    qr-code-block(data.at("qrImagePath", default: ""), size: 45pt)
+  } else { none },
   [
     #set text(size: 9pt, fill: luma(80))
     #if profile.at("email", default: "") != "" { profile.email; linebreak() }
