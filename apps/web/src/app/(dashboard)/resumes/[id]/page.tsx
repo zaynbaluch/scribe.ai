@@ -133,6 +133,15 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
     debouncedSave({ customStyles: styles });
   };
 
+  const handleProfileImageToggle = (show: boolean) => {
+    setLocalShowProfileImage(show);
+    setLocalStyles(prev => {
+      const next = { ...prev, showProfileImage: show };
+      debouncedSave({ customStyles: next });
+      return next;
+    });
+  };
+
   const handleOrderChange = (order: string[]) => {
     setLocalSectionOrder(order);
     debouncedSave({ sectionOrder: order });
@@ -153,12 +162,6 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
     debouncedSave({ showQrCode: show });
   };
 
-  const handleProfileImageToggle = (show: boolean) => {
-    setLocalShowProfileImage(show);
-    const updatedStyles = { ...localStyles, showProfileImage: show };
-    setLocalStyles(updatedStyles);
-    debouncedSave({ customStyles: updatedStyles });
-  };
 
   const handleSyncProfile = () => {
     if (!globalProfile) return;

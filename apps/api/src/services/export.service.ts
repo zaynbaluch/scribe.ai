@@ -102,7 +102,8 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
     showQrCode: resume.showQrCode, 
     showProfileImageStyle: styles.showProfileImage,
     calculatedShowProfileImage: showProfileImage,
-    hasImageUrl: !!snapshot.imageUrl
+    hasImageUrl: !!snapshot.imageUrl,
+    rawStyles: JSON.stringify(styles)
   }, 'Exporting PDF: Visibility Flags');
 
   if (snapshot.imageUrl && showProfileImage) {

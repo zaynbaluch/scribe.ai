@@ -147,7 +147,12 @@ export async function updateResume(userId: string, resumeId: string, data: Updat
     },
   });
 
-  logger.info({ userId, resumeId }, 'Resume updated');
+  logger.info({ 
+    userId, 
+    resumeId, 
+    receivedStyles: data.customStyles,
+    savedStyles: updated.customStyles 
+  }, 'Resume updated with styles');
   return updated;
 }
 
