@@ -1,43 +1,64 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import logger from '../lib/logger';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
- * Email service — Nodemailer transport with Mailpit for dev.
+ * Email service — Resend SDK.
  * Templates are pre-compiled HTML stored in /templates/emails/
  */
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'localhost',
-  port: parseInt(process.env.SMTP_PORT || '1025'),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: process.env.SMTP_USER ? {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  } : undefined,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
-const FROM = process.env.EMAIL_FROM || 'noreply@scribe.local';
+// Pre-load logo buffer for attachments
+const LOGO_PATH = path.resolve(__dirname, '../../../apps/web/public/logo.png');
+let logoBuffer: Buffer | null = null;
+try {
+  if (fs.existsSync(LOGO_PATH)) {
+    logoBuffer = fs.readFileSync(LOGO_PATH);
+  }
+} catch (err) {
+  logger.error({ err, path: LOGO_PATH }, 'Failed to pre-load logo for email attachments');
+}
 
 export async function sendEmail(to: string, subject: string, html: string, attachments: any[] = []) {
   try {
-    const info = await transporter.sendMail({ 
-      from: FROM, 
-      to, 
-      subject, 
+    const resendAttachments = [];
+    
+    // Add logo if available
+    if (logoBuffer) {
+      resendAttachments.push({
+        filename: 'logo.png',
+        content: logoBuffer,
+        cid: 'scribe-logo', // Resend supports cid for inline images
+      });
+    }
+
+    // Add other attachments
+    for (const att of attachments) {
+      resendAttachments.push({
+        filename: att.filename,
+        content: att.content, // Should be Buffer or string
+      });
+    }
+
+    const { data, error } = await resend.emails.send({
+      from: FROM,
+      to,
+      subject,
       html,
-      attachments: [
-        {
-          filename: 'logo.png',
-          path: '../../apps/web/public/logo.png', 
-          cid: 'scribe-logo'
-        },
-        ...attachments
-      ]
+      attachments: resendAttachments,
     });
-    logger.info({ to, subject, messageId: info.messageId }, 'Email sent');
-    return info;
+
+    if (error) {
+      throw error;
+    }
+
+    logger.info({ to, subject, id: data?.id }, 'Email sent via Resend');
+    return data;
   } catch (err) {
-    logger.error({ err, to, subject }, 'Failed to send email');
+    logger.error({ err, to, subject }, 'Failed to send email via Resend');
     throw err;
   }
 }
