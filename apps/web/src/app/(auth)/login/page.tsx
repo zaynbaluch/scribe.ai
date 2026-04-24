@@ -62,11 +62,11 @@ export default function LoginPage() {
         setView('2fa');
         toast.info('Verification code sent to your email');
       } else {
-        toast.success('Welcome back!');
+        // Redirect is enough feedback
         router.push('/dashboard');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Registration failed');
+      toast.error(err.message || 'Login failed. Please check your credentials.');
     }
   };
 
@@ -92,11 +92,11 @@ export default function LoginPage() {
         setView('verify-email');
         toast.info('Verification code sent to your email');
       } else {
-        // Successful login - no toast needed as redirect is enough feedback
+        // Successful registration - no toast needed if auto-login redirects
         router.push('/dashboard');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Invalid email or password');
+      toast.error(err.message || 'Registration failed. Please try again.');
     }
   };
 

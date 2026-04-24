@@ -41,11 +41,12 @@ export async function sendEmail(to: string, subject: string, html: string, attac
       filename: att.filename,
       content: att.content,
     }));
+    const { data, error } = await resend.emails.send({
       from: FROM,
       to,
       subject,
       html,
-      attachments,
+      attachments: resendAttachments,
     });
 
     if (error) {
