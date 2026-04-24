@@ -28,21 +28,16 @@
 )
 
 // ─── Header ─────────────────────────────────────────────────────────────────
-// Absolute QR Code
-#let has-qr = data.at("showQrCode", default: false)
-#if has-qr {
-  place(
-    top + right,
-    qr-code-block(data.at("qrImagePath", default: ""), size: 45pt)
-  )
-}
+#let show-img = data.at("showProfileImage", default: false)
+#let show-qr = data.at("showQrCode", default: false)
 
 #block(fill: accent, inset: (x: 16pt, y: 14pt), radius: 4pt, width: 100%)[
-#let has-img = data.at("profileImagePath", default: "") != ""
 #grid(
-  columns: (if has-img { 70pt } else { 0pt }, 1fr),
+  columns: (if show-img { 70pt } else { 0pt }, 1fr, if show-qr { 60pt } else { 0pt }),
   column-gutter: 1.5em,
-  profile-image-block(data.at("profileImagePath", default: ""), size: 60pt),
+  if show-img {
+    profile-image-block(data.at("profileImagePath", default: ""), size: 60pt)
+  } else { none },
   align(left + horizon)[
     #text(size: 24pt, weight: "bold", fill: white)[#profile.at("name", default: "Your Name")]
     #if profile.at("headline", default: "") != "" {
@@ -59,7 +54,10 @@
     #if profile.at("linkedin", default: "") != "" { items.push("linkedin.com/in/" + profile.linkedin.split("/").at(-1)) }
     #if profile.at("github", default: "") != "" { items.push("github.com/" + profile.github.split("/").at(-1)) }
     #items.join([ #sym.bar.v ])
-  ]
+  ],
+  if show-qr {
+    qr-code-block(data.at("qrImagePath", default: ""), size: 45pt)
+  } else { none }
 )
 ]
 

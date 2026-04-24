@@ -131,6 +131,7 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
       sectionOrder: resume.sectionOrder,
       sectionVisibility: (resume.sectionVisibility as any) || {},
       showQrCode: !!qrImagePath,
+      showProfileImage: !!profileImageFileName,
       qrImagePath: qrFileName ? `/tmp/${qrFileName}` : undefined,
       profileImagePath: profileImageFileName ? `/tmp/${profileImageFileName}` : undefined,
     });

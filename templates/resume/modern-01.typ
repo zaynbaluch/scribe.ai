@@ -28,37 +28,36 @@
 )
 
 // ─── Header ─────────────────────────────────────────────────────────────────
-#let has-img = data.at("profileImagePath", default: "") != ""
-#let has-qr = data.at("showQrCode", default: false)
+#let show-img = data.at("showProfileImage", default: false)
+#let show-qr = data.at("showQrCode", default: false)
 
-// Absolute QR Code
-#if has-qr {
-  place(
-    top + right,
-    qr-code-block(data.at("qrImagePath", default: ""), size: 40pt)
-  )
-}
-
-#align(center)[
-  #if has-img {
-    profile-image-block(data.at("profileImagePath", default: ""), size: 64pt)
-    v(0.6em)
-  }
-  #text(size: 22pt, weight: "bold", fill: accent)[#profile.at("name", default: "Your Name")]
-  #v(0.3em)
-  #if profile.at("headline", default: "") != "" {
-    text(size: 11pt, fill: luma(80))[#profile.headline]
-    v(0.2em)
-  }
-  #contact-row(
-    email: profile.at("email", default: none),
-    phone: profile.at("phone", default: none),
-    location: profile.at("location", default: none),
-    website: profile.at("website", default: none),
-    linkedin: profile.at("linkedin", default: none),
-    github: profile.at("github", default: none),
-  )
-]
+#grid(
+  columns: (if show-img { 70pt } else { 0pt }, 1fr, if show-qr { 70pt } else { 0pt }),
+  column-gutter: 1em,
+  align: (center + horizon, center + horizon, center + horizon),
+  if show-img {
+    profile-image-block(data.at("profileImagePath", default: ""), size: 60pt)
+  } else { none },
+  [
+    #text(size: 22pt, weight: "bold", fill: accent)[#profile.at("name", default: "Your Name")]
+    #v(0.3em)
+    #if profile.at("headline", default: "") != "" {
+      text(size: 11pt, fill: luma(80))[#profile.headline]
+      v(0.2em)
+    }
+    #contact-row(
+      email: profile.at("email", default: none),
+      phone: profile.at("phone", default: none),
+      location: profile.at("location", default: none),
+      website: profile.at("website", default: none),
+      linkedin: profile.at("linkedin", default: none),
+      github: profile.at("github", default: none),
+    )
+  ],
+  if show-qr {
+    qr-code-block(data.at("qrImagePath", default: ""), size: 45pt)
+  } else { none }
+)
 
 #v(0.5em)
 
