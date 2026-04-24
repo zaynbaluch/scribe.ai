@@ -8,6 +8,7 @@ import logger from '../lib/logger';
 const execFileAsync = promisify(execFile);
 
 const LOCAL_TYPST = path.resolve(__dirname, '../../typst-bin');
+const CWD_TYPST = path.resolve(process.cwd(), 'typst-bin');
 const MONOREPO_TYPST = path.resolve(process.cwd(), 'apps/api/typst-bin');
 
 // Check for binary in various locations
@@ -15,11 +16,14 @@ let detectedBin = 'typst';
 if (require('fs').existsSync(LOCAL_TYPST)) {
   detectedBin = LOCAL_TYPST;
   logger.info(`Detected Typst at LOCAL_TYPST: ${LOCAL_TYPST}`);
+} else if (require('fs').existsSync(CWD_TYPST)) {
+  detectedBin = CWD_TYPST;
+  logger.info(`Detected Typst at CWD_TYPST: ${CWD_TYPST}`);
 } else if (require('fs').existsSync(MONOREPO_TYPST)) {
   detectedBin = MONOREPO_TYPST;
   logger.info(`Detected Typst at MONOREPO_TYPST: ${MONOREPO_TYPST}`);
 } else {
-  logger.warn(`Typst binary not found at ${LOCAL_TYPST} or ${MONOREPO_TYPST}. Falling back to global 'typst'.`);
+  logger.warn(`Typst binary not found. Checked: ${LOCAL_TYPST}, ${CWD_TYPST}, ${MONOREPO_TYPST}. Falling back to 'typst'.`);
 }
 
 const TYPST_BIN = process.env.TYPST_BIN || detectedBin;
