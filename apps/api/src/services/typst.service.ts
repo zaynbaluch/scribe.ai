@@ -28,6 +28,7 @@ interface ResumeData {
   sectionOrder: string[];
   sectionVisibility: any;
   showQrCode?: boolean;
+  showProfileImage?: boolean;
   qrImagePath?: string;
   profileImagePath?: string;
 }
