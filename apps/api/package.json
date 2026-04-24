@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:*",
     "dev:server": "tsx watch src/index.ts",
-    "build": "prisma generate && prisma migrate deploy && tsc",
+    "build": "prisma generate && tsc",
     "postinstall": "prisma generate",
     "start": "node dist/index.js",
     "lint": "eslint .",
