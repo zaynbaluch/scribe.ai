@@ -92,7 +92,7 @@ export default function LoginPage() {
         setView('email');
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Registration failed');
+      toast.error(err.message || 'Registration failed');
     }
   };
 
@@ -105,7 +105,7 @@ export default function LoginPage() {
       toast.success('Email verified! You can now sign in.');
       setView('email');
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Invalid verification code');
+      toast.error(err.message || 'Invalid verification code');
     }
   };
 
@@ -130,7 +130,7 @@ export default function LoginPage() {
         duration: 5000,
       });
     } catch (err: any) {
-      toast.error('We encountered an issue. Please try again later.');
+      toast.error(err.message || 'We encountered an issue. Please try again later.');
     }
   };
 
@@ -167,7 +167,7 @@ export default function LoginPage() {
       toast.success('Verified successfully!');
       router.push('/dashboard');
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Invalid verification code');
+      toast.error(err.message || 'Invalid verification code');
     }
   };
 
@@ -195,7 +195,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative bg-[#050508]">
+    <div data-theme="dark" className="min-h-screen flex items-center justify-center relative bg-[#050508] text-[#FFFFFF]">
       {/* Ambient glow */}
       <div
         className="absolute inset-0 pointer-events-none overflow-hidden"
