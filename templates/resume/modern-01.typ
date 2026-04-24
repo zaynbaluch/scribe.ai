@@ -30,28 +30,35 @@
 // ─── Header ─────────────────────────────────────────────────────────────────
 #let has-img = data.at("profileImagePath", default: "") != ""
 #let has-qr = data.at("showQrCode", default: false)
-#grid(
-  columns: (if has-img { 65pt } else { 0pt }, 1fr, if has-qr { 60pt } else { 0pt }),
-  column-gutter: 1.2em,
-  profile-image-block(data.at("profileImagePath", default: ""), size: 54pt),
-  align(left + horizon)[
-    #text(size: 20pt, weight: "bold", fill: accent.darken(30%))[#profile.at("name", default: "Your Name")]
-    #if profile.at("headline", default: "") != "" {
-      linebreak()
-      text(size: 10pt, fill: luma(60))[#profile.headline]
-    }
-    #v(0.2em)
-    #contact-row(
-      email: profile.at("email", default: none),
-      phone: profile.at("phone", default: none),
-      location: profile.at("location", default: none),
-      website: profile.at("website", default: none),
-    )
-  ],
-  if has-qr {
+
+// Absolute QR Code
+#if has-qr {
+  place(
+    top + right,
     qr-code-block(data.at("qrImagePath", default: ""), size: 40pt)
+  )
+}
+
+#align(center)[
+  #if has-img {
+    profile-image-block(data.at("profileImagePath", default: ""), size: 64pt)
+    v(0.6em)
   }
-)
+  #text(size: 22pt, weight: "bold", fill: accent)[#profile.at("name", default: "Your Name")]
+  #v(0.3em)
+  #if profile.at("headline", default: "") != "" {
+    text(size: 11pt, fill: luma(80))[#profile.headline]
+    v(0.2em)
+  }
+  #contact-row(
+    email: profile.at("email", default: none),
+    phone: profile.at("phone", default: none),
+    location: profile.at("location", default: none),
+    website: profile.at("website", default: none),
+    linkedin: profile.at("linkedin", default: none),
+    github: profile.at("github", default: none),
+  )
+]
 
 #v(0.5em)
 

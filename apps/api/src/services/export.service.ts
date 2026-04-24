@@ -93,7 +93,8 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
   let profileImageFileName: string | undefined;
 
   // Handle Profile Image (save base64 to temp file for Typst)
-  if (snapshot.imageUrl && snapshot.imageUrl.startsWith('data:image')) {
+  const styles = (resume.customStyles as any) || {};
+  if (snapshot.imageUrl && snapshot.imageUrl.startsWith('data:image') && styles.showProfileImage !== false) {
     try {
       await fs.mkdir(TMP_QR_DIR, { recursive: true });
       profileImageFileName = `profile-${resume.id}-${Date.now()}.png`;
