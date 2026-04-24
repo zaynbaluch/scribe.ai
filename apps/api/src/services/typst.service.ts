@@ -7,26 +7,18 @@ import logger from '../lib/logger';
 
 const execFileAsync = promisify(execFile);
 
-const LOCAL_TYPST = path.resolve(__dirname, '../../typst-bin');
-const CWD_TYPST = path.resolve(process.cwd(), 'typst-bin');
-const MONOREPO_TYPST = path.resolve(process.cwd(), 'apps/api/typst-bin');
+function getTypstBin() {
+  const localPath = path.resolve(__dirname, '../../typst-bin');
+  const cwdPath = path.resolve(process.cwd(), 'typst-bin');
+  const monorepoPath = path.resolve(process.cwd(), 'apps/api/typst-bin');
 
-// Check for binary in various locations
-let detectedBin = 'typst';
-if (require('fs').existsSync(LOCAL_TYPST)) {
-  detectedBin = LOCAL_TYPST;
-  logger.info(`Detected Typst at LOCAL_TYPST: ${LOCAL_TYPST}`);
-} else if (require('fs').existsSync(CWD_TYPST)) {
-  detectedBin = CWD_TYPST;
-  logger.info(`Detected Typst at CWD_TYPST: ${CWD_TYPST}`);
-} else if (require('fs').existsSync(MONOREPO_TYPST)) {
-  detectedBin = MONOREPO_TYPST;
-  logger.info(`Detected Typst at MONOREPO_TYPST: ${MONOREPO_TYPST}`);
-} else {
-  logger.warn(`Typst binary not found. Checked: ${LOCAL_TYPST}, ${CWD_TYPST}, ${MONOREPO_TYPST}. Falling back to 'typst'.`);
+  if (require('fs').existsSync(localPath)) return localPath;
+  if (require('fs').existsSync(cwdPath)) return cwdPath;
+  if (require('fs').existsSync(monorepoPath)) return monorepoPath;
+  
+  return process.env.TYPST_BIN || 'typst';
 }
 
-const TYPST_BIN = process.env.TYPST_BIN || detectedBin;
 const TEMPLATES_DIR = path.resolve(__dirname, '../../../../templates');
 const TMP_DIR = path.join(TEMPLATES_DIR, 'tmp');
 
@@ -40,16 +32,28 @@ interface ResumeData {
 }
 
 export async function compilePdf(templateId: string, data: ResumeData): Promise<Buffer> {
+  const bin = getTypstBin();
+  logger.info(`Compiling PDF using Typst at: ${bin}`);
+  
+  // Debug: list files in CWD
+  try {
+    const files = require('fs').readdirSync(process.cwd());
+    logger.info(`CWD files: ${files.join(', ')}`);
+    const appDirFiles = require('fs').readdirSync(path.resolve(process.cwd(), 'apps/api'));
+    logger.info(`App dir files: ${appDirFiles.join(', ')}`);
+  } catch (err) {}
+
   const templatePath = path.join(TEMPLATES_DIR, 'resume', `${templateId}.typ`);
-  return runTypst(templatePath, data);
+  return runTypst(templatePath, data, bin);
 }
 
 export async function compileCoverLetterPdf(templateId: string, data: { profile: any; content: string }): Promise<Buffer> {
+  const bin = getTypstBin();
   const templatePath = path.join(TEMPLATES_DIR, 'cover-letter', `${templateId}.typ`);
-  return runTypst(templatePath, data);
+  return runTypst(templatePath, data, bin);
 }
 
-async function runTypst(templatePath: string, data: any): Promise<Buffer> {
+async function runTypst(templatePath: string, data: any, bin: string): Promise<Buffer> {
   // Verify template exists
   try {
     await fs.access(templatePath);
@@ -74,7 +78,7 @@ async function runTypst(templatePath: string, data: any): Promise<Buffer> {
     await fs.writeFile(dataFilePath, JSON.stringify(data));
 
     // Compile using --input path=... so templates can use json("/tmp/data-xxx.json")
-    await execFileAsync(TYPST_BIN, [
+    await execFileAsync(bin, [
       'compile',
       '--root', TEMPLATES_DIR,
       '--input', `dataPath=/tmp/${dataFileName}`,
