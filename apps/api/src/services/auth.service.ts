@@ -180,7 +180,12 @@ export async function verifyGoogleToken(token: string): Promise<OAuthUserInfo> {
  */
 export async function registerWithEmailPassword(email: string, password: string, name: string) {
   const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) throw new Error('Email already in use');
+  if (existing) {
+    if (existing.oauthProvider) {
+      throw new Error(`This email is already linked to a ${existing.oauthProvider} account. Please sign in using ${existing.oauthProvider} or reset your password.`);
+    }
+    throw new Error('Email already in use. Please sign in or reset your password.');
+  }
 
   const passwordHash = await bcrypt.hash(password, 10);
 
@@ -397,6 +402,7 @@ export async function findOrCreateUser(info: OAuthUserInfo, provider: string) {
           avatarUrl: info.avatarUrl,
           oauthProvider: provider,
           oauthId: info.oauthId,
+          emailVerified: true, // OAuth accounts are pre-verified
           profile: { 
             create: { 
               name: info.name, 
@@ -408,6 +414,13 @@ export async function findOrCreateUser(info: OAuthUserInfo, provider: string) {
       });
       logger.info({ userId: user.id, email: user.email, provider }, 'Created new user via OAuth');
     }
+  } else if (!user.emailVerified) {
+    // If user exists via OAuth but isn't verified (migration case), verify them now
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerified: true },
+      include: { profile: true },
+    });
   }
 
   return user;

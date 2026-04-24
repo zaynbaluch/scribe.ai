@@ -11,15 +11,27 @@ import * as path from 'path';
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
-// Pre-load logo buffer for attachments
-const LOGO_PATH = path.resolve(__dirname, '../../../apps/web/public/logo.png');
+// Robust logo loading for production environments
+const logoSearchPaths = [
+  path.resolve(__dirname, '../../../apps/web/public/logo.png'), // Monorepo dist relative
+  path.resolve(process.cwd(), '../web/public/logo.png'),       // CWD sibling
+  path.resolve(process.cwd(), 'public/logo.png'),              // CWD local
+];
+
 let logoBuffer: Buffer | null = null;
-try {
-  if (fs.existsSync(LOGO_PATH)) {
-    logoBuffer = fs.readFileSync(LOGO_PATH);
+for (const p of logoSearchPaths) {
+  try {
+    if (fs.existsSync(p)) {
+      logoBuffer = fs.readFileSync(p);
+      logger.info({ path: p }, 'Scribe logo loaded for email');
+      break;
+    }
+  } catch (err) {
+    // Continue to next path
   }
-} catch (err) {
-  logger.error({ err, path: LOGO_PATH }, 'Failed to pre-load logo for email attachments');
+}
+if (!logoBuffer) {
+  logger.warn('Could not find Scribe logo at any search path, using remote fallback for emails');
 }
 
 export async function sendEmail(to: string, subject: string, html: string, attachments: any[] = []) {
@@ -154,7 +166,7 @@ const TWO_FACTOR_HTML = `
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
     <tr>
       <td align="center" style="padding: 60px 24px;">
-        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
+        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" style="margin-bottom: 40px; border:0; display:block;">
         
         <h1 class="hero-title" style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.03em;">Security Pin</h1>
         <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 48px; line-height: 1.6; max-width: 320px;">Use the code below to securely sign in to your Scribe.ai account.</p>
@@ -196,7 +208,7 @@ const VERIFICATION_HTML = `
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
     <tr>
       <td align="center" style="padding: 60px 24px;">
-        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
+        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" style="margin-bottom: 40px; border:0; display:block;">
         
         <div style="font-size: 14px; font-weight: 600; color: #10b981; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Welcome to the future</div>
         <h1 class="hero-title" style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.03em;">Verify your account</h1>
@@ -239,7 +251,7 @@ const RESET_PASSWORD_HTML = `
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
     <tr>
       <td align="center" style="padding: 60px 24px;">
-        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
+        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" style="margin-bottom: 40px; border:0; display:block;">
         
         <h1 class="hero-title" style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.03em;">Reset Password</h1>
         <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 48px; line-height: 1.6; max-width: 320px;">Lost your access? No worries. Use the recovery code below to set a new password.</p>
@@ -280,7 +292,7 @@ const DEADLINE_REMINDER_HTML = `
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
     <tr>
       <td align="center" style="padding: 60px 24px;">
-        <img src="cid:scribe-logo" alt="Scribe.ai" width="48" height="48" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
+        <img src="cid:scribe-logo" alt="Scribe.ai" width="48" height="48" style="margin-bottom: 40px; border:0; display:block;">
         
         <div style="font-size: 14px; font-weight: 600; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Action Required</div>
         <h1 class="hero-title" style="font-size: 28px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.02em;">Deadline Approaching</h1>
@@ -322,7 +334,7 @@ const TAILORED_DOCS_HTML = `
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
     <tr>
       <td align="center" style="padding: 60px 24px;">
-        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" class="logo-img" style="margin-bottom: 40px; filter: invert(1) brightness(2); -webkit-filter: invert(1) brightness(2);">
+        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" style="margin-bottom: 40px; border:0; display:block;">
         
         <div style="font-size: 14px; font-weight: 600; color: #818cf8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Documents Ready</div>
         <h1 class="hero-title" style="font-size: 30px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.02em;">Tailored for Success</h1>
@@ -330,10 +342,14 @@ const TAILORED_DOCS_HTML = `
           Hi {{name}}, your AI-optimized application for <strong style="color: #ffffff;">{{jobTitle}}</strong> at <strong>{{company}}</strong> has been generated and is attached to this email.
         </p>
         
-        <div style="background-color: #09090b; border: 1px solid #18181b; border-radius: 16px; padding: 24px; margin-bottom: 40px; display: inline-block; text-align: left; width: 100%; max-width: 320px;">
+        <div style="background-color: #09090b; border: 1px solid #18181b; border-radius: 16px; padding: 24px; margin-bottom: 40px; display: block; text-align: left; width: 100%; box-sizing: border-box;">
           <div style="color: #ffffff; font-weight: 600; margin-bottom: 12px; font-size: 14px;">Included Files:</div>
-          <div style="color: #a1a1aa; font-size: 13px; margin-bottom: 8px;">📄 Tailored Resume.pdf</div>
-          <div style="color: #a1a1aa; font-size: 13px;">✉️ Targeted Cover Letter.pdf</div>
+          <div style="color: #a1a1aa; font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 16px;">📄</span> Tailored Resume.pdf
+          </div>
+          <div style="color: #a1a1aa; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 16px;">✉️</span> Targeted Cover Letter.pdf
+          </div>
         </div>
         
         <p style="color: #52525b; font-size: 14px; line-height: 1.6; max-width: 380px; margin: 0 auto 60px;">
