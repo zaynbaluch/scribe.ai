@@ -108,19 +108,25 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
   if (snapshot.imageUrl && showProfileImage) {
     try {
       await fs.mkdir(TMP_QR_DIR, { recursive: true });
-      profileImageFileName = `profile-${resume.id}-${Date.now()}.png`;
-      profileImagePath = path.join(TMP_QR_DIR, profileImageFileName);
-
       if (snapshot.imageUrl.startsWith('data:image')) {
         const base64Data = snapshot.imageUrl.split(',')[1];
+        profileImageFileName = `profile-${resume.id}-${Date.now()}.png`;
+        profileImagePath = path.join(TMP_QR_DIR, profileImageFileName);
         await fs.writeFile(profileImagePath, Buffer.from(base64Data, 'base64'));
         logger.info({ resumeId: resume.id }, 'Saved base64 profile image');
       } else {
         // Download from Supabase/External URL
         logger.info({ resumeId: resume.id, url: snapshot.imageUrl }, 'Downloading profile image from URL');
         const response = await axios.get(snapshot.imageUrl, { responseType: 'arraybuffer' });
+        
+        // Detect extension from content-type
+        const contentType = response.headers['content-type'] || 'image/png';
+        const ext = contentType.split('/')[1] || 'png';
+        profileImageFileName = `profile-${resume.id}-${Date.now()}.${ext}`;
+        profileImagePath = path.join(TMP_QR_DIR, profileImageFileName);
+
         await fs.writeFile(profileImagePath, Buffer.from(response.data));
-        logger.info({ resumeId: resume.id }, 'Downloaded and saved profile image');
+        logger.info({ resumeId: resume.id, ext }, 'Downloaded and saved profile image');
       }
     } catch (err) {
       logger.error({ err, url: snapshot.imageUrl }, 'Failed to save/download profile image for PDF export');
@@ -194,19 +200,33 @@ export async function exportDocx(userId: string, resumeId: string): Promise<Buff
 
   // Profile Image for DOCX
   let profileImageRun: ImageRun | null = null;
-  if (profile.imageUrl && profile.imageUrl.startsWith('data:image')) {
+  const styles = (resume.customStyles as any) || {};
+  const showProfileImage = styles.showProfileImage !== false;
+
+  if (profile.imageUrl && showProfileImage) {
     try {
-      const base64Data = profile.imageUrl.split(',')[1];
+      let imageBuffer: Buffer;
+      if (profile.imageUrl.startsWith('data:image')) {
+        const base64Data = profile.imageUrl.split(',')[1];
+        imageBuffer = Buffer.from(base64Data, 'base64');
+      } else {
+        // Download from Supabase/External URL
+        logger.info({ resumeId: resume.id, url: profile.imageUrl }, 'Downloading profile image for DOCX');
+        const response = await axios.get(profile.imageUrl, { responseType: 'arraybuffer' });
+        imageBuffer = Buffer.from(response.data);
+      }
+
       profileImageRun = new ImageRun({
-        data: Buffer.from(base64Data, 'base64'),
+        data: imageBuffer,
         transformation: { width: 60, height: 60 },
         floating: {
           horizontalPosition: { relative: 'margin', offset: 0 },
           verticalPosition: { relative: 'margin', offset: 0 },
         }
       } as any);
+      logger.info({ resumeId: resume.id }, 'Added profile image to DOCX');
     } catch (err) {
-      logger.error({ err }, 'Failed to add profile image to DOCX');
+      logger.error({ err, url: profile.imageUrl }, 'Failed to add profile image to DOCX');
     }
   }
 

@@ -77,7 +77,7 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
           {/* Header */}
           {templateId === 'bold-05' ? (
             <div className="rounded px-4 py-3 mb-3 flex items-center gap-4" style={{ backgroundColor: accentColor }}>
-              {customStyles?.showProfileImage && profile.imageUrl && (
+              {(customStyles?.showProfileImage !== false) && profile.imageUrl && (
                 <img src={profile.imageUrl} alt="Profile" className="w-14 h-14 rounded-full object-cover border-2 border-white/20 flex-shrink-0" />
               )}
               <div>
@@ -90,7 +90,7 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
             <div className="mb-3 relative pr-14">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-4">
-                  {customStyles?.showProfileImage && profile.imageUrl && (
+                  {(customStyles?.showProfileImage !== false) && profile.imageUrl && (
                     <img src={profile.imageUrl} alt="Profile" className="w-14 h-14 rounded-full object-cover border border-gray-300 flex-shrink-0" />
                   )}
                   <div>
@@ -111,7 +111,7 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
             </div>
           ) : templateId === 'compact-03' ? (
             <div className="rounded px-3 py-2 mb-3 flex items-center gap-3" style={{ backgroundColor: `${accentColor}10` }}>
-              {customStyles?.showProfileImage && profile.imageUrl && (
+              {(customStyles?.showProfileImage !== false) && profile.imageUrl && (
                 <img src={profile.imageUrl} alt="Profile" className="w-10 h-10 rounded-full object-cover border border-gray-200 flex-shrink-0" />
               )}
               <div>
@@ -127,13 +127,13 @@ export default function ResumePreview({ profile, templateId, sectionOrder, secti
                 {profile.headline && <div className="text-sm text-gray-400 mt-0.5">{profile.headline}</div>}
                 <div className="text-xs text-gray-400 mt-1">{[profile.email, profile.phone, profile.location, profile.website, profile.linkedin, profile.github].filter(Boolean).join(' | ')}</div>
               </div>
-              {customStyles?.showProfileImage && profile.imageUrl && (
+              {(customStyles?.showProfileImage !== false) && profile.imageUrl && (
                 <img src={profile.imageUrl} alt="Profile" className="w-14 h-14 rounded-full object-cover grayscale opacity-80 flex-shrink-0" />
               )}
             </div>
           ) : (
             <div className="text-center mb-4 flex flex-col items-center relative px-10">
-              {customStyles?.showProfileImage && profile.imageUrl && (
+              {(customStyles?.showProfileImage !== false) && profile.imageUrl && (
                 <img src={profile.imageUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover border border-gray-200 mb-2" />
               )}
               <div className="text-xl font-bold" style={{ color: accentColor }}>{profile.name || 'Your Name'}</div>
