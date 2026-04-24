@@ -110,18 +110,11 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
     };
   }, [resize, stopResizing]);
 
-  const [isSaving, setIsSaving] = useState(false);
-
   // Debounced save
   const debouncedSave = useDebounce((data: any) => {
-    setIsSaving(true);
     updateResume(id, data)
-      .then(() => {
-        setTimeout(() => setIsSaving(false), 800);
-      })
       .catch(() => {
         toast.error('Save failed');
-        setIsSaving(false);
       });
   }, 500);
 
