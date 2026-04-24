@@ -28,13 +28,21 @@
 )
 
 // ─── Header ─────────────────────────────────────────────────────────────────
+// Absolute QR Code
+#let has-qr = data.at("showQrCode", default: false)
+#if has-qr {
+  place(
+    top + right,
+    qr-code-block(data.at("qrImagePath", default: ""), size: 36pt)
+  )
+}
+
 #block(fill: accent.lighten(90%), inset: (x: 12pt, y: 10pt), radius: 4pt, width: 100%)[
 #let has-img = data.at("profileImagePath", default: "") != ""
-#let has-qr = data.at("showQrCode", default: false)
 #grid(
-  columns: (if has-img { 65pt } else { 0pt }, 1fr, if has-qr { 60pt } else { 0pt }),
+  columns: (if has-img { 60pt } else { 0pt }, 1fr),
   column-gutter: 1.2em,
-  profile-image-block(data.at("profileImagePath", default: ""), size: 54pt),
+  profile-image-block(data.at("profileImagePath", default: ""), size: 50pt),
   align(left + horizon)[
     #text(size: 20pt, weight: "bold", fill: accent.darken(30%))[#profile.at("name", default: "Your Name")]
     #if profile.at("headline", default: "") != "" {
@@ -47,11 +55,10 @@
       phone: profile.at("phone", default: none),
       location: profile.at("location", default: none),
       website: profile.at("website", default: none),
+      linkedin: profile.at("linkedin", default: none),
+      github: profile.at("github", default: none),
     )
-  ],
-  if has-qr {
-    qr-code-block(data.at("qrImagePath", default: ""), size: 40pt)
-  }
+  ]
 )
 ]
 
