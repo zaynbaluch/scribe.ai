@@ -140,8 +140,12 @@ export async function updateResume(userId: string, resumeId: string, data: Updat
       name: data.name,
       templateId: data.templateId,
       sectionOrder: data.sectionOrder,
-      sectionVisibility: data.sectionVisibility !== undefined ? data.sectionVisibility : undefined,
-      customStyles: data.customStyles !== undefined ? data.customStyles : undefined,
+      sectionVisibility: data.sectionVisibility !== undefined 
+        ? { ...(existing.sectionVisibility as any || {}), ...(data.sectionVisibility as any) } 
+        : undefined,
+      customStyles: data.customStyles !== undefined 
+        ? { ...(existing.customStyles as any || {}), ...(data.customStyles as any) } 
+        : undefined,
       showQrCode: data.showQrCode !== undefined ? data.showQrCode : undefined,
       baseProfileSnapshot: data.baseProfileSnapshot !== undefined ? data.baseProfileSnapshot : undefined,
     },

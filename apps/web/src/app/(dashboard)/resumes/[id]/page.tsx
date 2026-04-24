@@ -135,11 +135,8 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
 
   const handleProfileImageToggle = (show: boolean) => {
     setLocalShowProfileImage(show);
-    setLocalStyles(prev => {
-      const next = { ...prev, showProfileImage: show };
-      debouncedSave({ customStyles: next });
-      return next;
-    });
+    setLocalStyles(prev => ({ ...prev, showProfileImage: show }));
+    debouncedSave({ customStyles: { showProfileImage: show } });
   };
 
   const handleOrderChange = (order: string[]) => {
