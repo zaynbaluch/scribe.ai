@@ -66,7 +66,7 @@
     #if skills.len() > 0 and vis.at("skills", default: true) != false {
       section-heading("Skills", accent: accent, style: "modern")
       for skill in skills {
-        text(size: 8.5pt)[#sym.bullet.op #skill.at("name", default: "")]
+        text(size: 8.5pt)[#sym.bullet #skill.at("name", default: "")]
         linebreak()
       }
     }
