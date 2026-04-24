@@ -28,7 +28,7 @@ class OpenAIProvider(LLMProvider):
             model=self.model,
             messages=messages,
             temperature=kwargs.get("temperature", 0.7),
-            max_tokens=kwargs.get("max_tokens", 1024),
+            max_tokens=kwargs.get("max_tokens", 4096),
         )
         return response.choices[0].message.content or ""
 
@@ -59,7 +59,7 @@ class OpenAIProvider(LLMProvider):
             model=self.model,
             messages=messages,
             temperature=kwargs.get("temperature", 0.3),
-            max_tokens=kwargs.get("max_tokens", 1024),
+            max_tokens=kwargs.get("max_tokens", 4096),
             response_format={"type": "json_object"},
         )
         raw = response.choices[0].message.content or "{}"

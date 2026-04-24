@@ -106,25 +106,15 @@ async def parse_resume(file: UploadFile = File(...)):
             "}\n"
         )
         
-        prompt = f"Resume Text:\n\n{text[:6000]}"
+        prompt = f"Resume Text:\n\n{text[:8000]}"
         
-        raw_json = llm.generate(prompt, system=system, temperature=0.1, format="json")
-        clean_json = re.sub(r'```json\s*(.*?)\s*```', r'\1', raw_json, flags=re.DOTALL).strip()
-        
-        logger.info(f"LLM Raw Output: {raw_json}")
-        
-        # More robust JSON cleaning
-        json_start = clean_json.find('{')
-        json_end = clean_json.rfind('}')
-        if json_start != -1 and json_end != -1:
-            clean_json = clean_json[json_start:json_end+1]
+        # Use generate_json for native JSON mode and increase tokens to prevent truncation
+        data = llm.generate_json(prompt, system=system, temperature=0.1, max_tokens=4096)
         
         try:
-            data = json.loads(clean_json)
-            logger.info(f"Parsed JSON Data: {data}")
-        except json.JSONDecodeError as je:
-            logger.error(f"Failed to parse JSON from LLM: {clean_json}")
-            raise HTTPException(status_code=500, detail=f"Invalid JSON from AI: {str(je)}")
+            logger.info(f"Successfully parsed resume for {data.get('name')}")
+        except Exception as e:
+            logger.error(f"Error logging parsed data: {str(e)}")
 
         # Post-processing to fix phone field if it contains an email
         phone = data.get("phone")
