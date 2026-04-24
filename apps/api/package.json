@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:*",
     "dev:server": "tsx watch src/index.ts",
-    "build": "prisma generate && tsc",
-    "postinstall": "prisma generate && node scripts/install-typst.js",
+    "build": "node scripts/install-typst.js && prisma generate && tsc",
+    "postinstall": "prisma generate",
     "start": "node dist/index.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"

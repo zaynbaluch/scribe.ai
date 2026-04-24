@@ -24,7 +24,12 @@ function install() {
     }
 
     console.log('Downloading Typst...');
-    execSync(`curl -L ${URL} -o typst.tar.xz`, { cwd: TARGET_DIR });
+    try {
+      execSync(`curl -L ${URL} -o typst.tar.xz`, { cwd: TARGET_DIR });
+    } catch (e) {
+      console.log('curl failed, trying wget...');
+      execSync(`wget ${URL} -O typst.tar.xz`, { cwd: TARGET_DIR });
+    }
     
     console.log('Extracting Typst...');
     execSync(`tar -xJf typst.tar.xz`, { cwd: TARGET_DIR });
@@ -40,7 +45,7 @@ function install() {
     console.log(`Successfully installed Typst to ${BIN_PATH}`);
   } catch (error) {
     console.error('ERROR: Typst installation failed!', error.message);
-    process.exit(0); // Don't fail the whole build, just log the error
+    process.exit(1); // Fail the build so we see it in logs
   }
 }
 
