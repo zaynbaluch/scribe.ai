@@ -14,6 +14,7 @@ RUN pnpm install --filter api...
 
 # Copy source
 COPY apps/api/ apps/api/
+COPY templates/ templates/
 
 # Generate Prisma Client & Build
 WORKDIR /app/apps/api
@@ -21,6 +22,14 @@ RUN pnpm prisma generate
 RUN pnpm build
 
 FROM node:20-alpine AS runner
+
+# Install Typst
+RUN apk add --no-cache wget xz \
+    && wget https://github.com/typst/typst/releases/download/v0.11.0/typst-x86_64-unknown-linux-musl.tar.xz \
+    && tar -xJf typst-x86_64-unknown-linux-musl.tar.xz \
+    && mv typst-x86_64-unknown-linux-musl/typst /usr/local/bin/typst \
+    && rm -rf typst-x86_64-unknown-linux-musl.tar.xz typst-x86_64-unknown-linux-musl \
+    && apk del wget xz
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
@@ -31,6 +40,7 @@ COPY --from=builder /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.ya
 COPY --from=builder /app/apps/api/package.json ./apps/api/
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
+COPY --from=builder /app/templates /app/templates
 
 # Install production dependencies
 RUN pnpm install --prod --filter api...

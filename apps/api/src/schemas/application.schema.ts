@@ -6,15 +6,15 @@ export const applicationStatusEnum = z.enum([
 
 export const createApplicationSchema = z.object({
   jobId: z.string().uuid(),
-  resumeId: z.string().uuid().optional(),
-  coverLetterId: z.string().uuid().optional(),
+  resumeId: z.string().uuid().optional().nullable(),
+  coverLetterId: z.string().uuid().optional().nullable(),
   status: applicationStatusEnum.optional().default('saved'),
-  appliedAt: z.string().datetime().optional(),
-  notes: z.string().optional(),
-  contactName: z.string().max(200).optional(),
-  contactEmail: z.string().email().optional().or(z.literal('')),
-  salaryRange: z.string().max(100).optional(),
-  nextDeadline: z.string().datetime().optional(),
+  appliedAt: z.string().datetime().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  contactName: z.string().max(200).optional().nullable(),
+  contactEmail: z.string().email().optional().or(z.literal('')).nullable(),
+  salaryRange: z.string().max(100).optional().nullable(),
+  nextDeadline: z.string().datetime().optional().nullable(),
 });
 
 export const updateApplicationSchema = z.object({
@@ -22,10 +22,10 @@ export const updateApplicationSchema = z.object({
   resumeId: z.string().uuid().optional().nullable(),
   coverLetterId: z.string().uuid().optional().nullable(),
   appliedAt: z.string().datetime().optional().nullable(),
-  notes: z.string().optional(),
-  contactName: z.string().max(200).optional(),
-  contactEmail: z.string().email().optional().or(z.literal('')),
-  salaryRange: z.string().max(100).optional(),
+  notes: z.string().optional().nullable(),
+  contactName: z.string().max(200).optional().nullable(),
+  contactEmail: z.string().email().optional().or(z.literal('')).nullable(),
+  salaryRange: z.string().max(100).optional().nullable(),
   nextDeadline: z.string().datetime().optional().nullable(),
   reminderSent: z.boolean().optional(),
 });
