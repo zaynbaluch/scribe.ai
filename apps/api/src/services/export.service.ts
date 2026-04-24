@@ -120,7 +120,7 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
         const response = await axios.get(snapshot.imageUrl, { responseType: 'arraybuffer' });
         
         // Detect extension from content-type
-        const contentType = response.headers['content-type'] || 'image/png';
+        const contentType = (response.headers['content-type'] as string) || 'image/png';
         const ext = contentType.split('/')[1] || 'png';
         profileImageFileName = `profile-${resume.id}-${Date.now()}.${ext}`;
         profileImagePath = path.join(TMP_QR_DIR, profileImageFileName);
