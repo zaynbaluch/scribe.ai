@@ -90,7 +90,7 @@
   for item in items {
     if item != none and item != "" {
       block(spacing: 0.35em)[
-        #text(fill: luma(80), size: 9pt)[#sym.bullet.op ]
+        #text(fill: luma(80), size: 9pt)[#sym.bullet ]
         #text(size: 9.5pt)[#item]
       ]
     }

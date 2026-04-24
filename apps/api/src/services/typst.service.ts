@@ -77,11 +77,11 @@ async function runTypst(templatePath: string, data: any, bin: string): Promise<B
     // Write data to a temp file instead of passing via --input to avoid Windows CLI length/escaping limits
     await fs.writeFile(dataFilePath, JSON.stringify(data));
 
-    // Compile using --input path=... so templates can use json("/tmp/data-xxx.json")
+    // Compile using --input path=... so templates can use json("tmp/data-xxx.json")
     await execFileAsync(bin, [
       'compile',
       '--root', TEMPLATES_DIR,
-      '--input', `dataPath=/tmp/${dataFileName}`,
+      '--input', `dataPath=tmp/${dataFileName}`,
       templatePath,
       outputPath,
     ], {
