@@ -57,8 +57,8 @@ export async function createResume(userId: string, data: CreateResumeInput) {
       templateId: data.templateId || 'modern-01',
       baseProfileSnapshot: snapshot,
       sectionOrder: data.sectionOrder || ['summary', 'experience', 'skills', 'projects', 'education'],
-      sectionVisibility: data.sectionVisibility || {},
-      customStyles: data.customStyles || {},
+      sectionVisibility: (data.sectionVisibility as any) || {},
+      customStyles: (data.customStyles as any) || {},
       showQrCode: data.showQrCode !== undefined ? data.showQrCode : true,
     },
   });
@@ -141,10 +141,10 @@ export async function updateResume(userId: string, resumeId: string, data: Updat
       templateId: data.templateId,
       sectionOrder: data.sectionOrder,
       sectionVisibility: data.sectionVisibility !== undefined 
-        ? { ...(existing.sectionVisibility as any || {}), ...(data.sectionVisibility as any) } 
+        ? ({ ...(existing.sectionVisibility as any || {}), ...(data.sectionVisibility as any) } as any)
         : undefined,
       customStyles: data.customStyles !== undefined 
-        ? { ...(existing.customStyles as any || {}), ...(data.customStyles as any) } 
+        ? ({ ...(existing.customStyles as any || {}), ...(data.customStyles as any) } as any)
         : undefined,
       showQrCode: data.showQrCode !== undefined ? data.showQrCode : undefined,
       baseProfileSnapshot: data.baseProfileSnapshot !== undefined ? data.baseProfileSnapshot : undefined,
