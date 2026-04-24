@@ -29,6 +29,7 @@ interface ResumeData {
   sectionVisibility: any;
   showQrCode?: boolean;
   qrImagePath?: string;
+  profileImagePath?: string;
 }
 
 export async function compilePdf(templateId: string, data: ResumeData): Promise<Buffer> {
