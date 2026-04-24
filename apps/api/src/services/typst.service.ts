@@ -7,9 +7,9 @@ import logger from '../lib/logger';
 
 const execFileAsync = promisify(execFile);
 
-const LOCAL_TYPST = path.join(process.cwd(), 'typst-bin');
+const LOCAL_TYPST = path.resolve(__dirname, '../../typst-bin');
 const TYPST_BIN = process.env.TYPST_BIN || (require('fs').existsSync(LOCAL_TYPST) ? LOCAL_TYPST : 'typst');
-const TEMPLATES_DIR = path.resolve(process.cwd(), '../../templates');
+const TEMPLATES_DIR = path.resolve(__dirname, '../../../../templates');
 const TMP_DIR = path.join(TEMPLATES_DIR, 'tmp');
 
 interface ResumeData {
