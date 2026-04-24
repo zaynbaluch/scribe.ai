@@ -9,6 +9,11 @@ const TARGET_DIR = path.resolve(__dirname, '..');
 const BIN_PATH = path.join(TARGET_DIR, 'typst-bin');
 
 function install() {
+  console.log(`--- Typst Installer ---`);
+  console.log(`Platform: ${os.platform()}`);
+  console.log(`CWD: ${process.cwd()}`);
+  console.log(`__dirname: ${__dirname}`);
+  
   if (os.platform() !== 'linux') {
     console.log('Skipping Typst installation: Not on Linux.');
     return;
