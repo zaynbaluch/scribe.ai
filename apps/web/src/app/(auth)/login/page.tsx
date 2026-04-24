@@ -36,8 +36,8 @@ export default function LoginPage() {
       await loginWithGoogle(credential);
       toast.success('Welcome to Scribe.ai!');
       router.push('/dashboard');
-    } catch {
-      toast.error('Login failed. Please try again.');
+    } catch (err: any) {
+      toast.error(err.message || 'Login failed. Please try again.');
     }
   };
 
@@ -62,7 +62,7 @@ export default function LoginPage() {
         router.push('/dashboard');
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Invalid email or password');
+      toast.error(err.message || 'Registration failed');
     }
   };
 
@@ -154,7 +154,7 @@ export default function LoginPage() {
       setPassword('');
       setView('email');
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Invalid reset code or expired. Please try again.');
+      toast.error(err.message || 'Invalid reset code or expired. Please try again.');
     }
   };
 

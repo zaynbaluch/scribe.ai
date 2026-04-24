@@ -165,8 +165,18 @@ const TWO_FACTOR_HTML = `
 <body style="font-family: 'Outfit', Arial, sans-serif; background-color: #050508; color: #e4e4e7; margin: 0; padding: 0;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
     <tr>
-      <td align="center" style="padding: 60px 24px;">
-        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" style="margin-bottom: 40px; border:0; display:block;">
+      <td align="center" style="padding: 0;">
+        <!-- Navbar Header -->
+        <div style="background-color: #09090b; border-bottom: 1px solid #18181b; padding: 20px 24px; text-align: left; margin-bottom: 40px;">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="display: flex; align-items: center; gap: 12px;">
+                <img src="cid:scribe-logo" alt="Scribe" width="32" height="32" style="border:0; display:block;">
+                <span style="color: #ffffff; font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.02em;">Scribe.ai</span>
+              </td>
+            </tr>
+          </table>
+        </div>
         
         <h1 class="hero-title" style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.03em;">Security Pin</h1>
         <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 48px; line-height: 1.6; max-width: 320px;">Use the code below to securely sign in to your Scribe.ai account.</p>
@@ -207,8 +217,18 @@ const VERIFICATION_HTML = `
 <body style="font-family: 'Outfit', Arial, sans-serif; background-color: #050508; color: #e4e4e7; margin: 0; padding: 0;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
     <tr>
-      <td align="center" style="padding: 60px 24px;">
-        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" style="margin-bottom: 40px; border:0; display:block;">
+      <td align="center" style="padding: 0;">
+        <!-- Navbar Header -->
+        <div style="background-color: #09090b; border-bottom: 1px solid #18181b; padding: 20px 24px; text-align: left; margin-bottom: 40px;">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="display: flex; align-items: center; gap: 12px;">
+                <img src="cid:scribe-logo" alt="Scribe" width="32" height="32" style="border:0; display:block;">
+                <span style="color: #ffffff; font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.02em;">Scribe.ai</span>
+              </td>
+            </tr>
+          </table>
+        </div>
         
         <div style="font-size: 14px; font-weight: 600; color: #10b981; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Welcome to the future</div>
         <h1 class="hero-title" style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.03em;">Verify your account</h1>
@@ -250,8 +270,18 @@ const RESET_PASSWORD_HTML = `
 <body style="font-family: 'Outfit', Arial, sans-serif; background-color: #050508; color: #e4e4e7; margin: 0; padding: 0;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
     <tr>
-      <td align="center" style="padding: 60px 24px;">
-        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" style="margin-bottom: 40px; border:0; display:block;">
+      <td align="center" style="padding: 0;">
+        <!-- Navbar Header -->
+        <div style="background-color: #09090b; border-bottom: 1px solid #18181b; padding: 20px 24px; text-align: left; margin-bottom: 40px;">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="display: flex; align-items: center; gap: 12px;">
+                <img src="cid:scribe-logo" alt="Scribe" width="32" height="32" style="border:0; display:block;">
+                <span style="color: #ffffff; font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.02em;">Scribe.ai</span>
+              </td>
+            </tr>
+          </table>
+        </div>
         
         <h1 class="hero-title" style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.03em;">Reset Password</h1>
         <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 48px; line-height: 1.6; max-width: 320px;">Lost your access? No worries. Use the recovery code below to set a new password.</p>
@@ -291,8 +321,18 @@ const DEADLINE_REMINDER_HTML = `
 <body style="font-family: 'Outfit', Arial, sans-serif; background-color: #050508; color: #e4e4e7; margin: 0; padding: 0;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
     <tr>
-      <td align="center" style="padding: 60px 24px;">
-        <img src="cid:scribe-logo" alt="Scribe.ai" width="48" height="48" style="margin-bottom: 40px; border:0; display:block;">
+      <td align="center" style="padding: 0;">
+        <!-- Navbar Header -->
+        <div style="background-color: #09090b; border-bottom: 1px solid #18181b; padding: 20px 24px; text-align: left; margin-bottom: 40px;">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="display: flex; align-items: center; gap: 12px;">
+                <img src="cid:scribe-logo" alt="Scribe" width="32" height="32" style="border:0; display:block;">
+                <span style="color: #ffffff; font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.02em;">Scribe.ai</span>
+              </td>
+            </tr>
+          </table>
+        </div>
         
         <div style="font-size: 14px; font-weight: 600; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Action Required</div>
         <h1 class="hero-title" style="font-size: 28px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.02em;">Deadline Approaching</h1>
@@ -333,8 +373,18 @@ const TAILORED_DOCS_HTML = `
 <body style="font-family: 'Outfit', Arial, sans-serif; background-color: #050508; color: #e4e4e7; margin: 0; padding: 0;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050508;">
     <tr>
-      <td align="center" style="padding: 60px 24px;">
-        <img src="cid:scribe-logo" alt="Scribe.ai" width="56" height="56" style="margin-bottom: 40px; border:0; display:block;">
+      <td align="center" style="padding: 0;">
+        <!-- Navbar Header -->
+        <div style="background-color: #09090b; border-bottom: 1px solid #18181b; padding: 20px 24px; text-align: left; margin-bottom: 40px;">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="display: flex; align-items: center; gap: 12px;">
+                <img src="cid:scribe-logo" alt="Scribe" width="32" height="32" style="border:0; display:block;">
+                <span style="color: #ffffff; font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.02em;">Scribe.ai</span>
+              </td>
+            </tr>
+          </table>
+        </div>
         
         <div style="font-size: 14px; font-weight: 600; color: #818cf8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Documents Ready</div>
         <h1 class="hero-title" style="font-size: 30px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.02em;">Tailored for Success</h1>

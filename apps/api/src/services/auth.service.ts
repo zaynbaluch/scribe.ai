@@ -285,7 +285,7 @@ export async function resetPassword(email: string, code: string, passwordNew: st
   const passwordHash = await bcrypt.hash(passwordNew, 10);
   await prisma.user.update({
     where: { email },
-    data: { passwordHash },
+    data: { passwordHash, emailVerified: true },
   });
 
   await prisma.verificationCode.delete({ where: { id: verification.id } });
@@ -300,7 +300,7 @@ export async function loginWithEmailPassword(email: string, password: string) {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !user.passwordHash) throw new Error('Invalid credentials');
 
-  if (!user.emailVerified) {
+  if (!user.emailVerified && !user.oauthProvider) {
     throw new Error('Please verify your email address before logging in');
   }
 
