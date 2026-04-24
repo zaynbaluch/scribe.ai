@@ -9,6 +9,7 @@ interface User {
   name: string;
   avatarUrl?: string | null;
   plan: string;
+  extensionToken?: string;
 }
 
 interface AuthState {

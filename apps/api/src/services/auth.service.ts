@@ -438,6 +438,15 @@ export function generateRefreshToken(userId: string): string {
 }
 
 /**
+ * Generate a very long-lived token for the browser extension.
+ */
+export function generateExtensionToken(userId: string, email: string): string {
+  return jwt.sign({ userId, email, isExtension: true }, JWT_SECRET, {
+    expiresIn: '365d',
+  } as jwt.SignOptions);
+}
+
+/**
  * Verify a refresh token and return the userId.
  */
 export function verifyRefreshToken(token: string): { userId: string } {

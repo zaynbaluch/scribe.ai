@@ -232,5 +232,7 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
     throw createError('User not found', 404, 'USER_NOT_FOUND');
   }
 
-  res.json({ success: true, data: user });
+  const extensionToken = authService.generateExtensionToken(user.id, user.email);
+
+  res.json({ success: true, data: { ...user, extensionToken } });
 });
