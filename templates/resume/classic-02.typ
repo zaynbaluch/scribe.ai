@@ -30,8 +30,8 @@
 // ─── Header ─────────────────────────────────────────────────────────────────
 #let has-qr = data.at("showQrCode", default: false)
 #grid(
-  columns: (1fr, if has-qr { auto } else { none }, auto),
-  column-gutter: 1em,
+  columns: if has-qr { (1fr, auto, auto) } else { (1fr, auto) },
+  column-gutter: 1.5em,
   align: (left, right, right),
   [
     #text(size: 24pt, weight: "bold")[#profile.at("name", default: "Your Name")]

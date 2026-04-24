@@ -29,28 +29,30 @@
 
 // ─── Header ─────────────────────────────────────────────────────────────────
 #block(fill: accent.lighten(90%), inset: (x: 12pt, y: 10pt), radius: 4pt, width: 100%)[
-  #stack(
-    dir: ltr,
-    spacing: 16pt,
-    profile-image-block(data.at("profileImagePath", default: ""), size: 54pt),
-    align(left + horizon)[
-      #text(size: 20pt, weight: "bold", fill: accent.darken(30%))[#profile.at("name", default: "Your Name")]
-      #if profile.at("headline", default: "") != "" {
-        linebreak()
-        text(size: 10pt, fill: luma(60))[#profile.headline]
-      }
-      #v(0.2em)
-      #contact-row(
-        email: profile.at("email", default: none),
-        phone: profile.at("phone", default: none),
-        location: profile.at("location", default: none),
-        website: profile.at("website", default: none),
-      )
-    ],
-    if data.at("showQrCode", default: false) {
-      qr-code-block(data.at("qrImagePath", default: ""), size: 40pt)
+#let has-img = data.at("profileImagePath", default: "") != ""
+#let has-qr = data.at("showQrCode", default: false)
+#grid(
+  columns: (if has-img { 65pt } else { 0pt }, 1fr, if has-qr { 60pt } else { 0pt }),
+  column-gutter: 1.2em,
+  profile-image-block(data.at("profileImagePath", default: ""), size: 54pt),
+  align(left + horizon)[
+    #text(size: 20pt, weight: "bold", fill: accent.darken(30%))[#profile.at("name", default: "Your Name")]
+    #if profile.at("headline", default: "") != "" {
+      linebreak()
+      text(size: 10pt, fill: luma(60))[#profile.headline]
     }
-  )
+    #v(0.2em)
+    #contact-row(
+      email: profile.at("email", default: none),
+      phone: profile.at("phone", default: none),
+      location: profile.at("location", default: none),
+      website: profile.at("website", default: none),
+    )
+  ],
+  if has-qr {
+    qr-code-block(data.at("qrImagePath", default: ""), size: 40pt)
+  }
+)
 ]
 
 #v(0.4em)

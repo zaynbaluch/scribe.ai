@@ -64,7 +64,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main className="pt-14 min-h-screen transition-all duration-250" style={{ marginLeft: sidebarWidth }}>
         <div className="p-4 md:p-6">{children}</div>
       </main>
-      </main>
+      <Toaster theme="dark" position="bottom-right" toastOptions={{ style: { background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' } }} />
     </div>
   );
 }

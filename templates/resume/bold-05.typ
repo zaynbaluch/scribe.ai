@@ -29,28 +29,31 @@
 
 // ─── Header ─────────────────────────────────────────────────────────────────
 #block(fill: accent, inset: (x: 16pt, y: 14pt), radius: 4pt, width: 100%)[
-  #stack(
-    dir: ltr,
-    spacing: 1fr,
-    align(left + horizon)[
-      #text(size: 24pt, weight: "bold", fill: white)[#profile.at("name", default: "Your Name")]
-      #if profile.at("headline", default: "") != "" {
-        linebreak()
-        text(size: 11pt, fill: white.darken(15%))[#profile.headline]
-      }
-      #v(0.3em)
-      #set text(fill: white.darken(20%), size: 9pt)
-      #let items = ()
-      #if profile.at("email", default: "") != "" { items.push(profile.email) }
-      #if profile.at("phone", default: "") != "" { items.push(profile.phone) }
-      #if profile.at("location", default: "") != "" { items.push(profile.location) }
-      #if profile.at("website", default: "") != "" { items.push(profile.website) }
-      #items.join([ #sym.bar.v ])
-    ],
-    if data.at("showQrCode", default: false) {
-      qr-code-block(data.at("qrImagePath", default: ""), size: 45pt)
+#let has-img = data.at("profileImagePath", default: "") != ""
+#let has-qr = data.at("showQrCode", default: false)
+#grid(
+  columns: (if has-img { 70pt } else { 0pt }, 1fr, if has-qr { 70pt } else { 0pt }),
+  column-gutter: 1.5em,
+  profile-image-block(data.at("profileImagePath", default: ""), size: 60pt),
+  align(left + horizon)[
+    #text(size: 24pt, weight: "bold", fill: white)[#profile.at("name", default: "Your Name")]
+    #if profile.at("headline", default: "") != "" {
+      linebreak()
+      text(size: 11pt, fill: white.darken(15%))[#profile.headline]
     }
-  )
+    #v(0.3em)
+    #set text(fill: white.darken(20%), size: 9pt)
+    #let items = ()
+    #if profile.at("email", default: "") != "" { items.push(profile.email) }
+    #if profile.at("phone", default: "") != "" { items.push(profile.phone) }
+    #if profile.at("location", default: "") != "" { items.push(profile.location) }
+    #if profile.at("website", default: "") != "" { items.push(profile.website) }
+    #items.join([ #sym.bar.v ])
+  ],
+  if has-qr {
+    qr-code-block(data.at("qrImagePath", default: ""), size: 45pt)
+  }
+)
 ]
 
 #v(0.5em)

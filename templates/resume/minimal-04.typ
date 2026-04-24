@@ -27,10 +27,14 @@
 )
 
 // ─── Header ─────────────────────────────────────────────────────────────────
-#stack(
-  dir: ltr,
-  spacing: 1fr,
-  align(left + horizon)[
+#let has-img = data.at("profileImagePath", default: "") != ""
+#let has-qr = data.at("showQrCode", default: false)
+#grid(
+  columns: (if has-img { 65pt } else { 0pt }, 1fr, if has-qr { 50pt } else { 0pt }),
+  column-gutter: 1.5em,
+  align: (left + horizon, left + horizon, right + horizon),
+  profile-image-block(data.at("profileImagePath", default: ""), size: 60pt),
+  [
     #text(size: 26pt, weight: "light", tracking: 0.02em)[#profile.at("name", default: "Your Name")]
     #v(0.15em)
     #if profile.at("headline", default: "") != "" {
@@ -46,7 +50,7 @@
       github: profile.at("github", default: none),
     )
   ],
-  if data.at("showQrCode", default: false) {
+  if has-qr {
     qr-code-block(data.at("qrImagePath", default: ""), size: 40pt)
   }
 )

@@ -218,18 +218,6 @@ export async function exportDocx(userId: string, resumeId: string): Promise<Buff
       alignment: AlignmentType.CENTER,
     })
   );
-
-  // Header
-  sections.push(
-    new Paragraph({
-      children: [
-        ...(profileImageRun ? [profileImageRun] : []),
-        new TextRun({ text: profile.name || 'Your Name', bold: true, size: 32, font: 'Calibri' }),
-        ...(qrImageRun ? [qrImageRun] : [])
-      ],
-      alignment: AlignmentType.CENTER,
-    })
-  );
   
   if (profile.headline) {
     sections.push(new Paragraph({

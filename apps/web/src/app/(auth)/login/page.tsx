@@ -8,6 +8,7 @@ import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import Logo from '@/components/ui/logo';
 import { ArrowRight, Mail, Lock, ShieldCheck, ChevronLeft, Loader2 } from 'lucide-react';
+import { Toaster } from 'sonner';
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
@@ -199,7 +200,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div data-theme="dark" className="min-h-screen flex items-center justify-center relative bg-[#050508] text-[#FFFFFF]">
+    <main className="min-h-screen bg-[#050508] relative overflow-hidden" data-theme="dark">
+      <Toaster theme="dark" position="bottom-right" toastOptions={{ style: { background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' } }} />
       {/* Ambient glow */}
       <div
         className="absolute inset-0 pointer-events-none overflow-hidden"
