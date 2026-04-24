@@ -81,7 +81,7 @@ async function runTypst(templatePath: string, data: any, bin: string): Promise<B
     await execFileAsync(bin, [
       'compile',
       '--root', TEMPLATES_DIR,
-      '--input', `dataPath=tmp/${dataFileName}`,
+      '--input', `dataPath=/tmp/${dataFileName}`,
       templatePath,
       outputPath,
     ], {
