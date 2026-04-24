@@ -32,7 +32,7 @@
 #let show-qr = data.at("showQrCode", default: false)
 
 #grid(
-  columns: (if show-img { 65pt } else { 0pt }, 1fr, if show-qr { 55pt } else { 0pt }, auto),
+  columns: (if show-img { 65pt } else { 0pt }, 1fr, if show-qr { 55pt } else { 0pt }, 150pt),
   column-gutter: 1.5em,
   align: (left + horizon, left + horizon, right + horizon, right + horizon),
   if show-img {

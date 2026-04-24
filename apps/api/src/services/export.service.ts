@@ -6,6 +6,7 @@ import * as QRCode from 'qrcode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
+import axios from 'axios';
 
 const TEMPLATES_DIR = path.resolve(process.cwd(), '../../templates');
 const TMP_QR_DIR = path.join(TEMPLATES_DIR, 'tmp');
@@ -92,17 +93,27 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
   let profileImagePath: string | undefined;
   let profileImageFileName: string | undefined;
 
-  // Handle Profile Image (save base64 to temp file for Typst)
+  // Handle Profile Image (save base64 or download URL to temp file for Typst)
   const styles = (resume.customStyles as any) || {};
-  if (snapshot.imageUrl && snapshot.imageUrl.startsWith('data:image') && styles.showProfileImage !== false) {
+  const showProfileImage = styles.showProfileImage !== false;
+  
+  if (snapshot.imageUrl && showProfileImage) {
     try {
       await fs.mkdir(TMP_QR_DIR, { recursive: true });
       profileImageFileName = `profile-${resume.id}-${Date.now()}.png`;
       profileImagePath = path.join(TMP_QR_DIR, profileImageFileName);
-      const base64Data = snapshot.imageUrl.split(',')[1];
-      await fs.writeFile(profileImagePath, Buffer.from(base64Data, 'base64'));
+
+      if (snapshot.imageUrl.startsWith('data:image')) {
+        const base64Data = snapshot.imageUrl.split(',')[1];
+        await fs.writeFile(profileImagePath, Buffer.from(base64Data, 'base64'));
+      } else {
+        // Download from Supabase/External URL
+        const response = await axios.get(snapshot.imageUrl, { responseType: 'arraybuffer' });
+        await fs.writeFile(profileImagePath, Buffer.from(response.data));
+      }
     } catch (err) {
-      logger.error({ err }, 'Failed to save profile image for PDF export');
+      logger.error({ err, url: snapshot.imageUrl }, 'Failed to save/download profile image for PDF export');
+      profileImageFileName = undefined; // Reset if failed
     }
   }
 
