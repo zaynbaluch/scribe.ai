@@ -219,6 +219,7 @@ model Resume {
   atsScore             Int?
   atsReport            Json?
   showQrCode           Boolean  @default(true)
+  showProfileImage     Boolean  @default(true)
   
   isTailored           Boolean  @default(false)
   baseResumeId         String?

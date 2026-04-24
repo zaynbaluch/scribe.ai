@@ -109,7 +109,10 @@ export default function StyleControls({ styles, hasAvatar = true, onChange }: St
           </div>
           <button 
             disabled={!hasAvatar}
-            onClick={() => update('showProfileImage', styles.showProfileImage === false)}
+            onClick={() => {
+              const current = styles.showProfileImage ?? true;
+              update('showProfileImage', !current);
+            }}
             className={`w-8 h-4 rounded-full transition-all relative ${(styles.showProfileImage ?? true) && hasAvatar ? 'bg-[var(--gradient-2)]' : 'bg-gray-600'} ${!hasAvatar ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${(styles.showProfileImage ?? true) && hasAvatar ? 'left-[18px]' : 'left-0.5'}`} />

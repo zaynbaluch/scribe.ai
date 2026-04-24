@@ -27,13 +27,15 @@
 )
 
 // ─── Header ─────────────────────────────────────────────────────────────────
-#let has-img = data.at("profileImagePath", default: "") != ""
-#let has-qr = data.at("showQrCode", default: false)
+#let show-img = data.at("showProfileImage", default: false)
+#let show-qr = data.at("showQrCode", default: false)
 #grid(
-  columns: (if has-img { 65pt } else { 0pt }, 1fr, if has-qr { 50pt } else { 0pt }),
+  columns: (if show-img { 65pt } else { 0pt }, 1fr, if show-qr { 50pt } else { 0pt }),
   column-gutter: 1.5em,
   align: (left + horizon, left + horizon, right + horizon),
-  profile-image-block(data.at("profileImagePath", default: ""), size: 60pt),
+  if show-img {
+    profile-image-block(data.at("profileImagePath", default: ""), size: 60pt)
+  } else { none },
   [
     #text(size: 26pt, weight: "light", tracking: 0.02em)[#profile.at("name", default: "Your Name")]
     #v(0.15em)
@@ -50,9 +52,9 @@
       github: profile.at("github", default: none),
     )
   ],
-  if has-qr {
+  if show-qr {
     qr-code-block(data.at("qrImagePath", default: ""), size: 40pt)
-  }
+  } else { none }
 )
 #v(0.5em)
 
