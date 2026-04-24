@@ -6,7 +6,7 @@
     "dev": "npm-run-all --parallel dev:*",
     "dev:server": "tsx watch src/index.ts",
     "build": "prisma generate && tsc",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && (sh scripts/install-typst.sh || echo 'Skipping Typst install')",
     "start": "node dist/index.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
