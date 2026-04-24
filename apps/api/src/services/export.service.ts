@@ -97,6 +97,14 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
   const styles = (resume.customStyles as any) || {};
   const showProfileImage = styles.showProfileImage !== false;
   
+  logger.info({ 
+    resumeId: resume.id, 
+    showQrCode: resume.showQrCode, 
+    showProfileImageStyle: styles.showProfileImage,
+    calculatedShowProfileImage: showProfileImage,
+    hasImageUrl: !!snapshot.imageUrl
+  }, 'Exporting PDF: Visibility Flags');
+
   if (snapshot.imageUrl && showProfileImage) {
     try {
       await fs.mkdir(TMP_QR_DIR, { recursive: true });
@@ -106,10 +114,13 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
       if (snapshot.imageUrl.startsWith('data:image')) {
         const base64Data = snapshot.imageUrl.split(',')[1];
         await fs.writeFile(profileImagePath, Buffer.from(base64Data, 'base64'));
+        logger.info({ resumeId: resume.id }, 'Saved base64 profile image');
       } else {
         // Download from Supabase/External URL
+        logger.info({ resumeId: resume.id, url: snapshot.imageUrl }, 'Downloading profile image from URL');
         const response = await axios.get(snapshot.imageUrl, { responseType: 'arraybuffer' });
         await fs.writeFile(profileImagePath, Buffer.from(response.data));
+        logger.info({ resumeId: resume.id }, 'Downloaded and saved profile image');
       }
     } catch (err) {
       logger.error({ err, url: snapshot.imageUrl }, 'Failed to save/download profile image for PDF export');
@@ -119,23 +130,27 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
 
   if (resume.showQrCode !== false) {
     try {
-      // Ensure tmp dir exists inside TEMPLATES_DIR so Typst can access it (due to --root)
       await fs.mkdir(TMP_QR_DIR, { recursive: true });
-      
       qrFileName = `qr-${resume.id}-${Date.now()}.png`;
       qrImagePath = path.join(TMP_QR_DIR, qrFileName);
-      
       await QRCode.toFile(qrImagePath, portfolioUrl, {
         margin: 1,
         width: 200,
         color: { dark: '#000000', light: '#ffffff' }
       });
+      logger.info({ resumeId: resume.id }, 'Generated QR code image');
     } catch (err) {
       logger.error({ err }, 'Failed to generate QR image for PDF');
     }
   }
 
   try {
+    logger.info({ 
+      resumeId: resume.id, 
+      finalShowQr: !!qrImagePath, 
+      finalShowImg: !!profileImageFileName 
+    }, 'Calling Typst compilePdf');
+
     const pdfBuffer = await compilePdf(resume.templateId, {
       profile: snapshot,
       styles: resume.customStyles || {},
