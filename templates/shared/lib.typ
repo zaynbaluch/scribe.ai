@@ -27,6 +27,14 @@
   ]
 }
 
+#let profile-image-block(image-path, size: 60pt) = {
+  if image-path == none or image-path == "" { return none }
+  
+  block(width: size, height: size, radius: 100%, clip: true, stroke: 1pt + white)[
+    #image(image-path, width: size, height: size, fit: "cover")
+  ]
+}
+
 // ─── Helper: Section Heading ────────────────────────────────────────────────
 
 #let section-heading(title, accent: scribe-violet, style: "modern") = {

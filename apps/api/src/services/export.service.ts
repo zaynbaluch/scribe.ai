@@ -69,9 +69,14 @@ function htmlToTypst(html: string): string {
 export async function exportPdf(userId: string, resumeId: string): Promise<Buffer> {
   const resume = await getResumeWithValidation(userId, resumeId);
 
-  const snapshot = { ...((resume.tailoredContent as any) || (resume.baseProfileSnapshot as any)) };
-  if (!snapshot || Object.keys(snapshot).length === 0) {
-    throw new Error('Resume has no content. Please create your profile first.');
+  // Merge tailoredContent on top of baseProfileSnapshot for full data recovery
+  const snapshot = { 
+    ...((resume.baseProfileSnapshot as any) || {}),
+    ...((resume.tailoredContent as any) || {})
+  };
+  
+  if (!snapshot || Object.keys(snapshot).length <= 2) { // 2 fields usually just name/email
+    throw new Error('This resume snapshot appears to be incomplete. Please save your profile or re-tailor the document.');
   }
 
   // Filter invisible items
@@ -84,6 +89,21 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
 
   let qrImagePath: string | undefined;
   let qrFileName: string | undefined;
+  let profileImagePath: string | undefined;
+  let profileImageFileName: string | undefined;
+
+  // Handle Profile Image (save base64 to temp file for Typst)
+  if (snapshot.imageUrl && snapshot.imageUrl.startsWith('data:image')) {
+    try {
+      await fs.mkdir(TMP_QR_DIR, { recursive: true });
+      profileImageFileName = `profile-${resume.id}-${Date.now()}.png`;
+      profileImagePath = path.join(TMP_QR_DIR, profileImageFileName);
+      const base64Data = snapshot.imageUrl.split(',')[1];
+      await fs.writeFile(profileImagePath, Buffer.from(base64Data, 'base64'));
+    } catch (err) {
+      logger.error({ err }, 'Failed to save profile image for PDF export');
+    }
+  }
 
   if (resume.showQrCode !== false) {
     try {
@@ -110,16 +130,17 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
       sectionOrder: resume.sectionOrder,
       sectionVisibility: (resume.sectionVisibility as any) || {},
       showQrCode: !!qrImagePath,
-      // Pass path relative to TEMPLATES_DIR root for Typst
       qrImagePath: qrFileName ? `/tmp/${qrFileName}` : undefined,
+      profileImagePath: profileImageFileName ? `/tmp/${profileImageFileName}` : undefined,
     });
 
     return pdfBuffer;
   } finally {
     if (qrImagePath) {
-      try {
-        await fs.unlink(qrImagePath);
-      } catch {}
+      try { await fs.unlink(qrImagePath); } catch {}
+    }
+    if (profileImagePath) {
+      try { await fs.unlink(profileImagePath); } catch {}
     }
   }
 }
@@ -129,8 +150,11 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
  */
 export async function exportDocx(userId: string, resumeId: string): Promise<Buffer> {
   const resume = await getResumeWithValidation(userId, resumeId);
-  const profile = { ...resume.baseProfileSnapshot as any };
-  if (!profile) throw new Error('Resume has no profile snapshot.');
+  const profile = { 
+    ...((resume.baseProfileSnapshot as any) || {}),
+    ...((resume.tailoredContent as any) || {})
+  };
+  if (!profile || Object.keys(profile).length <= 2) throw new Error('Resume has no content. Please save your profile.');
 
   // Filter invisible items
   if (profile.experiences) profile.experiences = profile.experiences.filter((e: any) => e.visible !== false);
@@ -139,6 +163,24 @@ export async function exportDocx(userId: string, resumeId: string): Promise<Buff
 
   const vis = (resume.sectionVisibility as any) || {};
   const sections: any[] = [];
+
+  // Profile Image for DOCX
+  let profileImageRun: ImageRun | null = null;
+  if (profile.imageUrl && profile.imageUrl.startsWith('data:image')) {
+    try {
+      const base64Data = profile.imageUrl.split(',')[1];
+      profileImageRun = new ImageRun({
+        data: Buffer.from(base64Data, 'base64'),
+        transformation: { width: 60, height: 60 },
+        floating: {
+          horizontalPosition: { relative: 'margin', offset: 0 },
+          verticalPosition: { relative: 'margin', offset: 0 },
+        }
+      } as any);
+    } catch (err) {
+      logger.error({ err }, 'Failed to add profile image to DOCX');
+    }
+  }
 
   // Header and QR Code logic for DOCX
   let qrImageRun: ImageRun | null = null;
@@ -169,6 +211,19 @@ export async function exportDocx(userId: string, resumeId: string): Promise<Buff
   sections.push(
     new Paragraph({
       children: [
+        ...(profileImageRun ? [profileImageRun] : []),
+        new TextRun({ text: profile.name || 'Your Name', bold: true, size: 32, font: 'Calibri' }),
+        ...(qrImageRun ? [qrImageRun] : [])
+      ],
+      alignment: AlignmentType.CENTER,
+    })
+  );
+
+  // Header
+  sections.push(
+    new Paragraph({
+      children: [
+        ...(profileImageRun ? [profileImageRun] : []),
         new TextRun({ text: profile.name || 'Your Name', bold: true, size: 32, font: 'Calibri' }),
         ...(qrImageRun ? [qrImageRun] : [])
       ],

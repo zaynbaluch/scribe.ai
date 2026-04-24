@@ -31,7 +31,8 @@
 #block(fill: accent.lighten(90%), inset: (x: 12pt, y: 10pt), radius: 4pt, width: 100%)[
   #stack(
     dir: ltr,
-    spacing: 1fr,
+    spacing: 16pt,
+    profile-image-block(data.at("profileImagePath", default: ""), size: 54pt),
     align(left + horizon)[
       #text(size: 20pt, weight: "bold", fill: accent.darken(30%))[#profile.at("name", default: "Your Name")]
       #if profile.at("headline", default: "") != "" {

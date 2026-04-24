@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import { useAuthStore } from '@/stores/auth-store';
+import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import Logo from '@/components/ui/logo';
 import { ArrowRight, Mail, Lock, ShieldCheck, ChevronLeft, Loader2 } from 'lucide-react';
@@ -21,9 +22,12 @@ export default function LoginPage() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  const { setTheme } = useTheme();
+
   useEffect(() => {
+    setTheme('dark');
     fetchUser();
-  }, [fetchUser]);
+  }, [fetchUser, setTheme]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -88,11 +92,11 @@ export default function LoginPage() {
         setView('verify-email');
         toast.info('Verification code sent to your email');
       } else {
-        toast.success('Account created! Now you can sign in.');
-        setView('email');
+        // Successful login - no toast needed as redirect is enough feedback
+        router.push('/dashboard');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Registration failed');
+      toast.error(err.message || 'Invalid email or password');
     }
   };
 

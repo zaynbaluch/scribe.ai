@@ -31,6 +31,7 @@
 #stack(
   dir: ltr,
   spacing: 1fr,
+  profile-image-block(data.at("profileImagePath", default: ""), size: 60pt),
   align(center + horizon)[
     #text(size: 22pt, weight: "bold", fill: accent)[#profile.at("name", default: "Your Name")]
     #v(0.3em)

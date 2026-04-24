@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import logger from '../lib/logger';
+import { createError } from '../middleware/error-handler.middleware';
 import { send2FACode, sendVerificationEmail, sendPasswordResetEmail } from './email.service';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-dev-jwt-secret-change-in-prod';
@@ -182,9 +183,12 @@ export async function registerWithEmailPassword(email: string, password: string,
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     if (existing.oauthProvider) {
-      throw new Error(`This email is already linked to a ${existing.oauthProvider} account. Please sign in using ${existing.oauthProvider} or reset your password.`);
+      throw createError(
+        `This email is already linked to a ${existing.oauthProvider} account. Please sign in using ${existing.oauthProvider} or reset your password.`,
+        400
+      );
     }
-    throw new Error('Email already in use. Please sign in or reset your password.');
+    throw createError('Email already in use. Please sign in or reset your password.', 400);
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
