@@ -9,7 +9,8 @@ const customStylesSchema = z.object({
   marginBottom: z.number().min(0.3).max(1.5).optional().default(0.5),
   marginLeft: z.number().min(0.3).max(1.5).optional().default(0.6),
   marginRight: z.number().min(0.3).max(1.5).optional().default(0.6),
-});
+  showProfileImage: z.boolean().optional().default(true),
+}).passthrough();
 
 const sectionVisibilitySchema = z.object({
   summary: z.boolean().optional().default(true),
