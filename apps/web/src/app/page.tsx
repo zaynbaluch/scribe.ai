@@ -17,7 +17,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="flex-1">
-        <section className="relative pt-32 pb-20 px-6 md:px-12 max-w-7xl mx-auto flex flex-col items-center text-center">
+        <section className="relative min-h-[calc(100vh-64px)] flex flex-col items-center justify-center px-6 md:px-12 max-w-7xl mx-auto text-center py-20">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-xs font-mono text-[var(--gradient-2)] mb-8">
             <SparklesIcon size={14} /> Introducing AI Resume Tailoring
           </div>
