@@ -74,10 +74,27 @@ async def parse_resume(file: UploadFile = File(...)):
                 if extracted:
                     text += extracted + "\n"
         elif filename.endswith('.docx'):
-            doc = docx.Document(BytesIO(content))
-            for para in doc.paragraphs:
-                if para.text:
-                    text += para.text + "\n"
+            try:
+                doc = docx.Document(BytesIO(content))
+                for para in doc.paragraphs:
+                    if para.text:
+                        text += para.text + "\n"
+            except Exception as e:
+                import zipfile
+                from xml.etree import ElementTree
+                logger.warning(f"python-docx failed, falling back to manual XML extraction: {str(e)}")
+                try:
+                    with zipfile.ZipFile(BytesIO(content)) as zf:
+                        xml_content = zf.read('word/document.xml')
+                        tree = ElementTree.fromstring(xml_content)
+                        # Namespace for Word XML
+                        ns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+                        # Extract all text nodes
+                        for t in tree.findall('.//w:t', ns):
+                            if t.text:
+                                text += t.text + " "
+                except Exception as xml_err:
+                    logger.error(f"Manual XML extraction also failed: {str(xml_err)}")
         
         if not text.strip():
             raise HTTPException(status_code=400, detail=f"Could not extract text from {filename.split('.')[-1].upper()}")
