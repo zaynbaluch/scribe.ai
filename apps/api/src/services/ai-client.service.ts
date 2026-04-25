@@ -19,7 +19,7 @@ export async function callAI<T>(config: AxiosRequestConfig, retries = 5, backoff
       });
 
       // Check if response is JSON
-      const contentType = response.headers['content-type'] || '';
+      const contentType = String(response.headers['content-type'] || '');
       if (!contentType.includes('application/json')) {
         const snippet = typeof response.data === 'string' ? response.data.substring(0, 100) : 'Non-string data';
         throw new Error(`AI service returned non-JSON response (${contentType}): ${snippet}`);
