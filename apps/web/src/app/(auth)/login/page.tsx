@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTheme } from 'next-themes';
@@ -230,7 +231,9 @@ export default function LoginPage() {
 
           {/* Logo Section */}
           <div className="flex flex-col items-center gap-3">
-            <Logo size={56} className="text-[var(--text-primary)]" />
+            <Link href="/" className="group">
+              <Logo size={56} className="text-[var(--text-primary)] group-hover:scale-110 transition-transform" />
+            </Link>
             <div className="text-center">
               <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
                 {view === '2fa' ? 'Security Pin' : 

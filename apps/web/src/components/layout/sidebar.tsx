@@ -51,14 +51,14 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
       style={{ width: isMobile ? '260px' : (collapsed ? '64px' : '260px') }}
     >
       {/* Logo */}
-      <div className="h-14 flex items-center px-4 border-b border-[var(--grid-line-strong)]">
-        <Logo size={24} className="text-[var(--text-primary)]" />
+      <Link href="/" className="h-14 flex items-center px-4 border-b border-[var(--grid-line-strong)] group">
+        <Logo size={24} className="text-[var(--text-primary)] group-hover:scale-110 transition-transform" />
         {(!collapsed || isMobile) && (
-          <span className="ml-3 font-display font-bold text-lg tracking-tight whitespace-nowrap">
+          <span className="ml-3 font-display font-bold text-lg tracking-tight whitespace-nowrap group-hover:text-[var(--gradient-1)] transition-colors">
             Scribe.ai
           </span>
         )}
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 flex flex-col gap-1 p-2 mt-2 overflow-y-auto">
