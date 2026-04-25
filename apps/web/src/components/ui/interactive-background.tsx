@@ -50,7 +50,6 @@ const Blob = ({ color, size, top, left, delay = 0, opacity = [0.1, 0.2, 0.1] }: 
       }}
       transition={{
         opacity: { duration: 30, repeat: Infinity, ease: "linear", delay },
-        initial: { duration: 3 }
       }}
     >
       <div 
