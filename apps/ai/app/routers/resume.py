@@ -59,6 +59,7 @@ class ParseResumeResponse(BaseModel):
 
 @router.post("/parse-resume", response_model=ParseResumeResponse)
 async def parse_resume(file: UploadFile = File(...)):
+    logger = logging.getLogger("uvicorn")
     filename = file.filename.lower()
     if not (filename.endswith('.pdf') or filename.endswith('.docx')):
         raise HTTPException(status_code=400, detail="Only PDF and DOCX files are supported")
@@ -98,8 +99,6 @@ async def parse_resume(file: UploadFile = File(...)):
         
         if not text.strip():
             raise HTTPException(status_code=400, detail=f"Could not extract text from {filename.split('.')[-1].upper()}")
-
-        logger = logging.getLogger("uvicorn")
 
         from app.providers.factory import get_llm_provider
         llm = get_llm_provider()
@@ -185,6 +184,5 @@ async def parse_resume(file: UploadFile = File(...)):
     except HTTPException as he:
         raise he
     except Exception as e:
-        logger = logging.getLogger("uvicorn")
         logger.error(f"Resume parsing error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
