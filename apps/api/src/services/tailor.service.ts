@@ -3,8 +3,7 @@ import prisma from '../lib/prisma';
 import * as jobService from './job.service';
 import * as emailService from './email.service';
 import * as exportService from './export.service';
-
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+import * as aiClient from './ai-client.service';
 
 interface AnalyzeInput {
   text?: string;
@@ -22,12 +21,12 @@ export async function analyzeJob(userId: string, resumeId: string, input: Analyz
   // If URL provided, fetch text first
   if (input.url && !jdText) {
     try {
-      const fetchRes = await fetch(`${AI_SERVICE_URL}/ai/fetch-url`, {
+      const fetchData = await aiClient.callAI<any>({
+        url: '/ai/fetch-url',
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: input.url }),
+        data: { url: input.url },
       });
-      const fetchData = await fetchRes.json();
+
       if (fetchData.success && fetchData.data?.text) {
         jdText = fetchData.data.text;
       } else {
@@ -44,12 +43,12 @@ export async function analyzeJob(userId: string, resumeId: string, input: Analyz
   // Parse JD keywords
   let parsedKeywords: any;
   try {
-    const parseRes = await fetch(`${AI_SERVICE_URL}/ai/parse-jd`, {
+    const parseData = await aiClient.callAI<any>({
+      url: '/ai/parse-jd',
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: jdText }),
+      data: { text: jdText },
     });
-    const parseData = await parseRes.json();
+
     if (parseData.success) {
       parsedKeywords = parseData.data;
     } else {
@@ -72,12 +71,12 @@ export async function analyzeJob(userId: string, resumeId: string, input: Analyz
   // Compute match score
   let matchResult: any = { score: 0, strong: [], partial: [], gaps: [] };
   try {
-    const matchRes = await fetch(`${AI_SERVICE_URL}/ai/match-score`, {
+    const matchData = await aiClient.callAI<any>({
+      url: '/ai/match-score',
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ profile, jdKeywords: parsedKeywords }),
+      data: { profile, jdKeywords: parsedKeywords },
     });
-    const matchData = await matchRes.json();
+
     if (matchData.success) {
       matchResult = matchData.data;
     }
@@ -132,16 +131,16 @@ export async function tailorResume(userId: string, resumeId: string, jobId: stri
   if (!profile || !jdKeywords) throw new Error('Missing profile or JD data');
 
   try {
-    const res = await fetch(`${AI_SERVICE_URL}/ai/tailor`, {
+    const data = await aiClient.callAI<any>({
+      url: '/ai/tailor',
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+      data: {
         profile,
         jdKeywords,
         jdText: job.rawDescription,
-      }),
+      },
     });
-    const data = await res.json();
+
     if (!data.success) throw new Error('Tailoring failed');
 
     // Store tailored content on the resume
@@ -254,18 +253,17 @@ export async function generateCoverLetter(userId: string, data: {
   const profile = resume.baseProfileSnapshot as any;
 
   try {
-    const res = await fetch(`${AI_SERVICE_URL}/ai/cover-letter/generate`, {
+    const result = await aiClient.callAI<any>({
+      url: '/ai/cover-letter/generate',
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+      data: {
         profile,
         jd_text: jobDescription,
         jd_keywords: jobKeywords || {},
         tone: data.tone || 'formal',
         stream: false,
-      }),
+      },
     });
-    const result = await res.json();
     if (!result.content) throw new Error('Cover letter generation failed');
 
     // Save to DB

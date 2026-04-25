@@ -1,7 +1,5 @@
 import { prisma } from '../lib/prisma';
-import axios from 'axios';
-
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+import * as aiClient from './ai-client.service';
 
 export class CoverLetterService {
   static async generateCoverLetter(userId: string, resumeId: string, jobId: string, tone: string = 'formal') {
@@ -22,14 +20,18 @@ export class CoverLetterService {
     const profileToUse = resume.tailoredContent || resume.baseProfileSnapshot;
 
     // 2. Call AI Service to generate cover letter content
-    const response = await axios.post(`${AI_SERVICE_URL}/ai/cover-letter/generate`, {
-      profile: profileToUse,
-      jd_keywords: job.parsedKeywords || {},
-      jd_text: job.rawDescription,
-      tone: tone
+    const response = await aiClient.callAI<any>({
+      url: '/ai/cover-letter/generate',
+      method: 'POST',
+      data: {
+        profile: profileToUse,
+        jd_keywords: job.parsedKeywords || {},
+        jd_text: job.rawDescription,
+        tone: tone
+      }
     });
 
-    const content = response.data.content;
+    const content = response.content;
 
     // 3. Save to database
     const coverLetter = await prisma.coverLetter.create({

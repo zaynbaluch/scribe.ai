@@ -1,12 +1,67 @@
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import logger from '../lib/logger';
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 
 /**
+ * Robust HTTP client for the AI service.
+ * Handles Render's cold starts, 429 (Too Many Requests), and 503 (Service Unavailable).
+ */
+export async function callAI<T>(config: AxiosRequestConfig, retries = 5, backoff = 2000): Promise<T> {
+  let lastError: any;
+
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response: AxiosResponse<T> = await axios({
+        baseURL: AI_SERVICE_URL,
+        timeout: 60000, // 60s timeout for cold starts
+        ...config,
+      });
+
+      // Check if response is JSON
+      const contentType = response.headers['content-type'] || '';
+      if (!contentType.includes('application/json')) {
+        const snippet = typeof response.data === 'string' ? response.data.substring(0, 100) : 'Non-string data';
+        throw new Error(`AI service returned non-JSON response (${contentType}): ${snippet}`);
+      }
+
+      return response.data;
+    } catch (err: any) {
+      lastError = err;
+      const status = err.response?.status;
+      const isRetryable = !status || status === 429 || status === 503 || status >= 500;
+
+      if (isRetryable && i < retries - 1) {
+        const delay = backoff * Math.pow(2, i);
+        logger.warn(
+          { status, attempt: i + 1, delay, url: config.url },
+          'AI service call failed, retrying...'
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+
+      // If not retryable or out of retries
+      logger.error(
+        { 
+          err: err.message, 
+          status, 
+          url: config.url,
+          responseData: err.response?.data 
+        }, 
+        'AI service call failed permanently'
+      );
+      break;
+    }
+  }
+
+  throw new Error(`AI Service error: ${lastError.message}`);
+}
+
+/**
  * HTTP client for communicating with the Python AI service.
  * Falls back gracefully if the AI service is unavailable.
  */
-
 export async function parseResume(fileBuffer: Buffer, mimeType: string): Promise<any> {
   try {
     const formData = new FormData();
@@ -14,14 +69,12 @@ export async function parseResume(fileBuffer: Buffer, mimeType: string): Promise
     const blob = new Blob([uint8], { type: mimeType });
     formData.append('file', blob, 'resume.' + (mimeType.includes('pdf') ? 'pdf' : 'docx'));
 
-    const response = await fetch(`${AI_SERVICE_URL}/ai/parse-resume`, {
+    return await callAI({
+      url: '/ai/parse-resume',
       method: 'POST',
-      body: formData,
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
-
-    const result = await response.json();
-    logger.info({ result }, 'AI service response received');
-    return result;
   } catch (err) {
     logger.warn({ err }, 'AI service unavailable, using basic fallback parsing');
     return basicFallbackParse(fileBuffer, mimeType);
@@ -39,7 +92,6 @@ async function basicFallbackParse(fileBuffer: Buffer, mimeType: string): Promise
     try {
       const pdfParseModule = await import('pdf-parse');
       const pdfParse = pdfParseModule.default || pdfParseModule;
-      // Provide an empty options object to avoid some pdf-parse bugs
       const data = await (pdfParse as any)(fileBuffer, { pagerender: (pageData: any) => pageData.text });
       rawText = data.text || '';
     } catch (err) {
@@ -47,11 +99,9 @@ async function basicFallbackParse(fileBuffer: Buffer, mimeType: string): Promise
       rawText = '';
     }
   } else {
-    // For DOCX, just extract as text (basic)
     rawText = fileBuffer.toString('utf-8');
   }
 
-  // Very basic extraction using regex patterns
   const emailMatch = rawText.match(/[\w.-]+@[\w.-]+\.\w+/);
   const phoneMatch = rawText.match(/[\+]?\d[\d\s()-]{7,}/);
 
@@ -65,13 +115,10 @@ async function basicFallbackParse(fileBuffer: Buffer, mimeType: string): Promise
     projects: [],
     certifications: [],
     rawText,
-    confidence: 0.3, // Low confidence for basic parsing
+    confidence: 0.3,
   };
 }
 
-/**
- * Extract potential skills from raw text by matching against common tech skills.
- */
 function extractSkillsFromText(text: string): Array<{ name: string; category: string }> {
   const knownSkills: Record<string, string> = {
     'javascript': 'language', 'typescript': 'language', 'python': 'language',
@@ -104,9 +151,10 @@ function extractSkillsFromText(text: string): Array<{ name: string; category: st
 
 export async function healthCheck(): Promise<boolean> {
   try {
-    const response = await fetch(`${AI_SERVICE_URL}/ai/health`);
-    return response.ok;
+    const response = await axios.get(`${AI_SERVICE_URL}/ai/health`, { timeout: 5000 });
+    return response.status === 200;
   } catch {
     return false;
   }
 }
+

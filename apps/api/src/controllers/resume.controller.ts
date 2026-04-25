@@ -3,8 +3,7 @@ import * as resumeService from '../services/resume.service';
 import { asyncHandler, createError } from '../middleware/error-handler.middleware';
 import prisma from '../lib/prisma';
 import logger from '../lib/logger';
-
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+import * as aiClient from '../services/ai-client.service';
 
 export const createResume = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.userId;
@@ -72,12 +71,11 @@ export const getAtsScore = asyncHandler(async (req: Request, res: Response) => {
   }
 
   try {
-    const aiRes = await fetch(`${AI_SERVICE_URL}/ai/ats-score`, {
+    const aiData = await aiClient.callAI<any>({
+      url: '/ai/ats-score',
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ resumeData: profileData, jdKeywords }),
+      data: { resumeData: profileData, jdKeywords },
     });
-    const aiData = await aiRes.json();
 
     if (!aiData.success) throw new Error('ATS scoring failed');
 
