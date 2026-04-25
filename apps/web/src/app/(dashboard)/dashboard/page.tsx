@@ -36,47 +36,43 @@ export default function DashboardPage() {
   return (
     <div className="max-w-[1280px] mx-auto space-y-8 pb-12">
       {/* Onboarding Section */}
-      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#18181b]/50 backdrop-blur-xl p-8 mb-8">
+      <section className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-transparent)] p-8 mb-8">
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--gradient-1)]/10 border border-[var(--gradient-1)]/20 text-xs font-medium text-[var(--gradient-1)] mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-secondary)] mb-4">
             <TrendingUp size={14} /> Getting Started
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">Welcome to Scribe.ai</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-2 text-[var(--text-primary)]">Welcome to Scribe.ai</h2>
           <p className="text-[var(--text-secondary)] max-w-2xl mb-8">
             Let's get you ready for your next career move. Follow these steps to maximize your chances with AI-powered tailoring.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-sm">1</div>
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] flex items-center justify-center font-bold text-sm text-[var(--text-primary)]">1</div>
               <div>
-                <h4 className="font-semibold mb-1">Finish your profile</h4>
+                <h4 className="font-semibold mb-1 text-[var(--text-primary)]">Finish your profile</h4>
                 <p className="text-sm text-[var(--text-muted)] mb-3">Add your experience, skills, and projects to train your AI.</p>
-                <Link href="/profile" className="text-xs font-semibold text-[var(--gradient-1)] hover:underline">Complete Profile →</Link>
+                <Link href="/profile" className="text-xs font-semibold text-[var(--text-primary)] hover:opacity-70 transition-opacity">Complete Profile →</Link>
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-sm">2</div>
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] flex items-center justify-center font-bold text-sm text-[var(--text-primary)]">2</div>
               <div>
-                <h4 className="font-semibold mb-1">Create a base resume</h4>
+                <h4 className="font-semibold mb-1 text-[var(--text-primary)]">Create a base resume</h4>
                 <p className="text-sm text-[var(--text-muted)] mb-3">Build a master resume from your profile as a starting point.</p>
-                <Link href="/resumes" className="text-xs font-semibold text-[var(--gradient-1)] hover:underline">Create Resume →</Link>
+                <Link href="/resumes" className="text-xs font-semibold text-[var(--text-primary)] hover:opacity-70 transition-opacity">Create Resume →</Link>
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-sm">3</div>
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] flex items-center justify-center font-bold text-sm text-[var(--text-primary)]">3</div>
               <div>
-                <h4 className="font-semibold mb-1">Tailor & Apply</h4>
+                <h4 className="font-semibold mb-1 text-[var(--text-primary)]">Tailor & Apply</h4>
                 <p className="text-sm text-[var(--text-muted)] mb-3">Paste a job description and let the AI tailor your story.</p>
-                <Link href="/tailor" className="text-xs font-semibold text-[var(--gradient-1)] hover:underline">Start Tailoring →</Link>
+                <Link href="/tailor" className="text-xs font-semibold text-[var(--text-primary)] hover:opacity-70 transition-opacity">Start Tailoring →</Link>
               </div>
             </div>
           </div>
         </div>
-        
-        {/* Decorative background glow */}
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-[var(--gradient-1)] opacity-[0.08] blur-[80px] rounded-full pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-[var(--gradient-2)] opacity-[0.08] blur-[80px] rounded-full pointer-events-none" />
       </section>
 
       {/* Quick Actions */}

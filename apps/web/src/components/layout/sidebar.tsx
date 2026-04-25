@@ -54,7 +54,7 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
       <Link href="/" className="h-14 flex items-center px-4 border-b border-[var(--grid-line-strong)] group">
         <Logo size={24} className="text-[var(--text-primary)] group-hover:scale-110 transition-transform" />
         {(!collapsed || isMobile) && (
-          <span className="ml-3 font-display font-bold text-lg tracking-tight whitespace-nowrap group-hover:text-[var(--gradient-1)] transition-colors">
+          <span className="ml-3 font-display font-bold text-lg tracking-tight whitespace-nowrap hover:opacity-80 transition-opacity">
             Scribe.ai
           </span>
         )}
