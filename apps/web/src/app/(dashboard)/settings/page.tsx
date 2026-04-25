@@ -85,12 +85,12 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium block mb-2">Extension Key</label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input 
                   type="password" 
                   readOnly 
                   value={useAuthStore.getState().user?.extensionToken || ''}
-                  className="flex-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl px-4 py-2 text-sm font-mono text-[var(--text-secondary)] focus:outline-none"
+                  className="flex-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl px-4 py-2 text-sm font-mono text-[var(--text-secondary)] focus:outline-none w-full"
                 />
                 <button 
                   onClick={() => {
@@ -100,9 +100,9 @@ export default function SettingsPage() {
                       alert('Extension key copied to clipboard!');
                     }
                   }}
-                  className="px-4 py-2 bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl text-sm font-medium transition-colors"
+                  className="px-4 py-2 bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl text-sm font-medium transition-colors sm:w-auto w-full"
                 >
-                  Copy
+                  Copy Key
                 </button>
               </div>
               <p className="text-[10px] text-[var(--text-muted)] mt-2">
@@ -112,15 +112,15 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Danger Zone */}
-        <section className="p-6 rounded-2xl border border-red-500/20 bg-red-500/5 mt-12">
-          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-red-500/20">
-            <div className="p-2 bg-red-500/10 rounded-lg text-red-500">
-              <Shield size={20} />
+        {/* Session Management */}
+        <section className="p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] mt-12">
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[var(--grid-line)]">
+            <div className="p-2 bg-[var(--bg-elevated)] rounded-lg text-[var(--text-secondary)]">
+              <LogOut size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-medium text-red-500">Danger Zone</h2>
-              <p className="text-xs text-red-500/70">Irreversible and destructive actions.</p>
+              <h2 className="text-lg font-medium">Security & Sessions</h2>
+              <p className="text-xs text-[var(--text-muted)]">Manage your active sessions and security.</p>
             </div>
           </div>
 
@@ -130,7 +130,7 @@ export default function SettingsPage() {
               <div className="text-xs text-[var(--text-muted)]">End your current session.</div>
             </div>
             <button onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-red-500 hover:bg-red-500/10 transition-colors">
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors">
               <LogOut size={16} /> Log Out
             </button>
           </div>

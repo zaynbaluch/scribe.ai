@@ -2,9 +2,22 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 import sys
+import os
 from dotenv import load_dotenv
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 load_dotenv()
+
+# Initialize Sentry
+sentry_dsn = os.getenv("SENTRY_DSN")
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        integrations=[FastApiIntegration()],
+        traces_sample_rate=1.0,
+        environment=os.getenv("NODE_ENV", "development"),
+    )
 
 # Configure loguru
 logger.remove()

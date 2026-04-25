@@ -39,10 +39,12 @@
     profile-image-block(data.at("profileImagePath", default: ""), size: 60pt)
   } else { none },
   [
-    #text(size: 22pt, weight: "bold", fill: accent)[#profile.at("name", default: "Your Name")]
+    #let name = profile.at("name", default: none)
+    #text(size: 22pt, weight: "bold", fill: accent)[#(if name != none and name != "" { name } else { "Your Name" })]
     #v(0.3em)
-    #if profile.at("headline", default: "") != "" {
-      text(size: 11pt, fill: luma(80))[#profile.headline]
+    #let headline = profile.at("headline", default: none)
+    #if headline != none and headline != "" {
+      text(size: 11pt, fill: luma(80))[#headline]
       v(0.2em)
     }
     #contact-row(

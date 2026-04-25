@@ -39,10 +39,12 @@
     profile-image-block(data.at("profileImagePath", default: ""), size: 55pt)
   } else { none },
   [
-    #text(size: 24pt, weight: "bold")[#profile.at("name", default: "Your Name")]
+    #let name = profile.at("name", default: none)
+    #text(size: 24pt, weight: "bold")[#(if name != none and name != "" { name } else { "Your Name" })]
     #v(0.15em)
-    #if profile.at("headline", default: "") != "" {
-      text(size: 11pt, fill: luma(60), style: "italic")[#profile.headline]
+    #let headline = profile.at("headline", default: none)
+    #if headline != none and headline != "" {
+      text(size: 11pt, fill: luma(60), style: "italic")[#headline]
     }
   ],
   if show-qr {
@@ -51,12 +53,18 @@
   [
     #set text(size: 9pt, fill: luma(80))
     #let items = ()
-    #if profile.at("email", default: "") != "" { items.push(profile.email) }
-    #if profile.at("phone", default: "") != "" { items.push(profile.phone) }
-    #if profile.at("location", default: "") != "" { items.push(profile.location) }
-    #if profile.at("website", default: "") != "" { items.push(profile.website) }
-    #if profile.at("linkedin", default: "") != "" { items.push("linkedin.com/in/" + profile.linkedin.split("/").at(-1)) }
-    #if profile.at("github", default: "") != "" { items.push("github.com/" + profile.github.split("/").at(-1)) }
+    #let email = profile.at("email", default: none)
+    #if email != none and email != "" { items.push(email) }
+    #let phone = profile.at("phone", default: none)
+    #if phone != none and phone != "" { items.push(phone) }
+    #let loc = profile.at("location", default: none)
+    #if loc != none and loc != "" { items.push(loc) }
+    #let web = profile.at("website", default: none)
+    #if web != none and web != "" { items.push(web) }
+    #let li = profile.at("linkedin", default: none)
+    #if li != none and li != "" { items.push("linkedin.com/in/" + str(li).split("/").at(-1)) }
+    #let gh = profile.at("github", default: none)
+    #if gh != none and gh != "" { items.push("github.com/" + str(gh).split("/").at(-1)) }
     #items.join([ \ ])
   ],
 )

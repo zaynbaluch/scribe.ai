@@ -8,7 +8,7 @@ import { createError } from '../middleware/error-handler.middleware';
 import { send2FACode, sendVerificationEmail, sendPasswordResetEmail } from './email.service';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-dev-jwt-secret-change-in-prod';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '4h';
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 

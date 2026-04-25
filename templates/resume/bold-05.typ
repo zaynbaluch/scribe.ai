@@ -39,20 +39,28 @@
     profile-image-block(data.at("profileImagePath", default: ""), size: 60pt)
   } else { none },
   align(left + horizon)[
-    #text(size: 24pt, weight: "bold", fill: white)[#profile.at("name", default: "Your Name")]
-    #if profile.at("headline", default: "") != "" {
+    #let name = profile.at("name", default: none)
+    #text(size: 24pt, weight: "bold", fill: white)[#(if name != none and name != "" { name } else { "Your Name" })]
+    #let headline = profile.at("headline", default: none)
+    #if headline != none and headline != "" {
       linebreak()
-      text(size: 11pt, fill: white.darken(15%))[#profile.headline]
+      text(size: 11pt, fill: white.darken(15%))[#headline]
     }
     #v(0.3em)
     #set text(fill: white.darken(20%), size: 9pt)
     #let items = ()
-    #if profile.at("email", default: "") != "" { items.push(profile.email) }
-    #if profile.at("phone", default: "") != "" { items.push(profile.phone) }
-    #if profile.at("location", default: "") != "" { items.push(profile.location) }
-    #if profile.at("website", default: "") != "" { items.push(profile.website) }
-    #if profile.at("linkedin", default: "") != "" { items.push("linkedin.com/in/" + profile.linkedin.split("/").at(-1)) }
-    #if profile.at("github", default: "") != "" { items.push("github.com/" + profile.github.split("/").at(-1)) }
+    #let email = profile.at("email", default: none)
+    #if email != none and email != "" { items.push(email) }
+    #let phone = profile.at("phone", default: none)
+    #if phone != none and phone != "" { items.push(phone) }
+    #let loc = profile.at("location", default: none)
+    #if loc != none and loc != "" { items.push(loc) }
+    #let web = profile.at("website", default: none)
+    #if web != none and web != "" { items.push(web) }
+    #let li = profile.at("linkedin", default: none)
+    #if li != none and li != "" { items.push("linkedin.com/in/" + str(li).split("/").at(-1)) }
+    #let gh = profile.at("github", default: none)
+    #if gh != none and gh != "" { items.push("github.com/" + str(gh).split("/").at(-1)) }
     #items.join([ #sym.bar.v ])
   ],
   if show-qr {

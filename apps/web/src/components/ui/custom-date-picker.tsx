@@ -12,7 +12,7 @@ interface CustomDatePickerProps {
 export default function CustomDatePicker({ label, value, onChange, mode = 'month' }: CustomDatePickerProps) {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
+  const years = Array.from({ length: 70 }, (_, i) => currentYear + 10 - i);
 
   // Parse initial value (expected ISO string or YYYY-MM-DD)
   const date = value ? new Date(value) : new Date();
