@@ -131,9 +131,9 @@ Benefits over LaTeX/React-PDF:
 | Concern | Choice (Dev) | Choice (Prod) |
 |---|---|---|
 | Frontend | `next dev` (localhost:3000) | Vercel |
-| Backend API | `nodemon` (localhost:3001) | Railway / Render |
-| AI Service | `uvicorn` (localhost:8000) | Railway / Render |
-| Database | Docker PostgreSQL (localhost:5432) | Supabase / Neon |
+| Backend API | `nodemon` (localhost:3001) | Render |
+| AI Service | `uvicorn` (localhost:8000) | Render |
+| Database | Docker PostgreSQL (localhost:5432) | Supabase |
 | Cache | Docker Redis (localhost:6379) | Upstash |
 | Email | Docker Mailpit (localhost:8025) | SMTP provider |
 | LLM | Ollama (localhost:11434) | API provider |
@@ -669,4 +669,4 @@ Users should have these options on the job input screen:
 
 ---
 
-*Last Updated: April 21, 2026*
+*Last Updated: April 25, 2026*

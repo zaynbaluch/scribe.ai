@@ -1,111 +1,116 @@
-# Scribe.ai Developer Guide
+# Scribe.ai
 
-Welcome to the Scribe.ai monorepo! This guide will help you get your local development environment up and running.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/zaynbaluch/scribe.ai/main/apps/web/public/logo.png" width="120" alt="Scribe.ai Logo" />
+</p>
 
-## Prerequisites
+<p align="center">
+  <strong>Your career story, intelligently told.</strong>
+</p>
 
-- **Node.js**: >= 20.0.0
-- **pnpm**: >= 10.28.2 (We use `pnpm` as the package manager)
-- **Python**: >= 3.11 (For the AI service)
-- **Docker** & **Docker Compose**: For running the database, cache, and other infrastructure services.
-
-## Services Overview
-
-- **Web (Frontend)**: Next.js app located in `apps/web`
-- **API (Backend)**: Express + Prisma app located in `apps/api`
-- **AI Service**: FastAPI app located in `apps/ai`
-- **Infrastructure**: Postgres, Redis, and Mailpit via Docker Compose
+<p align="center">
+  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js" alt="Next.js" /></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=flat-square&logo=tailwind-css" alt="Tailwind" /></a>
+  <a href="https://www.prisma.io"><img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma" alt="Prisma" /></a>
+  <a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/FastAPI-AI-05998B?style=flat-square&logo=fastapi" alt="FastAPI" /></a>
+  <a href="https://turbo.build"><img src="https://img.shields.io/badge/Turborepo-Monorepo-EF4444?style=flat-square&logo=turborepo" alt="Turborepo" /></a>
+</p>
 
 ---
 
-## 1. Start Infrastructure Services
+**Scribe.ai** is an advanced agentic platform designed to take the guesswork out of the job hunt. From instant AI-powered resume tailoring to automated application tracking and professional portfolio hosting, Scribe provides a seamless, premium end-to-end experience for high-performance professionals.
 
-First, start the required background services using Docker Compose from the root directory:
+## ✨ Key Features
 
+- 🧠 **AI Tailoring Engine**: Instant mapping of your experiences to job descriptions using local LLMs (Ollama) or OpenAI.
+- 📄 **Typst-Powered Resumes**: Generate beautiful, ATS-optimized PDFs in milliseconds using the Typst typesetting system.
+- 📊 **ATS Simulator**: Get real-time feedback on your resume's compatibility with modern tracking systems.
+- 📋 **Kanban Command Center**: Track your applications, interviews, and offers in a fluid, interactive dashboard.
+- 🌐 **Shareable Portfolios**: Instantly deploy a professional, password-protected portfolio site linked to your master profile.
+- 🧩 **Browser Extension**: Capture job descriptions directly from LinkedIn and Indeed with a single click.
+
+## 🛠️ Tech Stack
+
+### Frontend & Web
+- **Framework**: Next.js 15 (App Router)
+- **Styling**: Tailwind CSS v4 + Framer Motion
+- **State Management**: Zustand + React Query
+
+### Backend & AI
+- **API Engine**: Node.js + Express + Prisma ORM
+- **AI Service**: Python FastAPI + Ollama (Local) / OpenAI (Production)
+- **Database**: PostgreSQL
+- **Caching**: Redis
+
+### Infrastructure
+- **Typesetting**: Typst CLI
+- **Monorepo**: Turborepo + pnpm
+- **DevOps**: Docker Compose (Postgres, Redis, Mailpit)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- **Node.js**: >= 20.0.0
+- **pnpm**: >= 10.x
+- **Docker**: For database and infrastructure
+- **Python**: >= 3.11 (For AI service)
+
+### 1. Clone & Install
+```bash
+git clone https://github.com/zaynbaluch/scribe.ai.git
+cd scribe.ai
+pnpm install
+```
+
+### 2. Infrastructure
+Spin up the database, cache, and mail server:
 ```bash
 docker-compose up -d
 ```
 
-This will spin up:
-- **Postgres** (Database) on port `5433`
-- **Redis** (Cache) on port `6379`
-- **Mailpit** (Local SMTP testing) on port `8025` (Web UI) and `1025` (SMTP)
+### 3. Environment Setup
+Copy the example environment variables:
+```bash
+cp .env.example .env
+```
+
+### 4. Run Development
+Launch all services (Web, API, AI) in parallel:
+```bash
+pnpm run dev
+```
 
 ---
 
-## 2. Start the Web & API Services
+## 📂 Project Structure
 
-We use [Turborepo](https://turbo.build/) to manage our Node.js services.
+```text
+scribe.ai/
+├── apps/
+│   ├── web/          # Next.js Frontend
+│   ├── api/          # Express Backend
+│   ├── ai/           # FastAPI AI Service
+│   └── extension/    # WXT Browser Extension
+├── packages/
+│   ├── types/        # Shared TypeScript Types
+│   └── utils/        # Shared Utility Functions
+├── docs/             # Comprehensive Documentation
+└── docker-compose.yml
+```
 
-1. Install dependencies from the root directory:
-   ```bash
-   pnpm install
-   ```
+## 📖 Documentation
 
-2. Generate the Prisma Client (if you haven't already):
-   ```bash
-   cd apps/api
-   npx prisma generate
-   ```
+For detailed technical guides, architecture deep-dives, and UI guidelines, please refer to the [docs](./docs) directory:
 
-3. Start the Web and API services in parallel from the root directory:
-   ```bash
-   pnpm run dev
-   ```
-   - **Web App** will be available at: http://localhost:3000 (default Next.js port)
-   - **API Server** will watch for changes and restart automatically.
-
----
-
-## 3. Start the AI Service
-
-The AI service is a standalone FastAPI application running on Python.
-
-1. Navigate to the AI app directory:
-   ```bash
-   cd apps/ai
-   ```
-
-2. Activate the virtual environment (assuming you've already created it during setup):
-   - **Windows**: `venv\Scripts\activate`
-   - **Mac/Linux**: `source venv/bin/activate`
-
-3. Install dependencies (if needed):
-   ```bash
-   pip install -r requirements.txt
-   # OR if using pyproject.toml / hatchling
-   pip install -e .
-   ```
-
-4. Run the development server:
-   ```bash
-   python -m uvicorn app.main:app --reload --port 8000
-   ```
-   - **AI Service** will be available at: http://localhost:8000
-   - **Swagger Docs**: http://localhost:8000/docs
-   - **Health Check**: http://localhost:8000/ai/health
+- [Architecture Overview](./docs/architecture.md)
+- [UI Guidelines & Design System](./docs/ui-guidelines.md)
+- [API Reference](./docs/api-reference.md)
+- [Project Roadmap](./docs/roadmap.md)
 
 ---
 
-## Verifying Everything Works
-
-1. **Database & Infrastructure**: Run `docker ps` to ensure `scribe-db`, `scribe-redis`, and `scribe-mail` are running.
-2. **Web**: Open http://localhost:3000 in your browser.
-3. **AI**: Open http://localhost:8000/docs to see the FastAPI Swagger UI and test the `/ai/health` endpoint.
-
----
-
-## Stopping the Services
-
-To shut everything down and free up your ports:
-
-1. **Stop Docker Services**: From the root directory, run:
-   ```bash
-   docker-compose down
-   ```
-   *This will stop and remove the Postgres, Redis, and Mailpit containers while keeping your data safe in volumes.*
-
-2. **Stop Web, API & AI Services**: If you have them running in your terminal, simply press `Ctrl + C` in the respective terminal windows to terminate the processes.
-
-Happy coding!
-
+<p align="center">
+  Built with ❤️ by the Scribe Team
+</p>

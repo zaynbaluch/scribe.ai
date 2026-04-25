@@ -15,6 +15,7 @@
 │  │  Express (api)        → localhost:3001             │   │
 │  │  FastAPI (ai)         → localhost:8000             │   │
 │  │  Ollama               → localhost:11434            │   │
+│  │  WXT (extension)      → dev panel / popup          │   │
 │  └────────────────────────────────────────────────────┘   │
 │                                                          │
 │  DOCKER (stateful services, zero install headache)       │
@@ -297,7 +298,14 @@ uvicorn app.main:app --reload --port 8000
 # → http://localhost:8000
 ```
 
-### Terminal 4: (Optional) Watch all with Turborepo
+### Terminal 4: Browser Extension
+```powershell
+cd apps/extension
+pnpm dev
+# → Loads extension into your browser for testing
+```
+
+### Terminal 5: (Optional) Watch all with Turborepo
 ```powershell
 # From root — starts web + api together
 pnpm dev
@@ -311,6 +319,7 @@ pnpm dev
 | API | http://localhost:3001 | Express REST API |
 | AI Service | http://localhost:8000 | FastAPI + Ollama |
 | AI Docs | http://localhost:8000/docs | FastAPI Swagger UI |
+| Extension | dev-panel | WXT Extension Dev mode |
 | Ollama | http://localhost:11434 | LLM API |
 | Mailpit UI | http://localhost:8025 | View sent emails |
 | PostgreSQL | localhost:5432 | Database |
@@ -427,4 +436,4 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ---
 
-*Last Updated: April 21, 2026*
+*Last Updated: April 25, 2026*
