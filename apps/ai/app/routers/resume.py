@@ -2,6 +2,7 @@ from fastapi import APIRouter, File, UploadFile, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 import PyPDF2
+import docx
 from io import BytesIO
 import re
 import json
@@ -58,20 +59,28 @@ class ParseResumeResponse(BaseModel):
 
 @router.post("/parse-resume", response_model=ParseResumeResponse)
 async def parse_resume(file: UploadFile = File(...)):
-    if not file.filename.endswith('.pdf'):
-        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+    filename = file.filename.lower()
+    if not (filename.endswith('.pdf') or filename.endswith('.docx')):
+        raise HTTPException(status_code=400, detail="Only PDF and DOCX files are supported")
     
     try:
         content = await file.read()
-        pdf_reader = PyPDF2.PdfReader(BytesIO(content))
         text = ""
-        for page in pdf_reader.pages:
-            extracted = page.extract_text()
-            if extracted:
-                text += extracted + "\n"
+        
+        if filename.endswith('.pdf'):
+            pdf_reader = PyPDF2.PdfReader(BytesIO(content))
+            for page in pdf_reader.pages:
+                extracted = page.extract_text()
+                if extracted:
+                    text += extracted + "\n"
+        elif filename.endswith('.docx'):
+            doc = docx.Document(BytesIO(content))
+            for para in doc.paragraphs:
+                if para.text:
+                    text += para.text + "\n"
         
         if not text.strip():
-            raise HTTPException(status_code=400, detail="Could not extract text from PDF")
+            raise HTTPException(status_code=400, detail=f"Could not extract text from {filename.split('.')[-1].upper()}")
 
         logger = logging.getLogger("uvicorn")
 
@@ -88,8 +97,9 @@ async def parse_resume(file: UploadFile = File(...)):
             "4. DATE HANDLING: Return dates in ISO format (YYYY-MM-DD) if possible. If only a year is provided, use YYYY-01-01. "
             "If a date is 'Present' or 'Current', use null for the endDate. If a date is completely missing, use null.\n"
             "5. EDUCATION & EXPERIENCE: Split degrees from fields. Use EXACT text for job titles. If an entry has no identifiable title or company/institution, you may still include it if it has a description, but prefer to omit completely empty entries.\n"
-            "6. SKILLS: Extract technical skills first, then soft skills.\n"
-            "7. Return ONLY valid JSON.\n\n"
+            "6. CLEANING: Extracted text from PDFs often contains stray spaces within words (e.g., 'T e chnology' or 'mehb o ob'). You MUST fix these artifacts by merging the words based on context, especially for names, emails, and well-known institutions/technologies. DO NOT invent information that isn't there.\n"
+            "7. SKILLS: Extract technical skills first, then soft skills.\n"
+            "8. Return ONLY valid JSON.\n\n"
             "JSON structure:\n"
             "{\n"
             "  \"name\": \"string\",\n"
