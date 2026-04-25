@@ -1,7 +1,7 @@
 # Scribe.ai
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/zaynbaluch/scribe.ai/main/apps/web/public/logo.png" width="120" alt="Scribe.ai Logo" />
+  <img src="https://raw.githubusercontent.com/zaynbaluch/scribe.ai/main/apps/web/public/logo-light.png" width="120" alt="Scribe.ai Logo" />
 </p>
 
 <p align="center">
