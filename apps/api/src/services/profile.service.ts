@@ -94,12 +94,13 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
     // Replace experiences
     if (data.experiences !== undefined) {
       await tx.experience.deleteMany({ where: { profileId } });
-      if (data.experiences.length > 0) {
+      const validExperiences = data.experiences.filter(exp => exp.title || exp.company || exp.description);
+      if (validExperiences.length > 0) {
         await tx.experience.createMany({
-          data: data.experiences.map((exp, i) => ({
+          data: validExperiences.map((exp, i) => ({
             profileId,
-            title: exp.title,
-            company: exp.company,
+            title: exp.title || null,
+            company: exp.company || null,
             location: exp.location || null,
             startDate: safeDate(exp.startDate),
             endDate: safeDate(exp.endDate),
@@ -115,12 +116,13 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
     // Replace education
     if (data.education !== undefined) {
       await tx.education.deleteMany({ where: { profileId } });
-      if (data.education.length > 0) {
+      const validEducation = data.education.filter(edu => edu.institution || edu.degree || edu.description);
+      if (validEducation.length > 0) {
         await tx.education.createMany({
-          data: data.education.map((edu, i) => ({
+          data: validEducation.map((edu, i) => ({
             profileId,
-            institution: edu.institution,
-            degree: edu.degree,
+            institution: edu.institution || null,
+            degree: edu.degree || null,
             field: edu.field || null,
             startDate: safeDate(edu.startDate),
             endDate: safeDate(edu.endDate),
@@ -152,11 +154,12 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
     // Replace projects
     if (data.projects !== undefined) {
       await tx.project.deleteMany({ where: { profileId } });
-      if (data.projects.length > 0) {
+      const validProjects = data.projects.filter(proj => proj.name || proj.description);
+      if (validProjects.length > 0) {
         await tx.project.createMany({
-          data: data.projects.map((proj, i) => ({
+          data: validProjects.map((proj, i) => ({
             profileId,
-            name: proj.name,
+            name: proj.name || null,
             description: proj.description || null,
             url: proj.url || null,
             techStack: proj.techStack || [],
@@ -172,12 +175,13 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
     // Replace certifications
     if (data.certifications !== undefined) {
       await tx.certification.deleteMany({ where: { profileId } });
-      if (data.certifications.length > 0) {
+      const validCertifications = data.certifications.filter(cert => cert.name || cert.issuer);
+      if (validCertifications.length > 0) {
         await tx.certification.createMany({
-          data: data.certifications.map((cert, i) => ({
+          data: validCertifications.map((cert, i) => ({
             profileId,
-            name: cert.name,
-            issuer: cert.issuer,
+            name: cert.name || null,
+            issuer: cert.issuer || null,
             date: safeDate(cert.date),
             expiryDate: safeDate(cert.expiryDate),
             url: cert.url || null,
@@ -190,13 +194,14 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
     // Replace publications
     if (data.publications !== undefined) {
       await tx.publication.deleteMany({ where: { profileId } });
-      if (data.publications.length > 0) {
+      const validPublications = data.publications.filter(pub => pub.title);
+      if (validPublications.length > 0) {
         await tx.publication.createMany({
-          data: data.publications.map((pub, i) => ({
+          data: validPublications.map((pub, i) => ({
             profileId,
-            title: pub.title,
+            title: pub.title || null,
             venue: pub.venue || null,
-            date: pub.date ? new Date(pub.date) : null,
+            date: safeDate(pub.date),
             url: pub.url || null,
             orderIndex: pub.orderIndex ?? i,
           })),
@@ -207,14 +212,15 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
     // Replace volunteer work
     if (data.volunteerWork !== undefined) {
       await tx.volunteerWork.deleteMany({ where: { profileId } });
-      if (data.volunteerWork.length > 0) {
+      const validVolunteer = data.volunteerWork.filter(vol => vol.role || vol.organization);
+      if (validVolunteer.length > 0) {
         await tx.volunteerWork.createMany({
-          data: data.volunteerWork.map((vol, i) => ({
+          data: validVolunteer.map((vol, i) => ({
             profileId,
-            role: vol.role,
-            organization: vol.organization,
-            startDate: vol.startDate ? new Date(vol.startDate) : null,
-            endDate: vol.endDate ? new Date(vol.endDate) : null,
+            role: vol.role || null,
+            organization: vol.organization || null,
+            startDate: safeDate(vol.startDate),
+            endDate: safeDate(vol.endDate),
             bullets: vol.bullets || [],
             orderIndex: vol.orderIndex ?? i,
           })),

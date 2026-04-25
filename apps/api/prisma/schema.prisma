@@ -79,10 +79,10 @@ model Experience {
   id          String    @id @default(uuid())
   profileId   String
   profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  title       String
-  company     String
+  title       String?
+  company     String?
   location    String?
-  startDate   DateTime
+  startDate   DateTime?
   endDate     DateTime?
   current     Boolean   @default(false)
   description String?   @db.Text
@@ -96,10 +96,10 @@ model Education {
   id          String    @id @default(uuid())
   profileId   String
   profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  institution String
-  degree      String
+  institution String?
+  degree      String?
   field       String?
-  startDate   DateTime
+  startDate   DateTime?
   endDate     DateTime?
   gpa         String?
   honors      String?
@@ -125,7 +125,7 @@ model Project {
   id          String    @id @default(uuid())
   profileId   String
   profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  name        String
+  name        String?
   description String?   @db.Text
   url         String?
   techStack   String[]
@@ -141,7 +141,7 @@ model Certification {
   id         String    @id @default(uuid())
   profileId  String
   profile    Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  name       String
+  name       String?
   issuer     String?
   date       DateTime?
   expiryDate DateTime?
@@ -155,7 +155,7 @@ model Publication {
   id        String    @id @default(uuid())
   profileId String
   profile   Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  title     String
+  title     String?
   venue     String?
   date      DateTime?
   url       String?
@@ -168,8 +168,8 @@ model VolunteerWork {
   id           String    @id @default(uuid())
   profileId    String
   profile      Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  role         String
-  organization String
+  role         String?
+  organization String?
   startDate    DateTime?
   endDate      DateTime?
   bullets      String[]
