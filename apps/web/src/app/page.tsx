@@ -32,7 +32,7 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <Link href="/login" className="px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:scale-105 transition-transform flex items-center gap-2">
+            <Link href="/login" className="h-10 px-4 rounded-lg text-sm font-semibold bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:scale-105 transition-transform flex items-center justify-center gap-2">
               Start Building for Free <ArrowRight size={16} />
             </Link>
             <a href="https://github.com/zaynbaluch/scribe.ai" target="_blank" rel="noreferrer" className="px-4 py-2 text-white rounded-lg text-sm font-semibold border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex items-center gap-2">

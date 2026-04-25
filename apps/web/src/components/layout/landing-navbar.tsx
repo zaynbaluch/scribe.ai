@@ -33,7 +33,7 @@ export default function LandingNavbar() {
         <Link href="/login" className="text-sm font-medium text-[#a1a1aa] hover:text-white transition-colors">
           Log in
         </Link>
-        <Link href="/login" className="hidden md:inline-flex px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:opacity-90 transition-opacity">
+        <Link href="/login" className="hidden md:inline-flex items-center justify-center h-10 px-4 rounded-lg text-sm font-semibold bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-2)] text-white hover:opacity-90 transition-opacity">
           Get Started
         </Link>
       </div>
