@@ -23,7 +23,7 @@ export default function Home() {
           </div>
 
           <h1 className="font-display text-5xl md:text-7xl lg:text-8xl tracking-tighter leading-[1.05] font-bold mb-6 max-w-4xl">
-            Your career story,<br />
+            Architecting your<br />
             <TypewriterEffect />
           </h1>
 

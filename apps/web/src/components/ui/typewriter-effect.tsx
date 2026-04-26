@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const phrases = [
-  "intelligently told.",
-  "expertly crafted.",
-  "boldly presented."
+  "ascent.",
+  "edge.",
+  "success.",
+  "legacy."
 ];
 
 export const TypewriterEffect = () => {
