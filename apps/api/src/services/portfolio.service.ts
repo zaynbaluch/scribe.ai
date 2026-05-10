@@ -87,17 +87,6 @@ export async function getPublicPortfolio(slug: string) {
     where: { vanitySlug: slug },
     include: {
       portfolio: true,
-      profile: {
-        include: {
-          experiences: { orderBy: { orderIndex: 'asc' } },
-          education: { orderBy: { orderIndex: 'asc' } },
-          skills: { orderBy: { orderIndex: 'asc' } },
-          projects: { orderBy: { orderIndex: 'asc' } },
-          certifications: { orderBy: { orderIndex: 'asc' } },
-          publications: { orderBy: { orderIndex: 'asc' } },
-          volunteerWork: { orderBy: { orderIndex: 'asc' } },
-        },
-      },
     },
   });
 
@@ -129,7 +118,7 @@ export async function getPublicPortfolio(slug: string) {
 export async function verifyPortfolioPassword(slug: string, password: string): Promise<boolean> {
   const user = await prisma.user.findFirst({
     where: { vanitySlug: slug },
-    select: { portfolio: { select: { passwordHash: true } } },
+    include: { portfolio: true },
   });
 
   if (!user?.portfolio?.passwordHash) return true; // No password = always valid

@@ -3,64 +3,24 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
-// ─── User ───────────────────────────────────────────────────────────────────────
+// ─── Embedded Types (stored inside User document) ───────────────────────────
 
-model User {
-  id               String   @id @default(uuid())
-  email            String   @unique
-  name             String
-  avatarUrl        String?  @db.Text
-  passwordHash     String?
-  oauthProvider    String?  // google, linkedin, github
-  oauthId          String?  @unique
-  twoFactorEnabled Boolean  @default(false)
-  emailVerified    Boolean  @default(false)
-  plan             String   @default("free") // free, pro, lifetime
-  vanitySlug       String?  @unique
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  profile      Profile?
-  resumes      Resume[]
-  coverLetters CoverLetter[]
-  jobs         Job[]
-  applications Application[]
-  portfolio    Portfolio?
-}
-
-model VerificationCode {
-  id        String   @id @default(cuid())
-  email     String
-  code      String
-  type      String   // '2fa', 'email_verification', 'password_reset'
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@index([email])
-}
-
-// ─── Profile ────────────────────────────────────────────────────────────────────
-
-model Profile {
-  id        String    @id @default(uuid())
-  userId    String    @unique
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String?
-  summary   String? @db.Text
-  headline  String?
-  location  String?
-  phone     String?
-  email     String?
-  website   String?
-  linkedin  String?
-  github    String?
-  imageUrl  String?   @db.Text
-  showQrCode Boolean   @default(true)
-
+type Profile {
+  name           String?
+  summary        String?
+  headline       String?
+  location       String?
+  phone          String?
+  email          String?
+  website        String?
+  linkedin       String?
+  github         String?
+  imageUrl       String?
+  showQrCode     Boolean        @default(true)
   experiences    Experience[]
   education      Education[]
   skills         Skill[]
@@ -68,34 +28,23 @@ model Profile {
   certifications Certification[]
   publications   Publication[]
   volunteerWork  VolunteerWork[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @default(now())
 }
 
-// ─── Experience ─────────────────────────────────────────────────────────────────
-
-model Experience {
-  id          String    @id @default(uuid())
-  profileId   String
-  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+type Experience {
   title       String?
   company     String?
   location    String?
   startDate   DateTime?
   endDate     DateTime?
   current     Boolean   @default(false)
-  description String?   @db.Text
+  description String?
   bullets     String[]
   orderIndex  Int       @default(0)
 }
 
-// ─── Education ──────────────────────────────────────────────────────────────────
-
-model Education {
-  id          String    @id @default(uuid())
-  profileId   String
-  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+type Education {
   institution String?
   degree      String?
   field       String?
@@ -103,30 +52,20 @@ model Education {
   endDate     DateTime?
   gpa         String?
   honors      String?
-  description String?   @db.Text
+  description String?
   orderIndex  Int       @default(0)
 }
 
-// ─── Skill ──────────────────────────────────────────────────────────────────────
-
-model Skill {
-  id          String  @id @default(uuid())
-  profileId   String
-  profile     Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+type Skill {
   name        String
-  category    String? // language, framework, tool, database, cloud, soft-skill
-  proficiency String? // beginner, intermediate, advanced, expert
+  category    String?
+  proficiency String?
   orderIndex  Int     @default(0)
 }
 
-// ─── Project ────────────────────────────────────────────────────────────────────
-
-model Project {
-  id          String    @id @default(uuid())
-  profileId   String
-  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+type Project {
   name        String?
-  description String?   @db.Text
+  description String?
   url         String?
   techStack   String[]
   bullets     String[]
@@ -135,12 +74,7 @@ model Project {
   orderIndex  Int       @default(0)
 }
 
-// ─── Certification ──────────────────────────────────────────────────────────────
-
-model Certification {
-  id         String    @id @default(uuid())
-  profileId  String
-  profile    Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+type Certification {
   name       String?
   issuer     String?
   date       DateTime?
@@ -149,25 +83,15 @@ model Certification {
   orderIndex Int       @default(0)
 }
 
-// ─── Publication ────────────────────────────────────────────────────────────────
-
-model Publication {
-  id        String    @id @default(uuid())
-  profileId String
-  profile   Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  title     String?
-  venue     String?
-  date      DateTime?
-  url       String?
+type Publication {
+  title      String?
+  venue      String?
+  date       DateTime?
+  url        String?
   orderIndex Int      @default(0)
 }
 
-// ─── Volunteer Work ─────────────────────────────────────────────────────────────
-
-model VolunteerWork {
-  id           String    @id @default(uuid())
-  profileId    String
-  profile      Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+type VolunteerWork {
   role         String?
   organization String?
   startDate    DateTime?
@@ -176,22 +100,63 @@ model VolunteerWork {
   orderIndex   Int       @default(0)
 }
 
+// ─── User ───────────────────────────────────────────────────────────────────────
+
+model User {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  email            String    @unique
+  name             String
+  avatarUrl        String?
+  passwordHash     String?
+  oauthProvider    String?
+  oauthId          String?
+  twoFactorEnabled Boolean   @default(false)
+  emailVerified    Boolean   @default(false)
+  plan             String    @default("free")
+  vanitySlug       String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Embedded profile document
+  profile          Profile?
+
+  // Relations to other collections
+  resumes      Resume[]
+  coverLetters CoverLetter[]
+  jobs         Job[]
+  applications Application[]
+  portfolio    Portfolio?
+}
+
+// ─── Verification Code ──────────────────────────────────────────────────────────
+
+model VerificationCode {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String
+  code      String
+  type      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
 // ─── Job ────────────────────────────────────────────────────────────────────────
 
 model Job {
-  id              String   @id @default(uuid())
-  userId          String
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @db.ObjectId
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title           String
   company         String
   location        String?
   url             String?
-  source          String   @default("manual") // manual, linkedin, indeed, glassdoor, extension, image
-  rawDescription  String   @db.Text
-  parsedKeywords  Json?    // { required: [], preferred: [], tools: [], softSkills: [] }
-  companyTone     String?  // startup, corporate, creative, academic
+  source          String   @default("manual")
+  rawDescription  String
+  parsedKeywords  Json?
+  companyTone     String?
   matchScore      Int?
-  matchBreakdown  Json?    // { strong: [], partial: [], gaps: [] }
+  matchBreakdown  Json?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -203,24 +168,24 @@ model Job {
 // ─── Resume ─────────────────────────────────────────────────────────────────────
 
 model Resume {
-  id                   String   @id @default(uuid())
-  userId               String
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String   @db.ObjectId
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobId                String?
+  jobId                String?  @db.ObjectId
   job                  Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
   name                 String
-  baseProfileSnapshot  Json?    // frozen copy of profile sections at creation
-  tailoredContent      Json?    // AI-modified content
+  baseProfileSnapshot  Json?
+  tailoredContent      Json?
   templateId           String   @default("modern-01")
-  customStyles         Json?    // font, spacing, color overrides
-  sectionOrder         String[] // ordered list of visible sections
-  sectionVisibility    Json?    // { skills: true, projects: false, ... }
+  customStyles         Json?
+  sectionOrder         String[]
+  sectionVisibility    Json?
   matchScore           Int?
   atsScore             Int?
   atsReport            Json?
   showQrCode           Boolean  @default(true)
   showProfileImage     Boolean  @default(true)
-  
+
   isTailored           Boolean  @default(false)
   baseResumeId         String?
 
@@ -234,16 +199,16 @@ model Resume {
 // ─── Cover Letter ───────────────────────────────────────────────────────────────
 
 model CoverLetter {
-  id         String   @id @default(uuid())
-  userId     String
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  resumeId   String?
+  resumeId   String?  @db.ObjectId
   resume     Resume?  @relation(fields: [resumeId], references: [id], onDelete: SetNull)
-  jobId      String?
+  jobId      String?  @db.ObjectId
   job        Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
   title      String
-  content    String   @db.Text
-  tone       String   @default("formal") // formal, conversational, storytelling
+  content    String
+  tone       String   @default("formal")
   templateId String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -252,17 +217,17 @@ model CoverLetter {
 // ─── Application ────────────────────────────────────────────────────────────────
 
 model Application {
-  id             String    @id @default(uuid())
-  userId         String
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String    @db.ObjectId
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobId          String?
+  jobId          String?   @db.ObjectId
   job            Job?      @relation(fields: [jobId], references: [id], onDelete: SetNull)
-  resumeId       String?
+  resumeId       String?   @db.ObjectId
   resume         Resume?   @relation(fields: [resumeId], references: [id], onDelete: SetNull)
   coverLetterId  String?
-  status         String    @default("saved") // saved, applied, screening, interview, offer, rejected, withdrawn
+  status         String    @default("saved")
   appliedAt      DateTime?
-  notes          String?   @db.Text
+  notes          String?
   contactName    String?
   contactEmail   String?
   salaryRange    String?
@@ -275,8 +240,8 @@ model Application {
 // ─── Portfolio ──────────────────────────────────────────────────────────────────
 
 model Portfolio {
-  id               String   @id @default(uuid())
-  userId           String   @unique
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String   @unique @db.ObjectId
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   templateId       String   @default("modern")
   primaryColor     String   @default("#818cf8")
@@ -288,8 +253,8 @@ model Portfolio {
   showPublications Boolean  @default(false)
   showVolunteer    Boolean  @default(false)
   customHeadline   String?
-  customBio        String?  @db.Text
-  passwordHash     String?  // bcrypt hash if password-protected
+  customBio        String?
+  passwordHash     String?
   isPublic         Boolean  @default(true)
   totalViews       Int      @default(0)
   lastViewedAt     DateTime?
