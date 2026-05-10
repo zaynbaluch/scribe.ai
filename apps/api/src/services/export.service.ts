@@ -183,8 +183,8 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
       sectionVisibility: (resume.sectionVisibility as any) || {},
       showQrCode: !!qrImagePath,
       showProfileImage: !!profileImageFileName,
-      qrImagePath: qrFileName ? `/tmp/${qrFileName}` : undefined,
-      profileImagePath: profileImageFileName ? `/tmp/${profileImageFileName}` : undefined,
+      qrImagePath: qrImagePath, // Pass absolute path
+      profileImagePath: profileImagePath, // Pass absolute path
     });
 
     return pdfBuffer;

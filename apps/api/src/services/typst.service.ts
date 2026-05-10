@@ -123,6 +123,22 @@ async function runTypst(templatePath: string, data: any, bin: string): Promise<B
   const outputPath = path.join(outputTmpDir, 'output.pdf');
 
   try {
+    // Copy images into the typstRoot/tmp directory if they exist
+    if (data.qrImagePath) {
+      const destTmp = path.join(typstRoot, 'tmp');
+      await fs.mkdir(destTmp, { recursive: true });
+      const filename = path.basename(data.qrImagePath);
+      await fs.copyFile(data.qrImagePath, path.join(destTmp, filename));
+      data.qrImagePath = `/tmp/${filename}`;
+    }
+    if (data.profileImagePath) {
+      const destTmp = path.join(typstRoot, 'tmp');
+      await fs.mkdir(destTmp, { recursive: true });
+      const filename = path.basename(data.profileImagePath);
+      await fs.copyFile(data.profileImagePath, path.join(destTmp, filename));
+      data.profileImagePath = `/tmp/${filename}`;
+    }
+
     // Write data to a temp file instead of passing via --input to avoid Windows CLI length/escaping limits
     await fs.writeFile(dataFilePath, JSON.stringify(data));
 
