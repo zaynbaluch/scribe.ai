@@ -19,8 +19,16 @@ function getTypstBin() {
   return process.env.TYPST_BIN || 'typst';
 }
 
-const TEMPLATES_DIR = path.resolve(__dirname, '../../../../templates');
-const TMP_DIR = path.join(TEMPLATES_DIR, 'tmp');
+const TEMPLATES_DIR_ROOT = path.resolve(process.cwd(), 'templates');
+const TEMPLATES_DIR_REL = path.resolve(__dirname, '../../../../templates');
+
+function getTemplatesDir() {
+  if (require('fs').existsSync(TEMPLATES_DIR_ROOT)) return TEMPLATES_DIR_ROOT;
+  return TEMPLATES_DIR_REL;
+}
+
+const TEMPLATES_DIR = getTemplatesDir();
+const TMP_DIR = os.tmpdir();
 
 interface ResumeData {
   profile: any;
@@ -64,7 +72,7 @@ async function runTypst(templatePath: string, data: any, bin: string): Promise<B
   }
 
   // Ensure tmp dir exists inside TEMPLATES_DIR
-  await fs.mkdir(TMP_DIR, { recursive: true });
+  // No need to mkdir TMP_DIR as it is os.tmpdir()
 
   // Create temporary filenames
   const id = Math.random().toString(36).substring(7);
@@ -79,16 +87,15 @@ async function runTypst(templatePath: string, data: any, bin: string): Promise<B
     // Write data to a temp file instead of passing via --input to avoid Windows CLI length/escaping limits
     await fs.writeFile(dataFilePath, JSON.stringify(data));
 
-    // Compile using --input path=... so templates can use json("tmp/data-xxx.json")
+    // Compile using --input dataPath=... so templates can use json(sys.inputs.dataPath)
     await execFileAsync(bin, [
       'compile',
-      '--root', TEMPLATES_DIR,
-      '--input', `dataPath=/tmp/${dataFileName}`,
+      '--root', '/',  // Use / as root to allow access to both templates and /tmp
+      '--input', `dataPath=${dataFilePath}`,
       templatePath,
       outputPath,
     ], {
       timeout: 15000,
-      cwd: TEMPLATES_DIR,
     });
 
     const pdfBuffer = await fs.readFile(outputPath);

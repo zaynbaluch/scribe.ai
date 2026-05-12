@@ -8,8 +8,16 @@ import * as path from 'path';
 import * as os from 'os';
 import axios from 'axios';
 
-const TEMPLATES_DIR = path.resolve(process.cwd(), '../../templates');
-const TMP_QR_DIR = path.join(TEMPLATES_DIR, 'tmp');
+const TEMPLATES_DIR = path.resolve(process.cwd(), 'templates');
+// Fallback for Vercel if process.cwd() is not root
+const FALLBACK_TEMPLATES_DIR = path.resolve(__dirname, '../../../../templates');
+
+function getTemplatesDir() {
+  if (require('fs').existsSync(TEMPLATES_DIR)) return TEMPLATES_DIR;
+  return FALLBACK_TEMPLATES_DIR;
+}
+
+const TMP_QR_DIR = os.tmpdir();
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr || dateStr === 'null' || dateStr === 'undefined' || dateStr === '0') return '';
@@ -108,7 +116,7 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
 
   if (snapshot.imageUrl && showProfileImage) {
     try {
-      await fs.mkdir(TMP_QR_DIR, { recursive: true });
+      // No need to mkdir TMP_QR_DIR
       if (snapshot.imageUrl.startsWith('data:image')) {
         const match = snapshot.imageUrl.match(/^data:image\/([a-zA-Z+]+);base64,/);
         const ext = match ? match[1] : 'png';
@@ -140,7 +148,7 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
 
   if (resume.showQrCode !== false) {
     try {
-      await fs.mkdir(TMP_QR_DIR, { recursive: true });
+      // No need to mkdir TMP_QR_DIR
       qrFileName = `qr-${resume.id}-${Date.now()}.png`;
       qrImagePath = path.join(TMP_QR_DIR, qrFileName);
       await QRCode.toFile(qrImagePath, portfolioUrl, {
@@ -168,8 +176,8 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
       sectionVisibility: (resume.sectionVisibility as any) || {},
       showQrCode: !!qrImagePath,
       showProfileImage: !!profileImageFileName,
-      qrImagePath: qrFileName ? `/tmp/${qrFileName}` : undefined,
-      profileImagePath: profileImageFileName ? `/tmp/${profileImageFileName}` : undefined,
+      qrImagePath: qrImagePath || undefined,
+      profileImagePath: profileImagePath || undefined,
     });
 
     return pdfBuffer;
