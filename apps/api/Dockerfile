@@ -39,7 +39,7 @@ WORKDIR /app
 COPY --from=builder /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
 COPY --from=builder /app/apps/api/package.json ./apps/api/
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/apps/api/prisma/schema.prisma ./apps/api/prisma/
+COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 COPY --from=builder /app/templates /app/templates
 
 # Install production dependencies

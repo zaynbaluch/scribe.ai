@@ -5,9 +5,9 @@ export const applicationStatusEnum = z.enum([
 ]);
 
 export const createApplicationSchema = z.object({
-  jobId: z.string(),
-  resumeId: z.string().optional().nullable(),
-  coverLetterId: z.string().optional().nullable(),
+  jobId: z.string().uuid(),
+  resumeId: z.string().uuid().optional().nullable(),
+  coverLetterId: z.string().uuid().optional().nullable(),
   status: applicationStatusEnum.optional().default('saved'),
   appliedAt: z.string().datetime().optional().nullable(),
   notes: z.string().optional().nullable(),
@@ -19,8 +19,8 @@ export const createApplicationSchema = z.object({
 
 export const updateApplicationSchema = z.object({
   status: applicationStatusEnum.optional(),
-  resumeId: z.string().optional().nullable(),
-  coverLetterId: z.string().optional().nullable(),
+  resumeId: z.string().uuid().optional().nullable(),
+  coverLetterId: z.string().uuid().optional().nullable(),
   appliedAt: z.string().datetime().optional().nullable(),
   notes: z.string().optional().nullable(),
   contactName: z.string().max(200).optional().nullable(),

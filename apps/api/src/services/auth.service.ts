@@ -200,18 +200,7 @@ export async function registerWithEmailPassword(email: string, password: string,
       passwordHash,
       twoFactorEnabled: false,
       emailVerified: false,
-      profile: {
-        name,
-        experiences: [],
-        education: [],
-        skills: [],
-        projects: [],
-        certifications: [],
-        publications: [],
-        volunteerWork: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      profile: { create: { name } },
     },
   });
 
@@ -372,49 +361,41 @@ export async function verify2FACode(email: string, code: string) {
  * Creates a Profile record automatically on first login.
  */
 export async function findOrCreateUser(info: OAuthUserInfo, provider: string) {
-  let user = await prisma.user.findFirst({
+  let user = await prisma.user.findUnique({
     where: { oauthId: info.oauthId },
+    include: { profile: true },
   });
 
   if (!user) {
     // Also check by email to merge accounts if needed
     const existingByEmail = await prisma.user.findUnique({
       where: { email: info.email },
+      include: { profile: true },
     });
 
     if (existingByEmail) {
       // Link OAuth to existing email account
-      const existingProfile = existingByEmail.profile;
-      const updatedProfile = existingProfile
-        ? {
-            ...existingProfile,
-            name: existingProfile.name || info.name,
-            imageUrl: existingProfile.imageUrl || info.avatarUrl,
-            updatedAt: new Date(),
-          }
-        : {
-            name: info.name,
-            imageUrl: info.avatarUrl,
-            experiences: [],
-            education: [],
-            skills: [],
-            projects: [],
-            certifications: [],
-            publications: [],
-            volunteerWork: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          };
-
       user = await prisma.user.update({
         where: { id: existingByEmail.id },
-        data: {
-          oauthId: info.oauthId,
+        data: { 
+          oauthId: info.oauthId, 
           oauthProvider: provider,
+          // Only update name/avatar if they are currently null
           name: existingByEmail.name || info.name,
           avatarUrl: existingByEmail.avatarUrl || info.avatarUrl,
-          profile: updatedProfile,
+          profile: existingByEmail.profile ? {
+            update: {
+              name: existingByEmail.profile.name || info.name,
+              imageUrl: existingByEmail.profile.imageUrl || info.avatarUrl,
+            }
+          } : {
+            create: {
+              name: info.name,
+              imageUrl: info.avatarUrl,
+            }
+          }
         },
+        include: { profile: true },
       });
       logger.info({ userId: user.id, email: user.email, provider }, 'Linked OAuth provider to existing email account');
     } else {
@@ -425,28 +406,24 @@ export async function findOrCreateUser(info: OAuthUserInfo, provider: string) {
           avatarUrl: info.avatarUrl,
           oauthProvider: provider,
           oauthId: info.oauthId,
-          emailVerified: true,
-          profile: {
-            name: info.name,
-            imageUrl: info.avatarUrl,
-            experiences: [],
-            education: [],
-            skills: [],
-            projects: [],
-            certifications: [],
-            publications: [],
-            volunteerWork: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
+          emailVerified: true, // OAuth accounts are pre-verified
+          profile: { 
+            create: { 
+              name: info.name, 
+              imageUrl: info.avatarUrl 
+            } 
           },
         },
+        include: { profile: true },
       });
       logger.info({ userId: user.id, email: user.email, provider }, 'Created new user via OAuth');
     }
   } else if (!user.emailVerified) {
+    // If user exists via OAuth but isn't verified (migration case), verify them now
     user = await prisma.user.update({
       where: { id: user.id },
       data: { emailVerified: true },
+      include: { profile: true },
     });
   }
 
@@ -522,6 +499,11 @@ export function generateTokenPair(userId: string, email: string): TokenPair {
 export async function getUserById(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
+    include: {
+      profile: {
+        select: { name: true, imageUrl: true }
+      }
+    }
   });
 
   if (!user) return null;

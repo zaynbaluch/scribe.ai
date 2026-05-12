@@ -46,7 +46,7 @@ export const updateResumeSchema = z.object({
 });
 
 export const createTailoredResumeSchema = z.object({
-  baseResumeId: z.string(),
+  baseResumeId: z.string().uuid(),
   profileSnapshot: z.any(),
 });
 

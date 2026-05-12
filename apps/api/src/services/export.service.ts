@@ -7,24 +7,9 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
 import axios from 'axios';
-import * as fsSync from 'fs';
 
-function resolveTemplatesDir(): string {
-  const candidates = [
-    path.resolve(__dirname, '../../../../templates'),   // from src/services/ in dev
-    path.resolve(__dirname, '../../../templates'),       // from dist/services/ in prod
-    path.resolve(process.cwd(), 'templates'),            // monorepo root when cwd=project
-    path.resolve(process.cwd(), '../../templates'),      // from apps/api/
-    path.resolve(process.cwd(), 'apps/api/templates'),   // Vercel monorepo
-  ];
-  for (const dir of candidates) {
-    if (fsSync.existsSync(dir)) return dir;
-  }
-  return candidates[0]; // fallback
-}
-
-const TEMPLATES_DIR = resolveTemplatesDir();
-const TMP_QR_DIR = path.join(os.tmpdir(), 'scribe-export-tmp');
+const TEMPLATES_DIR = path.resolve(process.cwd(), '../../templates');
+const TMP_QR_DIR = path.join(TEMPLATES_DIR, 'tmp');
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr || dateStr === 'null' || dateStr === 'undefined' || dateStr === '0') return '';
@@ -183,8 +168,8 @@ export async function exportPdf(userId: string, resumeId: string): Promise<Buffe
       sectionVisibility: (resume.sectionVisibility as any) || {},
       showQrCode: !!qrImagePath,
       showProfileImage: !!profileImageFileName,
-      qrImagePath: qrImagePath, // Pass absolute path
-      profileImagePath: profileImagePath, // Pass absolute path
+      qrImagePath: qrFileName ? `/tmp/${qrFileName}` : undefined,
+      profileImagePath: profileImageFileName ? `/tmp/${profileImageFileName}` : undefined,
     });
 
     return pdfBuffer;

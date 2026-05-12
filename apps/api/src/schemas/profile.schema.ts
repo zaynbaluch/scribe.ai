@@ -3,7 +3,7 @@ import { z } from 'zod';
 // ─── Sub-item schemas ────────────────────────────────────────────────────────
 
 const experienceSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   title: z.string().optional().nullable(),
   company: z.string().optional().nullable(),
   location: z.string().optional().nullable(),
@@ -16,7 +16,7 @@ const experienceSchema = z.object({
 });
 
 const educationSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   institution: z.string().optional().nullable(),
   degree: z.string().optional().nullable(),
   field: z.string().optional().nullable(),
@@ -29,7 +29,7 @@ const educationSchema = z.object({
 });
 
 const skillSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   name: z.string().min(1),
   category: z.string().optional().nullable(),
   proficiency: z.string().optional().nullable(),
@@ -37,7 +37,7 @@ const skillSchema = z.object({
 });
 
 const projectSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   name: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   url: z.string().optional().nullable(),
@@ -49,7 +49,7 @@ const projectSchema = z.object({
 });
 
 const certificationSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   name: z.string().optional().nullable(),
   issuer: z.string().optional().nullable(),
   date: z.string().optional().nullable(),
@@ -59,7 +59,7 @@ const certificationSchema = z.object({
 });
 
 const publicationSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   title: z.string().min(1),
   venue: z.string().optional().nullable(),
   date: z.string().optional().nullable(),
@@ -68,7 +68,7 @@ const publicationSchema = z.object({
 });
 
 const volunteerWorkSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   role: z.string().min(1),
   organization: z.string().min(1),
   startDate: z.string().optional().nullable(),

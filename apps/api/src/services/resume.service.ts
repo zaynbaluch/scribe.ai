@@ -6,20 +6,33 @@ import { CreateResumeInput, UpdateResumeInput } from '../schemas/resume.schema';
  * Create a new resume, snapshotting the user's current profile.
  */
 export async function createResume(userId: string, data: CreateResumeInput) {
-  // Get user with embedded profile
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
+  // Snapshot the user's current profile
+  const profile = await prisma.profile.findUnique({
+    where: { userId },
+    include: {
+      experiences: { orderBy: { orderIndex: 'asc' } },
+      education: { orderBy: { orderIndex: 'asc' } },
+      skills: { orderBy: { orderIndex: 'asc' } },
+      projects: { orderBy: { orderIndex: 'asc' } },
+      certifications: { orderBy: { orderIndex: 'asc' } },
+      publications: { orderBy: { orderIndex: 'asc' } },
+      volunteerWork: { orderBy: { orderIndex: 'asc' } },
+    },
   });
 
-  if (!user || !user.profile) {
+  if (!profile) {
     throw new Error('Profile not found. Please create a profile first.');
   }
 
-  const profile = user.profile;
+  // Get user info for the snapshot
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true },
+  });
 
   const snapshot = {
-    name: (profile.name && profile.name.trim()) ? profile.name : (user.name || ''),
-    email: (profile.email && profile.email.trim()) ? profile.email : (user.email || ''),
+    name: (profile.name && profile.name.trim()) ? profile.name : (user?.name || ''),
+    email: (profile.email && profile.email.trim()) ? profile.email : (user?.email || ''),
     imageUrl: profile.imageUrl,
     summary: profile.summary,
     headline: profile.headline,
